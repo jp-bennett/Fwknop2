@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Fwknop2</string>
+    <string name="title_config_detail">Config Detail</string>
+    <string name="QR_Code">Capture qr</string>
+    <string name="Save">Save config</string>
+    <string name="Delete">Delete config</string>
+    <string name="knock">Send knock</string>
+    <string-array name="spinner_options">
+        <item>Resolve IP</item>
+        <item>Source IP</item>
+        <item>Allow IP</item>
+
+    </string-array>
+
+</resources>

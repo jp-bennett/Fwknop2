@@ -1,0 +1,244 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/config_detail"
+    android:orientation="vertical"
+    style="?android:attr/textAppearanceLarge"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:textIsSelectable="true"
+    tools:context=".ConfigDetailFragment" >
+
+    <LinearLayout android:id="@+id/NicknameSL"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/NickNameStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nickname: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/NickName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/allowipl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/allowipstr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Allow IP: "
+            android:textSize="20sp"
+            />
+         <Spinner
+            android:id="@+id/allowip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/iptoallowsl"
+        android:visibility="invisible"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/iptoallowStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IP to allow: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/iptoallow"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/tcpAccessPortsl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/tcpAccessPortsStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TCP Access Ports: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/tcpAccessPorts"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="22"
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/udpAccessPortsl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/udpAccessPortsStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UDP Access Ports: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/udpAccessPorts"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/destIPl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/destIPStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Server Address: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/destIP"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/destPortl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/destPortStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Server UDP Port: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/destPort"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="62201"
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/fwTimeoutl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/fwTimeoutStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Firewall Timeout: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/fwTimeout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="60"
+            android:inputType="numberDecimal"
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/passwdl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/passwdStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rijndael Key: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/passwd"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:password="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <CheckBox
+        android:id="@+id/chkb64key"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Key Is Base 64 "
+    />
+    <LinearLayout android:id="@+id/hmacl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/hmacStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HMAC Key: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/hmac"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:password="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <CheckBox
+        android:id="@+id/chkb64hmac"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HMAC Is Base 64 "
+        />
+    </LinearLayout>
+</ScrollView>
