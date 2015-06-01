@@ -39,7 +39,7 @@ fko_errmsg(char *msg, int res) {
 
 /* JNI interface: constructs arguments and calls main function
 */
-jstring Java_biz_incomsystems_fwknop2_ConfigListFragment_sendSPAPacket(JNIEnv* env,
+jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         jobject thiz)
 {
     fko_ctx_t ctx;
@@ -55,7 +55,7 @@ jstring Java_biz_incomsystems_fwknop2_ConfigListFragment_sendSPAPacket(JNIEnv* e
 
     /* Read the member values from the Java Object that called sendSPAPacket() method
     */
-    jclass c = (*env)->FindClass(env,"biz/incomsystems/fwknop2/ConfigListFragment");
+    jclass c = (*env)->GetObjectClass(env,thiz);
     jfieldID fid = (*env)->GetFieldID(env, c, "access_str", "Ljava/lang/String;");
     jstring jaccess = (*env)->GetObjectField(env, thiz, fid);
     const char *access_str = (*env)->GetStringUTFChars(env, jaccess, 0);
@@ -63,7 +63,7 @@ jstring Java_biz_incomsystems_fwknop2_ConfigListFragment_sendSPAPacket(JNIEnv* e
     fid = (*env)->GetFieldID(env, c, "allowip_str", "Ljava/lang/String;");
     jstring jallowip = (*env)->GetObjectField(env, thiz, fid);
     const char *allowip_str = (*env)->GetStringUTFChars(env, jallowip, 0);
-
+    LOGV("%s", allowip_str);
     fid = (*env)->GetFieldID(env, c, "destip_str", "Ljava/lang/String;");
     jstring jdestip = (*env)->GetObjectField(env, thiz, fid);
     const char *destip_str = (*env)->GetStringUTFChars(env, jdestip, 0);

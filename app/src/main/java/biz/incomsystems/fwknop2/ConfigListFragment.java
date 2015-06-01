@@ -2,14 +2,8 @@ package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,7 +12,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -37,18 +30,7 @@ public class ConfigListFragment extends ListFragment {
     public ArrayAdapter customAdapter;
     ArrayList array_list = new ArrayList();
     DBHelper mydb;
-    private String output;
-
-    //These are the configs to pass to the native code
-    public native String sendSPAPacket();
-    public String access_str;
-    public String allowip_str;
-    public String tcpAccessPorts_str;
-    public String passwd_str;
-    public String hmac_str;
-    public String destip_str;
-    public String destport_str;
-    public String fw_timeout_str;
+    SendSPA OurSender;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -114,6 +96,7 @@ public class ConfigListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         mydb = new DBHelper(getActivity());
         array_list = mydb.getAllConfigs();
+        OurSender = new SendSPA();
         customAdapter = new ArrayAdapter<ArrayList>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
@@ -156,16 +139,18 @@ public class ConfigListFragment extends ListFragment {
         customAdapter = (ArrayAdapter) getListAdapter();
 
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        String nick = ((TextView) info.targetView).getText().toString();
         switch (item.getItemId()) {
-
             case R.id.delete: // Deleting the selected option
-                mydb.deleteConfig(((TextView) info.targetView).getText().toString());
+                mydb.deleteConfig(nick);
                 array_list.remove(info.position);
                 customAdapter.notifyDataSetChanged();
                 return true;
 
             case R.id.knock:
-                send(((TextView) info.targetView).getText().toString());
+                OurSender.ourCtx = getActivity();
+                OurSender.send(nick, getActivity());
+                //send(((TextView) info.targetView).getText().toString());
 
             default:
                 return super.onContextItemSelected(item);
@@ -232,76 +217,5 @@ public class ConfigListFragment extends ListFragment {
 
         mActivatedPosition = position;
     }
-
-    public void sendSPA() {
-        startSPASend();
-    }
-
-    //    Start calling the JNI interface
-    public synchronized void startSPASend() {
-        output = sendSPAPacket();
-        //sendHandlerMessage(handler, 1003);
-        //  if (startApp) {
-        //    startApp();
-        // }
-    }
-
-    public int send(String nick){
-        loadNativeLib("libfwknop.so", "/data/data/biz.incomsystems.fwknop2/lib");
-        //mydb = new DBHelper(Fwknop2.getContext());
-        Cursor CurrentIndex = mydb.getData(nick);
-        CurrentIndex.moveToFirst();
-        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-       // SharedPreferences.Editor edit = prefs.edit();
-        tcpAccessPorts_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS));
-       // edit.putString("access_str", ",tcp/" + CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS)));
-        access_str="tcp/" + CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS));
-        allowip_str = "0.0.0.0";
-        passwd_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY));
-        hmac_str = "";
-        destip_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_IP));
-        destport_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_PORT));
-        fw_timeout_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_TIMEOUT));
-       // edit.commit();
-        this.sendSPA();
-        return 0;
-    }
-
-    private void loadNativeLib(String lib, String destDir) {
-        if (true) {
-            String libLocation = destDir + "/" + lib;
-            try {
-                System.load(libLocation);
-            } catch (Exception ex) {
-                Log.e("JNIExample", "failed to load native library: " + ex);
-            }
-        }
-
-    }
-
-    public Handler handler = new Handler() {
-
-        @Override
-        public synchronized void handleMessage(Message msg) {
-            Bundle b = msg.getData();
-            Integer messageType = (Integer) b.get("message_type");
-
-            Toast.makeText(getActivity(), messageType.toString(), Toast.LENGTH_LONG).show();
-//            if (messageType != null && messageType == IPS_RESOLVED) {
-//                progDialog.dismiss();
-//            } else if (messageType != null && messageType == EXTIP_NOTRESOLVED) {
-//                progDialog.dismiss();
-//                UIAlert("Error", "Could not resolve your external IP. This means that "
-//                        + "you're not connected to the internet or ifconfig.me "
-//                        + "is not be accesible right now", activity);
-//            } else if (messageType != null && messageType == LOCALIP_NOTRESOLVED) {
-//                progDialog.dismiss();
-//                UIAlert("Error", "Could not find any IP, makes sure you have an internet connection", activity);
-//            } else if (messageType != null && messageType == SPA_SENT) {
-//                Toast.makeText(activity, output, Toast.LENGTH_LONG).show();
-//            }
-
-        }
-    };
 
 }
