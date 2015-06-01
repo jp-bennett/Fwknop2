@@ -2,12 +2,15 @@ package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Base64;
-import android.util.Base64DataException;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,7 +40,8 @@ import java.io.UnsupportedEncodingException;
  */
 public class ConfigDetailFragment extends Fragment {
     DBHelper mydb ;
-
+    private String output;
+    public native String sendSPAPacket();
     TextView txt_NickName ;  // objects representing the config options
     Spinner spn_allowip ;
     TextView txt_allowIP ;
@@ -178,28 +182,28 @@ public class ConfigDetailFragment extends Fragment {
                 String contents = data.getStringExtra("SCAN_RESULT");
                 for (String stanzas: contents.split(" ")){
                     String[] tmp = stanzas.split(":");
-                    switch (tmp[0]) {
+                    if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
 
-                        case "KEY_BASE64":
+                        //case "KEY_BASE64":
 
-                            txt_KEY.setText(tmp[1]);
-                            chkb64key.setChecked(true);
-                        break;
+                        txt_KEY.setText(tmp[1]);
+                        chkb64key.setChecked(true);
+                        //  break;
 
-                        case "KEY":
-                            txt_KEY.setText(tmp[1]);
-                            chkb64key.setChecked(false);
-                            break;
+                    } else  if (tmp[0].equalsIgnoreCase("KEY")) {
+                        txt_KEY.setText(tmp[1]);
+                        chkb64key.setChecked(false);
+                        //      break;
 
-                        case "HMAC_KEY_BASE64":
-                            txt_HMAC.setText(tmp[1]);
-                            chkb64hmac.setChecked(true);
-                            break;
+                    } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
+                        txt_HMAC.setText(tmp[1]);
+                        chkb64hmac.setChecked(true);
+                        //      break;
 
-                        case "HMAC_KEY":
+                    } else if (tmp[0].equalsIgnoreCase( "HMAC_KEY")) {
                             txt_HMAC.setText(tmp[1]);
                             chkb64hmac.setChecked(false);
-                            break;
+                     //       break;
 
                     } // end switch
                 }// end for loop
@@ -240,8 +244,6 @@ public class ConfigDetailFragment extends Fragment {
 
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
-
-        //lay_allowIP.setVisibility(LinearLayout.VISIBLE);
 
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -301,4 +303,77 @@ public class ConfigDetailFragment extends Fragment {
         }
         return rootView;
     }
+
+    public void sendSPA() {
+        startSPASend();
+    }
+
+    //    Start calling the JNI interface
+    public synchronized void startSPASend() {
+        output = sendSPAPacket();
+        //sendHandlerMessage(handler, 1003);
+      //  if (startApp) {
+        //    startApp();
+       // }
+    }
+
+    public int send(String nick){
+        loadNativeLib("libfwknop.so", "/data/data/biz.incomsystems.fwknop2/lib");
+        //mydb = new DBHelper(Fwknop2.getContext());
+        Cursor CurrentIndex = mydb.getData(nick);
+        CurrentIndex.moveToFirst();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putString("tcpAccessPorts_str", CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS)));
+        edit.putString("access_str", ",tcp/" + CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS)));
+        edit.putString("allowip_str", "0.0.0.0");
+        edit.putString("passwd_str", CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY)));
+        edit.putString("hmac_str", "");
+        edit.putString("destip_str", CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_IP)));
+        edit.putString("destport_str", CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_PORT)));
+        edit.putString("fw_timeout_str", CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_TIMEOUT)));
+        edit.commit();
+        this.sendSPA();
+        return 0;
+    }
+
+    private void loadNativeLib(String lib, String destDir) {
+        if (true) {
+            String libLocation = destDir + "/" + lib;
+            try {
+                System.load(libLocation);
+            } catch (Exception ex) {
+                Log.e("JNIExample", "failed to load native library: " + ex);
+            }
+        }
+
+    }
+
+    public Handler handler = new Handler() {
+
+        @Override
+        public synchronized void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            Integer messageType = (Integer) b.get("message_type");
+
+            Toast.makeText(getActivity(),messageType.toString(), Toast.LENGTH_LONG).show();
+//            if (messageType != null && messageType == IPS_RESOLVED) {
+//                progDialog.dismiss();
+//            } else if (messageType != null && messageType == EXTIP_NOTRESOLVED) {
+//                progDialog.dismiss();
+//                UIAlert("Error", "Could not resolve your external IP. This means that "
+//                        + "you're not connected to the internet or ifconfig.me "
+//                        + "is not be accesible right now", activity);
+//            } else if (messageType != null && messageType == LOCALIP_NOTRESOLVED) {
+//                progDialog.dismiss();
+//                UIAlert("Error", "Could not find any IP, makes sure you have an internet connection", activity);
+//            } else if (messageType != null && messageType == SPA_SENT) {
+//                Toast.makeText(activity, output, Toast.LENGTH_LONG).show();
+//            }
+
+        }
+    };
+
+
 }
+

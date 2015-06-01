@@ -118,7 +118,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public ArrayList<String> getAllConfigs()   // This returns an array of Nick Names in order
     {
-        ArrayList<String> array_list = new ArrayList<>();
+        ArrayList<String> array_list = new ArrayList<String>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from configs", null );
         res.moveToFirst();
