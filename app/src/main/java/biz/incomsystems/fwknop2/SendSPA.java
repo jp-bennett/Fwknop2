@@ -44,7 +44,9 @@ public class SendSPA extends Application {
     public String allowip_str;
     public String tcpAccessPorts_str;
     public String passwd_str;
+    public String passwd_b64;
     public String hmac_str;
+    public String hmac_b64;
     public String destip_str;
     public String destport_str;
     public String fw_timeout_str;
@@ -79,6 +81,16 @@ public class SendSPA extends Application {
         destport_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_PORT));
         fw_timeout_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_TIMEOUT));
         allowip_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_ACCESS_IP));
+        if (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY_BASE64)) == 1) {
+            passwd_b64 = "true";
+        } else {
+            passwd_b64 = "false";
+        }
+        if (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC_BASE64)) == 1) {
+            hmac_b64 = "true";
+        } else {
+            hmac_b64 = "false";
+        }
         if (allowip_str.equalsIgnoreCase("Source IP")) {
             allowip_str = "0.0.0.0";
             this.sendSPA();

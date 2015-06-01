@@ -46,8 +46,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     fwknop_options_t opts;
 
     int res, hmac_str_len = 0;
+    int *key_len, *hmac_key_len;
     char res_msg[MSG_BUFSIZE+1] = {0};
     char spa_msg[MSG_BUFSIZE+1] = {0};
+    unsigned char   *key_tmp[MAX_KEY_LEN+1] = {0}, *hmac_key_tmp[MAX_KEY_LEN+1] = {0};
 
     LOGV("**** Init fwknop ****");
 
@@ -74,11 +76,19 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
 
     fid = (*env)->GetFieldID(env, c, "passwd_str", "Ljava/lang/String;");
     jstring jpasswd = (*env)->GetObjectField(env, thiz, fid);
-    const char *passwd_str = (*env)->GetStringUTFChars(env, jpasswd, 0);
+    char *passwd_str = (*env)->GetStringUTFChars(env, jpasswd, 0);
+
+    fid = (*env)->GetFieldID(env, c, "passwd_b64", "Ljava/lang/String;");
+    jstring jpasswd_b64 = (*env)->GetObjectField(env, thiz, fid);
+    const char *passwd_b64 = (*env)->GetStringUTFChars(env, jpasswd_b64, 0);
 
     fid = (*env)->GetFieldID(env, c, "hmac_str", "Ljava/lang/String;");
     jstring jhmac = (*env)->GetObjectField(env, thiz, fid);
-    const char *hmac_str = (*env)->GetStringUTFChars(env, jhmac, 0);
+    char *hmac_str = (*env)->GetStringUTFChars(env, jhmac, 0);
+
+    fid = (*env)->GetFieldID(env, c, "hmac_b64", "Ljava/lang/String;");
+    jstring jhmac_b64 = (*env)->GetObjectField(env, thiz, fid);
+    const char *hmac_b64 = (*env)->GetStringUTFChars(env, jhmac_b64, 0);
 
     fid = (*env)->GetFieldID(env, c, "fw_timeout_str", "Ljava/lang/String;");
     jstring jfwtimeout = (*env)->GetObjectField(env, thiz, fid);
@@ -109,6 +119,41 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     if(fw_timeout_str == NULL) {
         sprintf(res_msg, "Error: Invalid or missing firewall timeout value");
         goto cleanup2;
+    }
+
+    LOGV("%s", hmac_b64);
+    if(strcmp(hmac_b64, "true") == 0) {
+        LOGV("Detected hmac b64");
+        *hmac_key_len = fko_base64_decode( hmac_str,
+                                (unsigned char *) hmac_key_tmp);
+        LOGV("Finished fko_base64_decode");
+        if(*hmac_key_len > MAX_KEY_LEN || *hmac_key_len < 0)
+        {
+            LOGV("[*] Invalid key length: '%d', must be in [1,%d]",
+                    *key_len, MAX_KEY_LEN);
+            goto cleanup2;
+        }
+        else
+        {
+            memcpy(hmac_str, hmac_key_tmp, *hmac_key_len);
+        }
+    }
+
+    LOGV("%s", passwd_b64);
+    if(strcmp(passwd_b64, "true") == 0) {
+        LOGV("Detected key b64");
+        *key_len = fko_base64_decode(passwd_str,
+                        (unsigned char *) key_tmp);
+        if(*key_len > MAX_KEY_LEN || *key_len < 0)
+        {
+            LOGV( "[*] Invalid key length: '%d', must be in [1,%d]",
+                    *key_len, MAX_KEY_LEN);
+            goto cleanup2;
+        }
+        else
+        {
+            memcpy(passwd_str, key_tmp, *key_len);
+        }
     }
 
     /* Using an HMAC is optional (currently)

@@ -41,6 +41,8 @@
 #define MAX_PORT_STR_LEN    6
 #define MAX_SERVER_STR_LEN  50
 #define MSG_BUFSIZE         255
+#define MAX_KEY_LEN                 180
+#define MAX_B64_KEY_LEN             180
 
 typedef struct fwknop_options
 {
