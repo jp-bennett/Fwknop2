@@ -21,13 +21,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import java.util.ArrayList;
 
-/**
- *
- * Created by jbennett on 5/29/15.
- */
+
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "fwknop.db";
@@ -95,7 +91,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateConfig  ( //  Automatically does an update or insert based on NICK_NAME
+    public boolean updateConfig  ( //  Automatically does either an update or insert based on NICK_NAME
                                   String NICK_NAME, String ACCESS_IP, String TCP_PORTS,
                                   String UDP_PORTS, String SERVER_IP, String SERVER_PORT,
                                   String SERVER_TIMEOUT, String KEY, Boolean KEY_BASE64,
@@ -121,7 +117,6 @@ public class DBHelper extends SQLiteOpenHelper {
         } else {
             db.insert("configs", null, contentValues);
         }
-
         return true;
     }
 
@@ -146,5 +141,4 @@ public class DBHelper extends SQLiteOpenHelper {
         array_list.add("New Config");
         return array_list;
     }
-
 }

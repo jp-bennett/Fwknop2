@@ -141,6 +141,7 @@ public class ConfigDetailFragment extends Fragment {
             } else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())){ // check server entry. Must be a valid url or ip.
                 toast.setText("You Must supply a valid server address.");
                 toast.show();
+                //These are placeholders for future input validation
             } else if (false){ // server udp port must make sense
             } else if (false){ // firewall timeout must make sense
             } else if (txt_KEY.getText().toString().equalsIgnoreCase("")){ //must have a key
@@ -190,29 +191,18 @@ public class ConfigDetailFragment extends Fragment {
                 for (String stanzas: contents.split(" ")){
                     String[] tmp = stanzas.split(":");
                     if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
-
-                        //case "KEY_BASE64":
-
                         txt_KEY.setText(tmp[1]);
                         chkb64key.setChecked(true);
-                        //  break;
-
                     } else  if (tmp[0].equalsIgnoreCase("KEY")) {
                         txt_KEY.setText(tmp[1]);
                         chkb64key.setChecked(false);
-                        //      break;
-
                     } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
                         txt_HMAC.setText(tmp[1]);
                         chkb64hmac.setChecked(true);
-                        //      break;
-
                     } else if (tmp[0].equalsIgnoreCase( "HMAC_KEY")) {
                             txt_HMAC.setText(tmp[1]);
                             chkb64hmac.setChecked(false);
-                     //       break;
-
-                    } // end switch
+                    }
                 }// end for loop
             }
             if(resultCode == Activity.RESULT_CANCELED){

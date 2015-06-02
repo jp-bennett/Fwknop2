@@ -83,9 +83,7 @@ public class ConfigListFragment extends ListFragment {
 
     };
 
-    protected void onNewIntent(Intent intent) {
-        //super. onNewIntent(intent);
-        //setIntent(intent);
+    protected void onNewIntent(Intent intent) { // this updates the list of
         mydb = new DBHelper(getActivity());
         array_list = mydb.getAllConfigs();
         customAdapter = (ArrayAdapter) getListAdapter();
@@ -119,7 +117,6 @@ public class ConfigListFragment extends ListFragment {
                 android.R.id.text1,
                 array_list);
         setListAdapter(customAdapter);
-
     }
 
     @Override
@@ -131,8 +128,6 @@ public class ConfigListFragment extends ListFragment {
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
-
-
     }
 
     @Override
@@ -166,7 +161,6 @@ public class ConfigListFragment extends ListFragment {
             case R.id.knock:
                 OurSender.ourCtx = getActivity();
                 OurSender.send(nick, getActivity());
-                //send(((TextView) info.targetView).getText().toString());
 
             default:
                 return super.onContextItemSelected(item);
