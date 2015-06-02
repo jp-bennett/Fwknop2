@@ -46,10 +46,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     fwknop_options_t opts;
 
     int res, hmac_str_len = 0;
-    int *key_len, *hmac_key_len;
+    int key_len, hmac_key_len;
     char res_msg[MSG_BUFSIZE+1] = {0};
     char spa_msg[MSG_BUFSIZE+1] = {0};
-    unsigned char   *key_tmp[MAX_KEY_LEN+1] = {0}, *hmac_key_tmp[MAX_KEY_LEN+1] = {0};
+    char *key_tmp[MAX_KEY_LEN+1] = {0}, *hmac_key_tmp[MAX_KEY_LEN+1] = {0};
 
     LOGV("**** Init fwknop ****");
 
@@ -121,46 +121,49 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         goto cleanup2;
     }
 
-    LOGV("%s", hmac_b64);
+
+    if(hmac_str != NULL) {
+        hmac_str_len = (int)strlen(hmac_str);
+    }
+
+    LOGV("%s", hmac_str);
     if(strcmp(hmac_b64, "true") == 0) {
         LOGV("Detected hmac b64");
-        *hmac_key_len = fko_base64_decode( hmac_str,
-                                (unsigned char *) hmac_key_tmp);
+        hmac_str_len = fko_base64_decode( hmac_str,
+                                (unsigned char *)hmac_key_tmp);
         LOGV("Finished fko_base64_decode");
-        if(*hmac_key_len > MAX_KEY_LEN || *hmac_key_len < 0)
+        if(hmac_str_len > MAX_KEY_LEN || hmac_str_len < 0)
         {
             LOGV("[*] Invalid key length: '%d', must be in [1,%d]",
-                    *key_len, MAX_KEY_LEN);
+                    hmac_str_len, MAX_KEY_LEN);
             goto cleanup2;
         }
         else
         {
-            memcpy(hmac_str, hmac_key_tmp, *hmac_key_len);
+            LOGV("now to memcpy");
+            memcpy(hmac_str, hmac_key_tmp, hmac_str_len);
         }
     }
 
     LOGV("%s", passwd_b64);
     if(strcmp(passwd_b64, "true") == 0) {
         LOGV("Detected key b64");
-        *key_len = fko_base64_decode(passwd_str,
-                        (unsigned char *) key_tmp);
-        if(*key_len > MAX_KEY_LEN || *key_len < 0)
+        key_len = fko_base64_decode(passwd_str,
+                        (unsigned char *)key_tmp);
+        if(key_len > MAX_KEY_LEN || key_len < 0)
         {
             LOGV( "[*] Invalid key length: '%d', must be in [1,%d]",
-                    *key_len, MAX_KEY_LEN);
+                    key_len, MAX_KEY_LEN);
             goto cleanup2;
         }
         else
         {
-            memcpy(passwd_str, key_tmp, *key_len);
+            memcpy(passwd_str, key_tmp, key_len);
         }
     }
-
+    LOGV("%i", hmac_str_len);
     /* Using an HMAC is optional (currently)
     */
-    if(hmac_str != NULL) {
-        hmac_str_len = (int)strlen(hmac_str);
-    }
 
     /* Set our spa server info
     */
@@ -206,7 +209,7 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     /* Finalize the context data (Encrypt and encode).
     */
     res = fko_spa_data_final(ctx, (char*)passwd_str,
-            (int)strlen(passwd_str), (char *)hmac_str, hmac_str_len);
+            key_len, (char *)hmac_str, hmac_str_len);
     if (res != FKO_SUCCESS) {
         strcpy(res_msg, fko_errmsg("Error generating SPA data", res));
         goto cleanup;
