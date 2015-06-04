@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -156,6 +157,7 @@ public class ConfigListFragment extends ListFragment {
                 mydb.deleteConfig(nick);
                 array_list.remove(info.position);
                 customAdapter.notifyDataSetChanged();
+                mydb.close();
                 return true;
 
             case R.id.knock:
@@ -165,6 +167,17 @@ public class ConfigListFragment extends ListFragment {
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    public void onUpdate() {
+       // customAdapter = (ArrayAdapter) getListAdapter();
+        mydb = new DBHelper(getActivity());
+        array_list.clear();
+        array_list.addAll(mydb.getAllConfigs());
+        customAdapter.notifyDataSetChanged();
+       // setListAdapter(customAdapter);
+        mydb.close();
+        Log.v("fwknop2", "onUpdate runs");
     }
 
 

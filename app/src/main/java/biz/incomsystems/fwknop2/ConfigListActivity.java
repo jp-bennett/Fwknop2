@@ -18,8 +18,12 @@ package biz.incomsystems.fwknop2;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.view.View;
+
+import java.util.List;
 
 /**
  * An activity representing a list of. This activity
@@ -39,6 +43,9 @@ import android.support.v4.app.FragmentTransaction;
  */
 public class ConfigListActivity extends FragmentActivity
         implements ConfigListFragment.Callbacks {
+    ConfigDetailFragment fragment;
+    ConfigListFragment fragment2;
+
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -69,6 +76,18 @@ public class ConfigListActivity extends FragmentActivity
 
 
     }
+
+
+    public void onItemSaved() {
+        List<Fragment> allFragments = getSupportFragmentManager().getFragments();
+        for (Fragment fragment : allFragments) {
+            if (fragment instanceof ConfigListFragment) {
+                ((ConfigListFragment) fragment).onUpdate();
+            }
+        }
+    }
+
+
     /**
      * Callback method from {@link ConfigListFragment.Callbacks}
      * indicating that the item with the given ID was selected.
@@ -81,7 +100,7 @@ public class ConfigListActivity extends FragmentActivity
             // fragment transaction.
             Bundle arguments = new Bundle();
             arguments.putString(ConfigDetailFragment.ARG_ITEM_ID, nick);
-            ConfigDetailFragment fragment = new ConfigDetailFragment();
+            fragment = new ConfigDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.config_detail_container, fragment)
@@ -94,6 +113,9 @@ public class ConfigListActivity extends FragmentActivity
             detailIntent.putExtra(ConfigDetailFragment.ARG_ITEM_ID, nick);
             startActivity(detailIntent);
         }
+    }
+    public void onCheckboxClicked(View view) {
+        fragment.onCheckboxClicked(view);
     }
 
     protected void onNewIntent(Intent intent) {

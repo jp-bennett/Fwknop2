@@ -55,7 +55,7 @@
             />
     </LinearLayout>
     <LinearLayout android:id="@+id/iptoallowsl"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -238,7 +238,90 @@
         android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="HMAC Is Base 64 "
+        android:text="HMAC Is Base 64"
         />
+    <CheckBox
+    android:id="@+id/chknataccess"
+    android:onClick="onCheckboxClicked"
+    android:textSize="20sp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Enable Nat Access"
+    />
+    <LinearLayout android:id="@+id/natipsl"
+        android:visibility="gone"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/natipStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Internal IP: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/natip"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/natportsl"
+        android:visibility="gone"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/natportStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Internal Port: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/natport"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <CheckBox
+        android:id="@+id/chkservercmd"
+        android:onClick="onCheckboxClicked"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enable Server command"
+        />
+    <LinearLayout android:id="@+id/servercmdsl"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/servercmdStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Server Command: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/servercmd"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

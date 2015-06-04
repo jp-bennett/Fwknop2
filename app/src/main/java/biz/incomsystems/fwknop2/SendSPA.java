@@ -16,12 +16,12 @@ This file is part of Fwknop2.
  */
 package biz.incomsystems.fwknop2;
 
-/**
- * Created by jbennett on 5/31/15.
- */
 import android.app.Application;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.database.Cursor;
@@ -36,6 +36,12 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.xbill.DNS.*;
+//import org.xbill.DNS.Lookup;
+//import org.xbill.DNS.Record;
+//import org.xbill.DNS.Resolver;
+//import org.xbill.DNS.SimpleResolver;
+//import org.xbill.DNS.Type;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -51,6 +57,7 @@ import java.util.logging.Logger;
 public class SendSPA extends Application {
     private String output;
     DBHelper mydb;
+    Config config;
     Context ourCtx;
     public native String sendSPAPacket();
 
@@ -77,6 +84,7 @@ public class SendSPA extends Application {
 
     public int send(String nick, Context ctx) {
         loadNativeLib("libfwknop.so", "/data/data/biz.incomsystems.fwknop2/lib");
+        config = mydb.getConfig(nick);
         mydb = new DBHelper(ctx);
         Cursor CurrentIndex = mydb.getData(nick);
         CurrentIndex.moveToFirst();
@@ -100,13 +108,34 @@ public class SendSPA extends Application {
         } else {
             hmac_b64 = "false";
         }
-        if (allowip_str.equalsIgnoreCase("Source IP")) {
+        if (allowip_str.equalsIgnoreCase("Source IP")) { // catch for an old database. Should convert this in the next database upgrade
             allowip_str = "0.0.0.0";
-            this.sendSPA();
-        } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
+        }
             getExternalIP task = new getExternalIP();
             task.execute();
-        }
+
+     //   if (nick.equalsIgnoreCase("home")) {
+            //try {
+         //   Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("ssh://root@jp-bennett.com:22/#home"));
+        //    i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
+            //i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
+       //     ctx.startActivity(i);
+            //startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("ssh://root@jp-bennett.com:22/#home")));
+            //try {
+              //  Intent intent = new Intent("com.connectbot.zxing.client.android.SCAN");
+                //intent.putExtra("SCAN_MODE", "QR_CODE_MODE"); // "PRODUCT_MODE for bar codes
+                //startActivity(intent, 0);
+            //} catch (Exception e) { // This is where the play store is called if the app is not installed
+              //  Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+                //Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
+               // startActivity(marketIntent);
+            //}
+//            } catch (Exception e) { // This is where the play store is called if the app is not installed
+        //        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
+      //          Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
+    //            startActivity(marketIntent);
+  //          }
+     //   }
         return 0;
     }
 
@@ -142,30 +171,51 @@ public class SendSPA extends Application {
         }
         @Override
         protected String doInBackground(Void... params) {
-            Log.v("fwknop2", "Your external IP address is " + allowip_str);
-            try {
-                HttpClient httpclient = new DefaultHttpClient();
-                HttpGet httpget = new HttpGet("http://whatismyip.akamai.com");
-                HttpResponse response;
-                response = httpclient.execute(httpget);
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    long len = entity.getContentLength();
-                    if (len != -1 && len < 1024) {
-                        allowip_str = EntityUtils.toString(entity);
+            //Log.v("fwknop2", "Your external IP address is " + allowip_str);
+            if (allowip_str.equalsIgnoreCase("Source IP")) {
+                allowip_str = "0.0.0.0";
+            } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
+
+                try {
+                    if (false) { // eventually implement choice of resolver
+                        HttpClient httpclient = new DefaultHttpClient();
+                        HttpGet httpget = new HttpGet("http://whatismyip.akamai.com");
+                        HttpResponse response;
+                        response = httpclient.execute(httpget);
+                        HttpEntity entity = response.getEntity();
+                        if (entity != null) {
+                            long len = entity.getContentLength();
+                            if (len != -1 && len < 1024) {
+                                allowip_str = EntityUtils.toString(entity);
+                                Log.v("fwknop2", "Your external IP address is " + allowip_str);
+                            }
+                        }
+                    } else {
+
+                        Resolver resolver = new SimpleResolver("208.67.222.222");
+                        Lookup lookup = new Lookup("myip.opendns.com", Type.A);
+                        lookup.setResolver(resolver);
+                        Record[] records = lookup.run();
+                        allowip_str = ((ARecord) records[0]).getAddress().toString();
+                        if (allowip_str.contains("/")) {
+                            allowip_str = allowip_str.split("/")[1];
+                        }
                         Log.v("fwknop2", "Your external IP address is " + allowip_str);
+
                     }
+
+                } catch (Exception ex) {
+                    Log.e("fwknop2", "error " + ex);
                 }
-            } catch (Exception ex) {
-                Log.e("fwknop2", "error " + ex);
             }
+            sendSPAPacket();
             return allowip_str;
         }
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             allowip_str = result;
-            sendSPA();
+            //sendSPA();
             pdLoading.dismiss();
         }
     }

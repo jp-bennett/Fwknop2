@@ -27,6 +27,7 @@ import java.util.ArrayList;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "fwknop.db";
+    public static final int DATABASE_VERSION = 2;
     public static final String CONFIGS_TABLE_NAME = "configs";
     public static final String CONFIGS_COLUMN_ID = "id";
     public static final String CONFIGS_COLUMN_NICK_NAME = "NICK_NAME";
@@ -39,11 +40,14 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CONFIGS_COLUMN_KEY = "KEY";
     public static final String CONFIGS_COLUMN_KEY_BASE64 = "KEY_BASE64";
     public static final String CONFIGS_COLUMN_HMAC = "HMAC";
+    public static final String CONFIGS_COLUMN_NAT_IP = "NAT_IP";
+    public static final String CONFIGS_COLUMN_NAT_PORT = "NAT_PORT";
+    public static final String CONFIGS_COLUMN_SERVER_CMD = "SERVER_CMD";
     public static final String CONFIGS_COLUMN_HMAC_BASE64 = "HMAC_BASE64";
 
     public DBHelper(Context context)
     {
-        super(context, DATABASE_NAME, null, 1);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
@@ -62,6 +66,9 @@ public class DBHelper extends SQLiteOpenHelper {
                         CONFIGS_COLUMN_KEY + " text, " +
                         CONFIGS_COLUMN_KEY_BASE64 + " integer, " +
                         CONFIGS_COLUMN_HMAC + " text, " +
+                        CONFIGS_COLUMN_NAT_IP + " text, " +
+                        CONFIGS_COLUMN_NAT_PORT + " text, " +
+                        CONFIGS_COLUMN_SERVER_CMD + " text, " +
                         CONFIGS_COLUMN_HMAC_BASE64 + " integer" +
                         ")"
         );
@@ -70,8 +77,18 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This needs to be updated if we update the app in a way that changes the DB format
-        db.execSQL("DROP TABLE IF EXISTS configs");
-        onCreate(db);
+        if (oldVersion == 1) {
+            db.execSQL("ALTER TABLE configs ADD COLUMN " + CONFIGS_COLUMN_NAT_IP + " text");
+            db.execSQL("ALTER TABLE configs ADD COLUMN " + CONFIGS_COLUMN_NAT_PORT + " text");
+            db.execSQL("ALTER TABLE configs ADD COLUMN " + CONFIGS_COLUMN_SERVER_CMD + " text");
+            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_NAT_IP +" = '' " );
+            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_NAT_PORT +" = '' " );
+            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_SERVER_CMD +" = '' ");
+            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_ACCESS_IP + " = '0.0.0.0' where " +
+                            CONFIGS_COLUMN_ACCESS_IP + " = 'Source IP'");
+            oldVersion = 2;
+        }
+
     }
 
     public Cursor getData(String id) { // returns cursor so the config detail fragment can load a saved config
@@ -91,32 +108,37 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateConfig  ( //  Automatically does either an update or insert based on NICK_NAME
-                                  String NICK_NAME, String ACCESS_IP, String TCP_PORTS,
-                                  String UDP_PORTS, String SERVER_IP, String SERVER_PORT,
-                                  String SERVER_TIMEOUT, String KEY, Boolean KEY_BASE64,
-                                  String HMAC, Boolean HMAC_BASE64
-                                  )
+    public boolean updateConfig  ( Context ctx, Config config)//  Automatically does either an update or insert based on NICK_NAME
+                                  //String NICK_NAME, String ACCESS_IP, String TCP_PORTS,
+                                 // String UDP_PORTS, String SERVER_IP, String SERVER_PORT,
+                                 // String SERVER_TIMEOUT, String KEY, Boolean KEY_BASE64,
+                                //  String HMAC, Boolean HMAC_BASE64
+                                  //)
     {
+        // do more input validation here? return error?
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("NICK_NAME", NICK_NAME);
-        contentValues.put("ACCESS_IP", ACCESS_IP);
-        contentValues.put("TCP_PORTS", TCP_PORTS);
-        contentValues.put("UDP_PORTS", UDP_PORTS);
-        contentValues.put("SERVER_IP", SERVER_IP);
-        contentValues.put("SERVER_PORT", SERVER_PORT);
-        contentValues.put("SERVER_TIMEOUT", SERVER_TIMEOUT);
-        contentValues.put("KEY", KEY);
-        contentValues.put("KEY_BASE64", KEY_BASE64);
-        contentValues.put("HMAC", HMAC);
-        contentValues.put("HMAC_BASE64", HMAC_BASE64);
+        contentValues.put(CONFIGS_COLUMN_NICK_NAME, config.NICK_NAME);
+        contentValues.put(CONFIGS_COLUMN_ACCESS_IP, config.ACCESS_IP);
+        contentValues.put(CONFIGS_COLUMN_TCP_PORTS, config.TCP_PORTS);
+        contentValues.put(CONFIGS_COLUMN_UDP_PORTS, config.UDP_PORTS);
+        contentValues.put(CONFIGS_COLUMN_SERVER_IP, config.SERVER_IP);
+        contentValues.put(CONFIGS_COLUMN_SERVER_PORT, config.SERVER_PORT);
+        contentValues.put(CONFIGS_COLUMN_SERVER_TIMEOUT, config.SERVER_TIMEOUT);
+        contentValues.put(CONFIGS_COLUMN_KEY, config.KEY);
+        contentValues.put(CONFIGS_COLUMN_KEY_BASE64, config.KEY_BASE64);
+        contentValues.put(CONFIGS_COLUMN_HMAC, config.HMAC);
+        contentValues.put(CONFIGS_COLUMN_HMAC_BASE64, config.HMAC_BASE64);
+        contentValues.put(CONFIGS_COLUMN_SERVER_CMD, config.SERVER_CMD);
+        contentValues.put(CONFIGS_COLUMN_NAT_IP, config.NAT_IP);
+        contentValues.put(CONFIGS_COLUMN_NAT_PORT, config.NAT_PORT);
 
-        if (CheckNickIsUnique(NICK_NAME)) {
-            db.update("configs", contentValues, "NICK_NAME='" + NICK_NAME + "'", null);
+        if (CheckNickIsUnique(config.NICK_NAME)) {
+            db.update("configs", contentValues, "NICK_NAME='" + config.NICK_NAME + "'", null);
         } else {
             db.insert("configs", null, contentValues);
         }
+        db.close();
         return true;
     }
 
@@ -140,5 +162,28 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
         array_list.add("New Config");
         return array_list;
+    }
+
+    public Config getConfig (String nick) {
+        Config config = new Config();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor CurrentIndex = db.rawQuery("select * from configs where NICK_NAME= '" + nick + "'", null);
+        CurrentIndex.moveToFirst();
+        config.ACCESS_IP = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_ACCESS_IP));
+        config.TCP_PORTS = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS));
+        config.UDP_PORTS = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_UDP_PORTS));
+        config.SERVER_IP = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_IP));
+        config.SERVER_PORT = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_PORT));
+        config.SERVER_TIMEOUT = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_TIMEOUT));
+        config.KEY = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY));
+        config.KEY_BASE64 = (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY_BASE64)) == 1);
+        config.HMAC = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC));
+        config.HMAC_BASE64 = (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC_BASE64)) == 1);
+        config.NAT_IP = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_NAT_IP));
+        config.NAT_PORT = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_NAT_PORT));
+        config.SERVER_CMD = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_CMD));
+        CurrentIndex.close();
+
+        return config;
     }
 }

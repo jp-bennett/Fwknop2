@@ -24,6 +24,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
+import android.view.View;
 
 
 /**
@@ -36,6 +37,7 @@ import android.view.MenuItem;
  * more than a {@link ConfigDetailFragment}.
  */
 public class ConfigDetailActivity extends ActionBarActivity {
+    ConfigDetailFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,12 +64,26 @@ public class ConfigDetailActivity extends ActionBarActivity {
             Bundle arguments = new Bundle();
             arguments.putString(ConfigDetailFragment.ARG_ITEM_ID,
                     getIntent().getStringExtra(ConfigDetailFragment.ARG_ITEM_ID));
-            ConfigDetailFragment fragment = new ConfigDetailFragment();
+            fragment = new ConfigDetailFragment();
+
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.config_detail_container, fragment)
                     .commit();
         }
+    }
+    public void onCheckboxClicked(View view) {
+        fragment.onCheckboxClicked(view);
+    }
+
+    public void onItemSaved() {
+        ConfigListFragment listFrag = new ConfigListFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.config_list, listFrag);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
     }
 
     @Override

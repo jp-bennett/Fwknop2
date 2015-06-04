@@ -48,16 +48,26 @@ import org.apache.commons.validator.routines.DomainValidator;
  * on handsets.
  */
 public class ConfigDetailFragment extends Fragment {
-    DBHelper mydb ;
+    DBHelper mydb;
+    Config config;
     TextView txt_NickName ;  // objects representing the config options
     Spinner spn_allowip ;
     TextView txt_allowIP ;
     LinearLayout lay_allowIP;
+    CheckBox chknataccess;
+    CheckBox chkservercmd;
+    LinearLayout lay_natIP;
+    LinearLayout lay_natport;
+    LinearLayout lay_serverCMD;
+
     TextView txt_tcp_ports ;
     TextView txt_udp_ports ;
     TextView txt_server_ip ;
     TextView txt_server_port ;
     TextView txt_server_time ;
+    TextView txt_nat_ip;
+    TextView txt_nat_port;
+    TextView txt_server_cmd;
     TextView txt_KEY ;
     CheckBox chkb64key ;
     TextView txt_HMAC ;
@@ -84,6 +94,7 @@ public class ConfigDetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        config = new Config();
         mydb = new DBHelper(getActivity()); // grabbing a database instance
         active_Nick = getArguments().getString(ARG_ITEM_ID); // This populates active_Nick with index of the selected config
     }
@@ -99,6 +110,32 @@ public class ConfigDetailFragment extends Fragment {
         // Inflate the menu; this adds items to the action bar if it is present.
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.mainmenu, menu);
+    }
+
+    public void onCheckboxClicked(View view) {
+        // Is the view now checked?
+        boolean checked = ((CheckBox) view).isChecked();
+
+        // Check which checkbox was clicked
+        switch(view.getId()) {
+            case R.id.chknataccess:
+                if (checked) {
+                    lay_natIP.setVisibility(View.VISIBLE);
+                    lay_natport.setVisibility(View.VISIBLE);
+                } else {
+                    lay_natIP.setVisibility(View.GONE);
+                    lay_natport.setVisibility(View.GONE);
+                }
+                break;
+            case R.id.chkservercmd:
+                if (checked) {
+                    lay_serverCMD.setVisibility(View.VISIBLE);
+                } else {
+                    lay_serverCMD.setVisibility(View.GONE);
+                }
+                break;
+
+        }
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -153,32 +190,57 @@ public class ConfigDetailFragment extends Fragment {
             } else if (b64_hmac_error){ //if key is base64, check if is b64 compat
                 toast.setText("Not a valid Base 64 hmac");
                 toast.show();
+
             //end input validation, actual saving below
             } else {
                 toast.show();
                 String tmp_access;
-                if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Resolve IP") || spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Source IP")) {
-                    tmp_access = spn_allowip.getSelectedItem().toString();
+                if (chknataccess.isChecked()) {
+                    config.NAT_IP = txt_nat_ip.getText().toString();
+                    config.NAT_PORT = txt_nat_port.getText().toString();
                 } else {
-                    tmp_access = txt_allowIP.getText().toString();
+                    config.NAT_IP = "";
+                    config.NAT_PORT = "";
                 }
-                mydb.updateConfig(
-                        txt_NickName.getText().toString(),  //nickname
-                        tmp_access,                        //overload this. possibilites are Resolve IP, Source IP, or the ip address
-                        txt_tcp_ports.getText().toString(),
-                        txt_udp_ports.getText().toString(),
-                        txt_server_ip.getText().toString(),
-                        txt_server_port.getText().toString(),
-                        txt_server_time.getText().toString(),
-                        txt_KEY.getText().toString(),       //key
-                        chkb64key.isChecked(),                      //is key b64
-                        txt_HMAC.getText().toString(), // hmac key
-                        chkb64hmac.isChecked()                     //is hmac base64
-                );
+                if (chkservercmd.isChecked()) {
+                    config.SERVER_CMD = txt_server_cmd.getText().toString();
+                } else {
+                    config.SERVER_CMD = "";
+                }
+                if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Resolve IP")) {
+                    config.ACCESS_IP = spn_allowip.getSelectedItem().toString();
+                } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Source IP")) {
+                    config.ACCESS_IP = "0.0.0.0";
+                } else {
+                    config.ACCESS_IP = txt_allowIP.getText().toString();
+                }
+                config.NICK_NAME = txt_NickName.getText().toString();  //nickname
+                config.TCP_PORTS = txt_tcp_ports.getText().toString();
+                config.UDP_PORTS = txt_udp_ports.getText().toString();
+                config.SERVER_IP = txt_server_ip.getText().toString();
+                config.SERVER_PORT = txt_server_port.getText().toString();
+                config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                config.KEY = txt_KEY.getText().toString();       //key
+                config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
+                config.HMAC = txt_HMAC.getText().toString(); // hmac key
+                config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
+                mydb.updateConfig(context, config);
+                //Need to somehow call
+                Activity activity = getActivity();
+                //if(activity instanceof ConfigDetailActivity){
+                //    ConfigDetailActivity myactivity = (ConfigDetailActivity) activity;
+                //    myactivity.onItemSaved();
+                //} else
+                if(activity instanceof ConfigListActivity) {
+                    ConfigListActivity myactivity = (ConfigListActivity) activity;
+                    myactivity.onItemSaved();
+                }
+
             }
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -230,18 +292,26 @@ public class ConfigDetailFragment extends Fragment {
         //spinner below
         txt_allowIP = (TextView) rootView.findViewById(R.id.iptoallow);
         lay_allowIP = (LinearLayout) rootView.findViewById(R.id.iptoallowsl);
+        lay_natIP = (LinearLayout) rootView.findViewById(R.id.natipsl);
+        lay_natport = (LinearLayout) rootView.findViewById(R.id.natportsl);
+        lay_serverCMD = (LinearLayout) rootView.findViewById(R.id.servercmdsl);
         txt_tcp_ports = (TextView) rootView.findViewById(R.id.tcpAccessPorts);
         txt_udp_ports = (TextView) rootView.findViewById(R.id.udpAccessPorts);
         txt_server_ip = (TextView) rootView.findViewById(R.id.destIP);
         txt_server_port = (TextView) rootView.findViewById(R.id.destPort);
         txt_server_time = (TextView) rootView.findViewById(R.id.fwTimeout);
+        txt_server_cmd = (TextView) rootView.findViewById(R.id.servercmd);
+        txt_nat_ip = (TextView) rootView.findViewById(R.id.natip);
+        txt_nat_port = (TextView) rootView.findViewById(R.id.natport);
+
 
         txt_KEY = (TextView) rootView.findViewById(R.id.passwd);
         txt_HMAC = (TextView) rootView.findViewById(R.id.hmac);
 
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
-
+        chknataccess = (CheckBox) rootView.findViewById(R.id.chknataccess);
+        chkservercmd = (CheckBox) rootView.findViewById(R.id.chkservercmd);
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
@@ -270,36 +340,44 @@ public class ConfigDetailFragment extends Fragment {
         if (active_Nick.equalsIgnoreCase("New Config")) {
             txt_NickName.setText("");
         } else {
-            Cursor CurrentIndex = mydb.getData(active_Nick);
-            CurrentIndex.moveToFirst();
-
-            txt_NickName.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_NICK_NAME)));
-            String tmp_access = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_ACCESS_IP));
-            if (tmp_access.equalsIgnoreCase( "Resolve IP")) {
+            config = mydb.getConfig(active_Nick);
+            txt_NickName.setText(active_Nick);
+            if (config.ACCESS_IP.equalsIgnoreCase( "Resolve IP")) {
                 spn_allowip.setSelection(0);
-            } else if (tmp_access.equalsIgnoreCase("Source IP")) {
+            } else if (config.ACCESS_IP.equalsIgnoreCase("0.0.0.0")) {
                 spn_allowip.setSelection(1);
             } else {
                 spn_allowip.setSelection(2);
-                txt_allowIP.setText(tmp_access);
+                txt_allowIP.setText(config.ACCESS_IP);
             }
-            txt_tcp_ports.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS)));
-            txt_udp_ports.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_UDP_PORTS)));
-            txt_server_ip.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_IP)));
-            txt_server_port.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_PORT)));
-            txt_server_time.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_TIMEOUT)));
-            txt_KEY.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY)));
-            if (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY_BASE64)) == 1) {
+
+            txt_tcp_ports.setText(config.TCP_PORTS);
+            txt_udp_ports.setText(config.UDP_PORTS);
+            txt_server_ip.setText(config.SERVER_IP);
+            txt_server_port.setText(config.SERVER_PORT);
+            txt_server_time.setText(config.SERVER_TIMEOUT);
+            txt_KEY.setText(config.KEY);
+            if (config.KEY_BASE64) {
                 chkb64key.setChecked(true);
             } else { chkb64key.setChecked(false);}
-            txt_HMAC.setText(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC)));
-            if (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC_BASE64)) == 1) {
+            txt_HMAC.setText(config.HMAC);
+            if (config.HMAC_BASE64) {
                 chkb64hmac.setChecked(true);
             } else { chkb64hmac.setChecked(false);}
-            CurrentIndex.close();
+            if (!config.SERVER_CMD.equalsIgnoreCase("")) {
+                chkservercmd.setChecked(true);
+                txt_server_cmd.setText(config.SERVER_CMD);
+                lay_serverCMD.setVisibility(View.VISIBLE);
+            }
+            if (!config.NAT_IP.equalsIgnoreCase("")) {
+                chknataccess.setChecked(true);
+                txt_nat_ip.setText(config.NAT_IP);
+                txt_nat_port.setText(config.NAT_PORT);
+                lay_natIP.setVisibility(View.VISIBLE);
+                lay_natport.setVisibility(View.VISIBLE);
+            }
         }
         return rootView;
     }
-
 }
 
