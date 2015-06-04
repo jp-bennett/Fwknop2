@@ -84,8 +84,8 @@ public class SendSPA extends Application {
 
     public int send(String nick, Context ctx) {
         loadNativeLib("libfwknop.so", "/data/data/biz.incomsystems.fwknop2/lib");
-        config = mydb.getConfig(nick);
         mydb = new DBHelper(ctx);
+        config = mydb.getConfig(nick);
         Cursor CurrentIndex = mydb.getData(nick);
         CurrentIndex.moveToFirst();
 
