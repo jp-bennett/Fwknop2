@@ -72,6 +72,10 @@ public class SendSPA extends Application {
     public String destip_str;
     public String destport_str;
     public String fw_timeout_str;
+    public String nat_ip_str;
+    public String nat_port_str;
+    public String nat_access_str;
+    public String server_cmd_str;
 
     public void sendSPA() {
         startSPASend();
@@ -90,26 +94,30 @@ public class SendSPA extends Application {
         CurrentIndex.moveToFirst();
 
         //These variables are the ones that the jni pulls settings from.
-        tcpAccessPorts_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS));
-        access_str = "tcp/" + CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS));
-        passwd_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY));
-        hmac_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC));
-        destip_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_IP));
-        destport_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_PORT));
-        fw_timeout_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_TIMEOUT));
-        allowip_str = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_ACCESS_IP));
-        if (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEY_BASE64)) == 1) {
+        access_str = config.PORTS;
+        passwd_str = config.KEY;
+        hmac_str = config.HMAC;
+        destip_str = config.SERVER_IP;
+        destport_str = config.SERVER_PORT;
+        fw_timeout_str = config.SERVER_TIMEOUT;
+        allowip_str = config.ACCESS_IP;
+        nat_ip_str = config.NAT_IP;
+        nat_port_str = config.NAT_PORT;
+        server_cmd_str = "";
+        nat_access_str = "";
+        if (!nat_ip_str.equalsIgnoreCase("")) {
+            nat_access_str = nat_ip_str + "," + nat_port_str;
+        }
+
+        if (config.KEY_BASE64) {
             passwd_b64 = "true";
         } else {
             passwd_b64 = "false";
         }
-        if (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC_BASE64)) == 1) {
+        if (config.HMAC_BASE64) {
             hmac_b64 = "true";
         } else {
             hmac_b64 = "false";
-        }
-        if (allowip_str.equalsIgnoreCase("Source IP")) { // catch for an old database. Should convert this in the next database upgrade
-            allowip_str = "0.0.0.0";
         }
             getExternalIP task = new getExternalIP();
             task.execute();
@@ -208,7 +216,11 @@ public class SendSPA extends Application {
                     Log.e("fwknop2", "error " + ex);
                 }
             }
-            sendSPAPacket();
+            if (!config.SERVER_CMD.equalsIgnoreCase("")) {
+                server_cmd_str = allowip_str + "," + config.SERVER_CMD;
+            }
+            output = sendSPAPacket();
+            // Toast this message to indicate success or failure -- possibly do so in onPostExecute
             return allowip_str;
         }
         @Override

@@ -52,16 +52,19 @@ public class ConfigDetailFragment extends Fragment {
     Config config;
     TextView txt_NickName ;  // objects representing the config options
     Spinner spn_allowip ;
+    Spinner spn_configtype ;
+    Spinner spn_ssh ;
     TextView txt_allowIP ;
     LinearLayout lay_allowIP;
-    CheckBox chknataccess;
-    CheckBox chkservercmd;
     LinearLayout lay_natIP;
     LinearLayout lay_natport;
     LinearLayout lay_serverCMD;
+    LinearLayout lay_AccessPort;
+    LinearLayout lay_fwTimeout;
+    String configtype = "Open Port";
 
-    TextView txt_tcp_ports ;
-    TextView txt_udp_ports ;
+    TextView txt_ports ;
+//    TextView txt_udp_ports ;
     TextView txt_server_ip ;
     TextView txt_server_port ;
     TextView txt_server_time ;
@@ -113,30 +116,9 @@ public class ConfigDetailFragment extends Fragment {
     }
 
     public void onCheckboxClicked(View view) {
-        // Is the view now checked?
-        boolean checked = ((CheckBox) view).isChecked();
-
-        // Check which checkbox was clicked
-        switch(view.getId()) {
-            case R.id.chknataccess:
-                if (checked) {
-                    lay_natIP.setVisibility(View.VISIBLE);
-                    lay_natport.setVisibility(View.VISIBLE);
-                } else {
-                    lay_natIP.setVisibility(View.GONE);
-                    lay_natport.setVisibility(View.GONE);
-                }
-                break;
-            case R.id.chkservercmd:
-                if (checked) {
-                    lay_serverCMD.setVisibility(View.VISIBLE);
-                } else {
-                    lay_serverCMD.setVisibility(View.GONE);
-                }
-                break;
 
         }
-    }
+
 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -172,10 +154,7 @@ public class ConfigDetailFragment extends Fragment {
             } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Allow IP") && (!ipValidate.isValid(txt_allowIP.getText().toString()))){ //Have to have a valid ip to allow, if using allow ip
                 toast.setText("You Must supply a valid IP address to 'Allow IP'.");
                 toast.show();
-            } else if (txt_tcp_ports.getText().toString().equalsIgnoreCase("") && txt_udp_ports.getText().toString().equalsIgnoreCase("")){ // check for valid number? Can we open multiple ports at once?
-                toast.setText("You Must supply either a TCP or UDP port to open.");
-                toast.show();
-            } else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())){ // check server entry. Must be a valid url or ip.
+            }  else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())){ // check server entry. Must be a valid url or ip.
                 toast.setText("You Must supply a valid server address.");
                 toast.show();
                 //These are placeholders for future input validation
@@ -194,15 +173,23 @@ public class ConfigDetailFragment extends Fragment {
             //end input validation, actual saving below
             } else {
                 toast.show();
-                String tmp_access;
-                if (chknataccess.isChecked()) {
+                if (configtype.equalsIgnoreCase("Open Port")) {
+                    config.PORTS = txt_ports.getText().toString();
+                    config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                } else {
+                    config.PORTS = "";
+                    config.SERVER_TIMEOUT = "";
+                }
+                if (configtype.equalsIgnoreCase("Nat Access")) {
                     config.NAT_IP = txt_nat_ip.getText().toString();
                     config.NAT_PORT = txt_nat_port.getText().toString();
+                    config.PORTS = txt_ports.getText().toString();
+                    config.SERVER_TIMEOUT = txt_server_time.getText().toString();
                 } else {
                     config.NAT_IP = "";
                     config.NAT_PORT = "";
                 }
-                if (chkservercmd.isChecked()) {
+                if (configtype.equalsIgnoreCase("Server Command")) {
                     config.SERVER_CMD = txt_server_cmd.getText().toString();
                 } else {
                     config.SERVER_CMD = "";
@@ -215,11 +202,12 @@ public class ConfigDetailFragment extends Fragment {
                     config.ACCESS_IP = txt_allowIP.getText().toString();
                 }
                 config.NICK_NAME = txt_NickName.getText().toString();  //nickname
-                config.TCP_PORTS = txt_tcp_ports.getText().toString();
-                config.UDP_PORTS = txt_udp_ports.getText().toString();
+                //config.TCP_PORTS = txt_tcp_ports.getText().toString();
+
                 config.SERVER_IP = txt_server_ip.getText().toString();
                 config.SERVER_PORT = txt_server_port.getText().toString();
-                config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                config.SSH_CMD = "";  //TODO: Fix this
+
                 config.KEY = txt_KEY.getText().toString();       //key
                 config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
                 config.HMAC = txt_HMAC.getText().toString(); // hmac key
@@ -295,14 +283,16 @@ public class ConfigDetailFragment extends Fragment {
         lay_natIP = (LinearLayout) rootView.findViewById(R.id.natipsl);
         lay_natport = (LinearLayout) rootView.findViewById(R.id.natportsl);
         lay_serverCMD = (LinearLayout) rootView.findViewById(R.id.servercmdsl);
-        txt_tcp_ports = (TextView) rootView.findViewById(R.id.tcpAccessPorts);
-        txt_udp_ports = (TextView) rootView.findViewById(R.id.udpAccessPorts);
+        txt_ports = (TextView) rootView.findViewById(R.id.AccessPorts);
         txt_server_ip = (TextView) rootView.findViewById(R.id.destIP);
         txt_server_port = (TextView) rootView.findViewById(R.id.destPort);
         txt_server_time = (TextView) rootView.findViewById(R.id.fwTimeout);
         txt_server_cmd = (TextView) rootView.findViewById(R.id.servercmd);
         txt_nat_ip = (TextView) rootView.findViewById(R.id.natip);
         txt_nat_port = (TextView) rootView.findViewById(R.id.natport);
+        lay_AccessPort = (LinearLayout) rootView.findViewById(R.id.AccessPortsl);
+        lay_fwTimeout = (LinearLayout) rootView.findViewById(R.id.fwTimeoutl);
+
 
 
         txt_KEY = (TextView) rootView.findViewById(R.id.passwd);
@@ -310,8 +300,7 @@ public class ConfigDetailFragment extends Fragment {
 
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
-        chknataccess = (CheckBox) rootView.findViewById(R.id.chknataccess);
-        chkservercmd = (CheckBox) rootView.findViewById(R.id.chkservercmd);
+
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
@@ -337,6 +326,90 @@ public class ConfigDetailFragment extends Fragment {
             }
         });
 
+
+
+        spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
+        ArrayAdapter<CharSequence> adapter_ssh = ArrayAdapter.createFromResource(getActivity(),
+                R.array.ssh_options, android.R.layout.simple_spinner_item);
+        adapter_ssh.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_ssh.setAdapter(adapter_ssh);
+        spn_ssh.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // An item was selected. You can retrieve the selected item using
+                // parent.getItemAtPosition(pos)
+
+                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("None")) {
+                    // blank the other options here
+                } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("SSH Uri")) {
+                    // show the txt for the uri
+                } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Juicessh")) {
+                    // show the Juicessh spinner
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }
+        });
+
+
+
+        spn_configtype = (Spinner) rootView.findViewById(R.id.configtype);
+        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(getActivity(),
+                R.array.configtype_options, android.R.layout.simple_spinner_item);
+        adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_configtype.setAdapter(adapter2);
+        spn_configtype.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int pos, long id) {
+                // An item was selected. You can retrieve the selected item using
+                // parent.getItemAtPosition(pos)
+
+                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Open Port")) {
+                    configtype = "Open Port";
+                    lay_AccessPort.setVisibility(View.VISIBLE);
+                    lay_fwTimeout.setVisibility(View.VISIBLE);
+                    txt_nat_ip.setText("");
+                    txt_nat_port.setText("");
+                    txt_server_cmd.setText("");
+                } else {
+                    lay_AccessPort.setVisibility(View.GONE);
+                    lay_fwTimeout.setVisibility(View.GONE);
+                }
+                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Nat Access")) {
+                    configtype = "Nat Access";
+                    txt_server_cmd.setText("");
+                    lay_AccessPort.setVisibility(View.VISIBLE);
+                    lay_fwTimeout.setVisibility(View.VISIBLE);
+                    lay_natIP.setVisibility(View.VISIBLE);
+                    lay_natport.setVisibility(View.VISIBLE);
+                } else {
+                    lay_natIP.setVisibility(View.GONE);
+                    lay_natport.setVisibility(View.GONE);
+                }
+                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Server Command")) {
+                    configtype = "Server Command";
+                    lay_serverCMD.setVisibility(View.VISIBLE);
+                    txt_ports.setText("");
+                    txt_nat_ip.setText("");
+                    txt_nat_port.setText("");
+                    txt_server_time.setText("");
+                } else {
+                    lay_serverCMD.setVisibility(View.GONE);
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Another interface callback
+            }
+        });
+
         if (active_Nick.equalsIgnoreCase("New Config")) {
             txt_NickName.setText("");
         } else {
@@ -351,8 +424,8 @@ public class ConfigDetailFragment extends Fragment {
                 txt_allowIP.setText(config.ACCESS_IP);
             }
 
-            txt_tcp_ports.setText(config.TCP_PORTS);
-            txt_udp_ports.setText(config.UDP_PORTS);
+            txt_ports.setText(config.PORTS);
+           // txt_udp_ports.setText(config.UDP_PORTS);
             txt_server_ip.setText(config.SERVER_IP);
             txt_server_port.setText(config.SERVER_PORT);
             txt_server_time.setText(config.SERVER_TIMEOUT);
@@ -365,16 +438,27 @@ public class ConfigDetailFragment extends Fragment {
                 chkb64hmac.setChecked(true);
             } else { chkb64hmac.setChecked(false);}
             if (!config.SERVER_CMD.equalsIgnoreCase("")) {
-                chkservercmd.setChecked(true);
+                spn_configtype.setSelection(2);
                 txt_server_cmd.setText(config.SERVER_CMD);
                 lay_serverCMD.setVisibility(View.VISIBLE);
-            }
-            if (!config.NAT_IP.equalsIgnoreCase("")) {
-                chknataccess.setChecked(true);
+            } else if (!config.NAT_IP.equalsIgnoreCase("")) {
+                spn_configtype.setSelection(1);
+                txt_ports.setText(config.PORTS);
                 txt_nat_ip.setText(config.NAT_IP);
                 txt_nat_port.setText(config.NAT_PORT);
+                txt_server_time.setText(config.SERVER_TIMEOUT);
                 lay_natIP.setVisibility(View.VISIBLE);
                 lay_natport.setVisibility(View.VISIBLE);
+                lay_AccessPort.setVisibility(View.VISIBLE);
+                lay_fwTimeout.setVisibility(View.VISIBLE);
+            } else {
+                spn_configtype.setSelection(0);
+               // txt_ports.setText(config.PORTS);
+               // txt_server_time.setText(config.SERVER_TIMEOUT);
+               // lay_AccessPort.setVisibility(View.VISIBLE);
+               // lay_fwTimeout.setVisibility(View.VISIBLE);
+
+
             }
         }
         return rootView;

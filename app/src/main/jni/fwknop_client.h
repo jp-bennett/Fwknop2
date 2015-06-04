@@ -41,14 +41,24 @@
 #define MAX_PORT_STR_LEN    6
 #define MAX_SERVER_STR_LEN  50
 #define MSG_BUFSIZE         255
-#define MAX_KEY_LEN                 180
-#define MAX_B64_KEY_LEN             180
+#define MAX_KEY_LEN         128
+#define MAX_B64_KEY_LEN     180
+#define MAX_LINE_LEN        1024
+#define MAX_PATH_LEN        1024
 
 typedef struct fwknop_options
 {
     char           *spa_server_str;
     unsigned int    spa_dst_port;
     char           *spa_data;
+
+    //nat access options // am I using these?
+    char nat_access_str[MAX_PATH_LEN];
+    int  nat_local;
+    int  nat_port;
+    int  nat_rand_port;
+
+    char server_command[MAX_LINE_LEN];
 } fwknop_options_t;
 
 /* Function Prototypes

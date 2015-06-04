@@ -46,6 +46,7 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     fwknop_options_t opts;
 
     int res, hmac_str_len = 0;
+    short message_type;
     int key_len, hmac_key_len;
     char res_msg[MSG_BUFSIZE+1] = {0};
     char spa_msg[MSG_BUFSIZE+1] = {0};
@@ -94,6 +95,14 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     jstring jfwtimeout = (*env)->GetObjectField(env, thiz, fid);
     const char *fw_timeout_str = (*env)->GetStringUTFChars(env, jfwtimeout, 0);
 
+    fid = (*env)->GetFieldID(env, c, "nat_access_str", "Ljava/lang/String;");
+        jstring jnat_access_str = (*env)->GetObjectField(env, thiz, fid);
+        const char *nat_access_str = (*env)->GetStringUTFChars(env, jnat_access_str, 0);
+
+     fid = (*env)->GetFieldID(env, c, "server_cmd_str", "Ljava/lang/String;");
+            jstring jserver_cmd = (*env)->GetObjectField(env, thiz, fid);
+            const char *server_cmd_str = (*env)->GetStringUTFChars(env, jserver_cmd, 0);
+
     /* Sanity checks
     */
     if(access_str == NULL) {
@@ -126,12 +135,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         hmac_str_len = (int)strlen(hmac_str);
     }
 
-    LOGV("%s", hmac_str);
+
     if(strcmp(hmac_b64, "true") == 0) {
-        LOGV("Detected hmac b64");
         hmac_str_len = fko_base64_decode( hmac_str,
                                 (unsigned char *)hmac_key_tmp);
-        LOGV("Finished fko_base64_decode");
         if(hmac_str_len > MAX_KEY_LEN || hmac_str_len < 0)
         {
             LOGV("[*] Invalid key length: '%d', must be in [1,%d]",
@@ -169,6 +176,7 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     */
     opts.spa_server_str = (char*)destip_str;
     opts.spa_dst_port   = atoi(destport_str);
+    message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
 
     /* Intialize the context
     */
@@ -178,22 +186,37 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         goto cleanup2;
     }
 
-    /* Set client timeout
-    */
-    res = fko_set_spa_client_timeout(ctx, atoi(fw_timeout_str));
-    if (res != FKO_SUCCESS) {
-        strcpy(res_msg, fko_errmsg("Error setting FW timeout", res));
-        goto cleanup;
-    }
+    /* Set server command
+        */
 
-    /* Set the spa message string
-    */
-    snprintf(spa_msg, MSG_BUFSIZE, "%s,%s", allowip_str, access_str);
+    if (server_cmd_str[0] != 0x0) {
+        message_type = FKO_COMMAND_MSG;
+        fko_set_spa_message_type(ctx, message_type);
+        res = fko_set_spa_message(ctx, server_cmd_str);
+        LOGV("server command: %s", server_cmd_str);
+            if (res != FKO_SUCCESS) {
+                strcpy(res_msg, fko_errmsg("Error setting SPA request message", res));
+                goto cleanup;
+            }
+    } else {
 
-    res = fko_set_spa_message(ctx, spa_msg);
-    if (res != FKO_SUCCESS) {
-        strcpy(res_msg, fko_errmsg("Error setting SPA request message", res));
-        goto cleanup;
+        /* Set client timeout
+        */
+        res = fko_set_spa_client_timeout(ctx, atoi(fw_timeout_str));
+        if (res != FKO_SUCCESS) {
+            strcpy(res_msg, fko_errmsg("Error setting FW timeout", res));
+            goto cleanup;
+        }
+
+        /* Set the spa message string
+        */
+        snprintf(spa_msg, MSG_BUFSIZE, "%s,%s", allowip_str, access_str);
+
+        res = fko_set_spa_message(ctx, spa_msg);
+        if (res != FKO_SUCCESS) {
+            strcpy(res_msg, fko_errmsg("Error setting SPA request message", res));
+            goto cleanup;
+        }
     }
 
     /* Set the HMAC mode if necessary
@@ -205,6 +228,20 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
             goto cleanup;
         }
     }
+
+    /* Set Nat
+    */
+    if (nat_access_str[0] != 0x0){
+        // if nat_access_str is not blank, push it into fko context
+        LOGV("Nat Access string is: %s", nat_access_str);
+        res = fko_set_spa_nat_access(ctx, nat_access_str);
+        if (res != FKO_SUCCESS) {
+                    strcpy(res_msg, fko_errmsg("Error setting NAT string", res));
+                    goto cleanup;
+                }
+    }
+
+
 
     /* Finalize the context data (Encrypt and encode).
     */
@@ -249,9 +286,13 @@ cleanup2:
     (*env)->ReleaseStringUTFChars(env, jaccess, access_str);
     (*env)->ReleaseStringUTFChars(env, jallowip, allowip_str);
     (*env)->ReleaseStringUTFChars(env, jdestip, destip_str);
+    (*env)->ReleaseStringUTFChars(env, jdestport, destport_str);
     (*env)->ReleaseStringUTFChars(env, jpasswd, passwd_str);
+    (*env)->ReleaseStringUTFChars(env, jpasswd_b64, passwd_b64);
     (*env)->ReleaseStringUTFChars(env, jhmac, hmac_str);
+    (*env)->ReleaseStringUTFChars(env, jhmac_b64, hmac_b64);
     (*env)->ReleaseStringUTFChars(env, jfwtimeout, fw_timeout_str);
+    (*env)->ReleaseStringUTFChars(env, jnat_access_str, nat_access_str);
 
     /* Log and return a string of success or error message.
      * This can be enhanced semantically with codes.

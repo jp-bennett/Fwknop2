@@ -27,13 +27,12 @@ import java.util.ArrayList;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "fwknop.db";
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 1;
     public static final String CONFIGS_TABLE_NAME = "configs";
     public static final String CONFIGS_COLUMN_ID = "id";
     public static final String CONFIGS_COLUMN_NICK_NAME = "NICK_NAME";
     public static final String CONFIGS_COLUMN_ACCESS_IP = "ACCESS_IP";
-    public static final String CONFIGS_COLUMN_TCP_PORTS = "TCP_PORTS";
-    public static final String CONFIGS_COLUMN_UDP_PORTS = "UDP_PORTS";
+    public static final String CONFIGS_COLUMN_PORTS = "PORTS";
     public static final String CONFIGS_COLUMN_SERVER_IP = "SERVER_IP";
     public static final String CONFIGS_COLUMN_SERVER_PORT = "SERVER_PORT";
     public static final String CONFIGS_COLUMN_SERVER_TIMEOUT = "SERVER_TIMEOUT";
@@ -44,6 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CONFIGS_COLUMN_NAT_PORT = "NAT_PORT";
     public static final String CONFIGS_COLUMN_SERVER_CMD = "SERVER_CMD";
     public static final String CONFIGS_COLUMN_HMAC_BASE64 = "HMAC_BASE64";
+    public static final String CONFIGS_COLUMN_SSH_CMD = "SSH_CMD";
 
     public DBHelper(Context context)
     {
@@ -58,8 +58,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         CONFIGS_COLUMN_ID + " integer primary key, " +
                         CONFIGS_COLUMN_NICK_NAME + " text, " +
                         CONFIGS_COLUMN_ACCESS_IP + " text, " +
-                        CONFIGS_COLUMN_TCP_PORTS + " text, " +
-                        CONFIGS_COLUMN_UDP_PORTS + " text, " +
+                        CONFIGS_COLUMN_PORTS + " text, " +
                         CONFIGS_COLUMN_SERVER_IP + " text, " +
                         CONFIGS_COLUMN_SERVER_PORT + " text, " +
                         CONFIGS_COLUMN_SERVER_TIMEOUT + " text, " +
@@ -70,6 +69,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         CONFIGS_COLUMN_NAT_PORT + " text, " +
                         CONFIGS_COLUMN_SERVER_CMD + " text, " +
                         CONFIGS_COLUMN_HMAC_BASE64 + " integer" +
+                        CONFIGS_COLUMN_SSH_CMD + " text, " +
                         ")"
         );
     }
@@ -77,17 +77,8 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This needs to be updated if we update the app in a way that changes the DB format
-        if (oldVersion == 1) {
-            db.execSQL("ALTER TABLE configs ADD COLUMN " + CONFIGS_COLUMN_NAT_IP + " text");
-            db.execSQL("ALTER TABLE configs ADD COLUMN " + CONFIGS_COLUMN_NAT_PORT + " text");
-            db.execSQL("ALTER TABLE configs ADD COLUMN " + CONFIGS_COLUMN_SERVER_CMD + " text");
-            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_NAT_IP +" = '' " );
-            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_NAT_PORT +" = '' " );
-            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_SERVER_CMD +" = '' ");
-            db.execSQL("UPDATE configs SET " + CONFIGS_COLUMN_ACCESS_IP + " = '0.0.0.0' where " +
-                            CONFIGS_COLUMN_ACCESS_IP + " = 'Source IP'");
-            oldVersion = 2;
-        }
+        db.execSQL("DROP TABLE IF EXISTS configs");
+        onCreate(db);
 
     }
 
@@ -109,19 +100,13 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public boolean updateConfig  ( Context ctx, Config config)//  Automatically does either an update or insert based on NICK_NAME
-                                  //String NICK_NAME, String ACCESS_IP, String TCP_PORTS,
-                                 // String UDP_PORTS, String SERVER_IP, String SERVER_PORT,
-                                 // String SERVER_TIMEOUT, String KEY, Boolean KEY_BASE64,
-                                //  String HMAC, Boolean HMAC_BASE64
-                                  //)
     {
         // do more input validation here? return error?
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(CONFIGS_COLUMN_NICK_NAME, config.NICK_NAME);
         contentValues.put(CONFIGS_COLUMN_ACCESS_IP, config.ACCESS_IP);
-        contentValues.put(CONFIGS_COLUMN_TCP_PORTS, config.TCP_PORTS);
-        contentValues.put(CONFIGS_COLUMN_UDP_PORTS, config.UDP_PORTS);
+        contentValues.put(CONFIGS_COLUMN_PORTS, config.PORTS);
         contentValues.put(CONFIGS_COLUMN_SERVER_IP, config.SERVER_IP);
         contentValues.put(CONFIGS_COLUMN_SERVER_PORT, config.SERVER_PORT);
         contentValues.put(CONFIGS_COLUMN_SERVER_TIMEOUT, config.SERVER_TIMEOUT);
@@ -132,6 +117,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(CONFIGS_COLUMN_SERVER_CMD, config.SERVER_CMD);
         contentValues.put(CONFIGS_COLUMN_NAT_IP, config.NAT_IP);
         contentValues.put(CONFIGS_COLUMN_NAT_PORT, config.NAT_PORT);
+        contentValues.put(CONFIGS_COLUMN_SSH_CMD, config.SSH_CMD);
 
         if (CheckNickIsUnique(config.NICK_NAME)) {
             db.update("configs", contentValues, "NICK_NAME='" + config.NICK_NAME + "'", null);
@@ -159,6 +145,7 @@ public class DBHelper extends SQLiteOpenHelper {
             array_list.add(res.getString(res.getColumnIndex(CONFIGS_COLUMN_NICK_NAME)));
             res.moveToNext();
         }
+        res.close();
         db.close();
         array_list.add("New Config");
         return array_list;
@@ -170,8 +157,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor CurrentIndex = db.rawQuery("select * from configs where NICK_NAME= '" + nick + "'", null);
         CurrentIndex.moveToFirst();
         config.ACCESS_IP = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_ACCESS_IP));
-        config.TCP_PORTS = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_TCP_PORTS));
-        config.UDP_PORTS = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_UDP_PORTS));
+        config.PORTS = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_PORTS));
         config.SERVER_IP = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_IP));
         config.SERVER_PORT = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_PORT));
         config.SERVER_TIMEOUT = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_TIMEOUT));
@@ -182,6 +168,7 @@ public class DBHelper extends SQLiteOpenHelper {
         config.NAT_IP = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_NAT_IP));
         config.NAT_PORT = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_NAT_PORT));
         config.SERVER_CMD = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_CMD));
+        config.SSH_CMD = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SSH_CMD));
         CurrentIndex.close();
 
         return config;

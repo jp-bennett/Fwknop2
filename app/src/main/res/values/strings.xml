@@ -9,7 +9,15 @@
         <item>Resolve IP</item>
         <item>Source IP</item>
         <item>Allow IP</item>
-
     </string-array>
-
+    <string-array name="configtype_options">
+        <item>Open Port</item>
+        <item>Nat Access</item>
+        <item>Server Command</item>
+    </string-array>
+    <string-array name="ssh_options">
+        <item>None</item>
+        <item>SSH Uri</item>
+        <item>Juicessh</item>
+    </string-array>
 </resources>
