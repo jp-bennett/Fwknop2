@@ -7,7 +7,7 @@
     android:orientation="vertical"
     style="?android:attr/textAppearanceLarge"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="16dp"
     android:textIsSelectable="true"
     tools:context=".ConfigDetailFragment" >
@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
+            android:inputType="text"
             android:textSize="20sp"
             />
     </LinearLayout>
@@ -51,6 +52,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
+            android:inputType="text"
             android:textSize="20sp"
             />
     </LinearLayout>
@@ -71,6 +73,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="62201"
+            android:inputType="number"
             android:singleLine="true"
             android:textSize="20sp"
             />
@@ -93,7 +96,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
-            android:password="true"
+            android:inputType="textPassword"
             android:textSize="20sp"
             />
     </LinearLayout>
@@ -122,7 +125,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
-            android:password="true"
+            android:inputType="textPassword"
             android:textSize="20sp"
             />
     </LinearLayout>
@@ -174,6 +177,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
+            android:inputType="phone"
             android:textSize="20sp"
             />
     </LinearLayout>
@@ -215,6 +219,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="tcp/22"
+            android:inputType="text"
             android:singleLine="true"
             android:textSize="20sp"
             />
@@ -259,6 +264,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text=""
+            android:inputType="phone"
             android:singleLine="true"
             android:textSize="20sp"
             />
@@ -281,6 +287,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text=""
+            android:inputType="number"
             android:singleLine="true"
             android:textSize="20sp"
             />
@@ -303,6 +310,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text=""
+            android:inputType="text"
             android:singleLine="true"
             android:textSize="20sp"
             />
@@ -338,7 +346,7 @@
             android:id="@+id/sshcmdStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User: "
+            android:text="Username: "
             android:textSize="20sp"
             />
         <EditText
@@ -347,6 +355,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
+            android:inputType="text"
             android:textSize="20sp"
             />
     </LinearLayout>
@@ -355,13 +364,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         >
-        <!--<TextView
-            android:id="@+id/sshstr"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Run SSH App: "
-            android:textSize="20sp"
-            /> -->
         <Spinner
             android:id="@+id/juice_spn"
             android:visibility="gone"

@@ -21,6 +21,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -433,6 +435,8 @@ public class ConfigDetailFragment extends Fragment {
         if (active_Nick.equalsIgnoreCase("New Config")) {
             txt_NickName.setText("");
             config.SSH_CMD = "";
+            txt_HMAC.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            txt_KEY.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
         } else {
             config = mydb.getConfig(active_Nick);
             txt_NickName.setText(active_Nick);

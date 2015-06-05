@@ -6,7 +6,6 @@ public class Config {
     public String NICK_NAME;
     public String ACCESS_IP;
     public String PORTS;
-//    public String UDP_PORTS;
     public String SERVER_IP;
     public String SERVER_PORT;
     public String SERVER_TIMEOUT;
