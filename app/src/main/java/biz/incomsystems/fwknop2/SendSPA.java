@@ -25,14 +25,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.database.Cursor;
-import android.os.Bundle;
-import android.os.Message;
-import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import com.sonelli.juicessh.pluginlibrary.PluginClient;
-import com.sonelli.juicessh.pluginlibrary.PluginContract;
 import com.sonelli.juicessh.pluginlibrary.exceptions.ServiceNotConnectedException;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnClientStartedListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionExecuteListener;
@@ -46,12 +42,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.xbill.DNS.*;
-//import org.xbill.DNS.Lookup;
-//import org.xbill.DNS.Record;
-//import org.xbill.DNS.Resolver;
-//import org.xbill.DNS.SimpleResolver;
-//import org.xbill.DNS.Type;
-
 
 public class SendSPA extends FragmentActivity implements OnSessionStartedListener, OnSessionFinishedListener {
     DBHelper mydb;
@@ -59,7 +49,6 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
    Activity ourAct;
     ProgressDialog pdLoading;
     Boolean ready;
-    Boolean connected = false;
     public PluginClient client;
     private volatile int sessionId;
     private volatile String sessionKey;
@@ -82,12 +71,6 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
     public String nat_port_str;
     public String nat_access_str;
     public String server_cmd_str;
-
-
-    //    Start calling the JNI interface
-
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -121,7 +104,6 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
 
     @Override
     public void onSessionCancelled() {
-
     }
 
     @Override
@@ -133,12 +115,9 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
     }
 
     public int send(String nick, final Activity ourAct) {
-        loadNativeLib("libfwknop.so", "/data/data/biz.incomsystems.fwknop2/lib");
         mydb = new DBHelper(ourAct);
         config = new Config();
         config = mydb.getConfig(nick);
-
-
         Cursor CurrentIndex = mydb.getData(nick);
         CurrentIndex.moveToFirst();
 
@@ -172,46 +151,9 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
 
            final getExternalIP task = new getExternalIP(ourAct);
 
-
-
-
-
             task.execute();
-
-
-
-
-
-
-
         return 0;
-
     }
-
-
-
-
-
-
-    private void loadNativeLib(String lib, String destDir) {
-        if (true) {
-            String libLocation = destDir + "/" + lib;
-            try {
-                System.load(libLocation);
-            } catch (Exception ex) {
-                Log.e("fwknop2", "failed to load native library: " + ex);
-            }
-        }
-    }
-
-//    public Handler handler = new Handler() {
-//
-//        @Override
-//        public synchronized void handleMessage(Message msg) {
-//            Bundle b = msg.getData();
- //           Integer messageType = (Integer) b.get("message_type");
-//        }
-//    };
 
     private class getExternalIP extends AsyncTask<Void, Void, String>
     {
@@ -229,7 +171,12 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
         }
         @Override
         protected String doInBackground(Void... params) {
-            //Log.v("fwknop2", "Your external IP address is " + allowip_str);
+            try {
+                System.load(mActivity.getFilesDir().getParentFile().getPath() + "/lib/libfwknop.so");
+            } catch (Exception ex) {
+                Log.e("fwknop2", "Could not load libfko: " + ex);
+            }
+
             if (allowip_str.equalsIgnoreCase("Source IP")) {
                 allowip_str = "0.0.0.0";
             } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
@@ -293,25 +240,15 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
                     @Override
                     public void onClientStopped() {
                         Log.v("fwknop2", "client stopped");
-                        //   connectButton.setEnabled(false);
                     }
                 });
-
-
-
             }
 
-            //sendSPA();
             pdLoading.dismiss();
-
-
-
                 if (!config.SSH_CMD.equalsIgnoreCase("") && !(config.SSH_CMD.contains("juice:")) ) {
                 String ssh_uri = "ssh://" + config.SSH_CMD +"@" + config.SERVER_IP + ":" + config.SERVER_PORT + "/#" + config.NICK_NAME;
                 Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));
                 Log.v("fwknop2", ssh_uri);
-                    //i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
-                //i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
                 ourAct.startActivity(i);
             }
 
