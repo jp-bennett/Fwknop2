@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.view.View;
 
 import java.util.List;
 
@@ -44,21 +43,12 @@ import java.util.List;
 public class ConfigListActivity extends FragmentActivity
         implements ConfigListFragment.Callbacks {
     ConfigDetailFragment fragment;
-    ConfigListFragment fragment2;
-
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
-    private boolean mTwoPane;
+    private boolean mTwoPane; // Whether in two-pane mode.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_config_list);
-
-
 
         if (findViewById(R.id.config_detail_container) != null) {
             // The detail container view will be present only in the
@@ -73,10 +63,7 @@ public class ConfigListActivity extends FragmentActivity
                     .findFragmentById(R.id.config_list))
                     .setActivateOnItemClick(true);
         }
-
-
     }
-
 
     public void onItemSaved() {
         List<Fragment> allFragments = getSupportFragmentManager().getFragments();
@@ -114,9 +101,9 @@ public class ConfigListActivity extends FragmentActivity
             startActivity(detailIntent);
         }
     }
-    public void onCheckboxClicked(View view) {
-        fragment.onCheckboxClicked(view);
-    }
+    //public void onCheckboxClicked(View view) {
+    //    fragment.onCheckboxClicked(view);
+    //}
 
     protected void onNewIntent(Intent intent) {
         super. onNewIntent(intent);
@@ -125,11 +112,7 @@ public class ConfigListActivity extends FragmentActivity
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.config_list, listFrag);
         transaction.addToBackStack(null);
-
-        // Commit the transaction
         transaction.commit();
-
     }
-
 }
 

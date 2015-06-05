@@ -328,6 +328,50 @@
             android:textSize="30sp"
             />
     </LinearLayout>
+    <LinearLayout android:id="@+id/sshcmdsl"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/sshcmdStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User: "
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/sshcmd"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/juice_spnl"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <!--<TextView
+            android:id="@+id/sshstr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Run SSH App: "
+            android:textSize="20sp"
+            /> -->
+        <Spinner
+            android:id="@+id/juice_spn"
+            android:visibility="gone"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="30sp"
+            />
+    </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

@@ -22,6 +22,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
+import java.util.UUID;
 
 
 public class DBHelper extends SQLiteOpenHelper {
@@ -44,6 +45,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CONFIGS_COLUMN_SERVER_CMD = "SERVER_CMD";
     public static final String CONFIGS_COLUMN_HMAC_BASE64 = "HMAC_BASE64";
     public static final String CONFIGS_COLUMN_SSH_CMD = "SSH_CMD";
+    public static final String CONFIGS_COLUMN_JUICE_UUID = "JUICE_UUID";
 
     public DBHelper(Context context)
     {
@@ -68,8 +70,9 @@ public class DBHelper extends SQLiteOpenHelper {
                         CONFIGS_COLUMN_NAT_IP + " text, " +
                         CONFIGS_COLUMN_NAT_PORT + " text, " +
                         CONFIGS_COLUMN_SERVER_CMD + " text, " +
-                        CONFIGS_COLUMN_HMAC_BASE64 + " integer" +
+                        CONFIGS_COLUMN_HMAC_BASE64 + " integer," +
                         CONFIGS_COLUMN_SSH_CMD + " text, " +
+                        CONFIGS_COLUMN_JUICE_UUID + " text " +
                         ")"
         );
     }
@@ -118,6 +121,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(CONFIGS_COLUMN_NAT_IP, config.NAT_IP);
         contentValues.put(CONFIGS_COLUMN_NAT_PORT, config.NAT_PORT);
         contentValues.put(CONFIGS_COLUMN_SSH_CMD, config.SSH_CMD);
+        contentValues.put(CONFIGS_COLUMN_JUICE_UUID, config.juice_uuid.toString());
 
         if (CheckNickIsUnique(config.NICK_NAME)) {
             db.update("configs", contentValues, "NICK_NAME='" + config.NICK_NAME + "'", null);
@@ -169,6 +173,8 @@ public class DBHelper extends SQLiteOpenHelper {
         config.NAT_PORT = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_NAT_PORT));
         config.SERVER_CMD = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_CMD));
         config.SSH_CMD = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SSH_CMD));
+        config.juice_uuid = UUID.fromString(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_JUICE_UUID)));
+
         CurrentIndex.close();
 
         return config;

@@ -24,8 +24,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
-import android.view.View;
-
 
 /**
  * An activity representing a single Config detail screen. This
@@ -72,9 +70,9 @@ public class ConfigDetailActivity extends ActionBarActivity {
                     .commit();
         }
     }
-    public void onCheckboxClicked(View view) {
-        fragment.onCheckboxClicked(view);
-    }
+    //public void onCheckboxClicked(View view) {
+    //    fragment.onCheckboxClicked(view);
+    //}
 
     public void onItemSaved() {
         ConfigListFragment listFrag = new ConfigListFragment();

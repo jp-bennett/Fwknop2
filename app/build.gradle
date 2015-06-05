@@ -1,4 +1,7 @@
 apply plugin: 'com.android.application'
+repositories {
+    maven { url 'https://raw.github.com/Sonelli/maven/master' }
+}
 
 android {
     compileSdkVersion 19
@@ -55,4 +58,5 @@ dependencies {
     }
     compile 'dnsjava:dnsjava:2.1.7'
     compile 'com.google.zxing:core:3.2.0'
+    compile 'com.sonelli:juicessh-pluginlibrary:1.0.+@aar'
 }

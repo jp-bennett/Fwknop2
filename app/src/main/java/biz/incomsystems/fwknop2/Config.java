@@ -1,4 +1,7 @@
 package biz.incomsystems.fwknop2;
+
+import java.util.UUID;
+
 public class Config {
     public String NICK_NAME;
     public String ACCESS_IP;
@@ -15,4 +18,5 @@ public class Config {
     public String SERVER_CMD;
     public Boolean HMAC_BASE64;
     public String SSH_CMD;
+    public UUID juice_uuid;
 }

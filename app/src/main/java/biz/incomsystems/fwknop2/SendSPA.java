@@ -16,9 +16,9 @@ This file is part of Fwknop2.
  */
 package biz.incomsystems.fwknop2;
 
+import android.app.Activity;
 import android.app.Application;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -27,9 +27,18 @@ import android.os.Handler;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.SystemClock;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.Toast;
-import org.apache.http.HttpConnection;
+
+import com.sonelli.juicessh.pluginlibrary.PluginClient;
+import com.sonelli.juicessh.pluginlibrary.PluginContract;
+import com.sonelli.juicessh.pluginlibrary.exceptions.ServiceNotConnectedException;
+import com.sonelli.juicessh.pluginlibrary.listeners.OnClientStartedListener;
+import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionExecuteListener;
+import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionFinishedListener;
+import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionStartedListener;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -43,28 +52,25 @@ import org.xbill.DNS.*;
 //import org.xbill.DNS.SimpleResolver;
 //import org.xbill.DNS.Type;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class SendSPA extends Application {
-    private String output;
+public class SendSPA extends FragmentActivity implements OnSessionStartedListener, OnSessionFinishedListener {
     DBHelper mydb;
-    Config config;
-    Context ourCtx;
+    public static Config config;
+   Activity ourAct;
+    ProgressDialog pdLoading;
+    Boolean ready;
+    Boolean connected = false;
+    public PluginClient client;
+    private volatile int sessionId;
+    private volatile String sessionKey;
+    private volatile boolean isConnected = false;
+    public String output;
+
     public native String sendSPAPacket();
 
     //These are the configs to pass to the native code
     public String access_str;
     public String allowip_str;
-    public String tcpAccessPorts_str;
     public String passwd_str;
     public String passwd_b64;
     public String hmac_str;
@@ -77,19 +83,62 @@ public class SendSPA extends Application {
     public String nat_access_str;
     public String server_cmd_str;
 
-    public void sendSPA() {
-        startSPASend();
-    }
 
     //    Start calling the JNI interface
-    public synchronized void startSPASend() {
-        output = sendSPAPacket();
+
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.v("fwknop2", "Trying to attach");
+        try {
+            client.attach(SendSPA.this.sessionId, SendSPA.this.sessionKey);
+        } catch (ServiceNotConnectedException ex){
+            Log.v("fwknop2", "Error attaching");
+        }
+
+        // This is important if you want to be able to interact with JuiceSSH sessions that you
+        // have started otherwise the plugin won't have access.
+        if(requestCode == 2585){
+            client.gotActivityResult(requestCode, resultCode, data);
+        }
     }
 
-    public int send(String nick, Context ctx) {
+    @Override
+    public void onSessionStarted(int i, String s) {
+        SendSPA.this.sessionId = i;
+        SendSPA.this.sessionKey = s;
+        SendSPA.this.isConnected = true;
+        Log.v("fwknop2", "Trying to attach");
+        try {
+            client.attach(i,s);
+        } catch (ServiceNotConnectedException ex){
+            Log.v("fwknop2", "Error attaching");
+        }
+    }
+
+    @Override
+    public void onSessionCancelled() {
+
+    }
+
+    @Override
+    public void onSessionFinished() {
+
+        SendSPA.this.sessionId = -1;
+        SendSPA.this.sessionKey = null;
+        SendSPA.this.isConnected = false;
+    }
+
+    public int send(String nick, final Activity ourAct) {
         loadNativeLib("libfwknop.so", "/data/data/biz.incomsystems.fwknop2/lib");
-        mydb = new DBHelper(ctx);
+        mydb = new DBHelper(ourAct);
+        config = new Config();
         config = mydb.getConfig(nick);
+
+
         Cursor CurrentIndex = mydb.getData(nick);
         CurrentIndex.moveToFirst();
 
@@ -119,33 +168,30 @@ public class SendSPA extends Application {
         } else {
             hmac_b64 = "false";
         }
-            getExternalIP task = new getExternalIP();
+        Log.v("fwknop2", config.juice_uuid.toString());
+
+           final getExternalIP task = new getExternalIP(ourAct);
+
+
+
+
+
             task.execute();
 
-     //   if (nick.equalsIgnoreCase("home")) {
-            //try {
-         //   Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("ssh://root@jp-bennett.com:22/#home"));
-        //    i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
-            //i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
-       //     ctx.startActivity(i);
-            //startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("ssh://root@jp-bennett.com:22/#home")));
-            //try {
-              //  Intent intent = new Intent("com.connectbot.zxing.client.android.SCAN");
-                //intent.putExtra("SCAN_MODE", "QR_CODE_MODE"); // "PRODUCT_MODE for bar codes
-                //startActivity(intent, 0);
-            //} catch (Exception e) { // This is where the play store is called if the app is not installed
-              //  Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-                //Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
-               // startActivity(marketIntent);
-            //}
-//            } catch (Exception e) { // This is where the play store is called if the app is not installed
-        //        Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-      //          Intent marketIntent = new Intent(Intent.ACTION_VIEW, marketUri);
-    //            startActivity(marketIntent);
-  //          }
-     //   }
+
+
+
+
+
+
         return 0;
+
     }
+
+
+
+
+
 
     private void loadNativeLib(String lib, String destDir) {
         if (true) {
@@ -158,22 +204,26 @@ public class SendSPA extends Application {
         }
     }
 
-    public Handler handler = new Handler() {
-
-        @Override
-        public synchronized void handleMessage(Message msg) {
-            Bundle b = msg.getData();
-            Integer messageType = (Integer) b.get("message_type");
-        }
-    };
+//    public Handler handler = new Handler() {
+//
+//        @Override
+//        public synchronized void handleMessage(Message msg) {
+//            Bundle b = msg.getData();
+ //           Integer messageType = (Integer) b.get("message_type");
+//        }
+//    };
 
     private class getExternalIP extends AsyncTask<Void, Void, String>
     {
-        ProgressDialog pdLoading = new ProgressDialog(ourCtx);
+        private Activity mActivity;
+        public getExternalIP (Activity activity) {
+            mActivity = activity;
+        }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            pdLoading = new ProgressDialog(mActivity);
             pdLoading.setMessage("\tSending...");
             pdLoading.show();
         }
@@ -209,9 +259,7 @@ public class SendSPA extends Application {
                             allowip_str = allowip_str.split("/")[1];
                         }
                         Log.v("fwknop2", "Your external IP address is " + allowip_str);
-
                     }
-
                 } catch (Exception ex) {
                     Log.e("fwknop2", "error " + ex);
                 }
@@ -219,6 +267,7 @@ public class SendSPA extends Application {
             if (!config.SERVER_CMD.equalsIgnoreCase("")) {
                 server_cmd_str = allowip_str + "," + config.SERVER_CMD;
             }
+
             output = sendSPAPacket();
             // Toast this message to indicate success or failure -- possibly do so in onPostExecute
             return allowip_str;
@@ -226,9 +275,48 @@ public class SendSPA extends Application {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            allowip_str = result;
+            if (config.SSH_CMD.contains("juice:")) {
+                ready = false;
+                client = new PluginClient();
+
+                client.start(mActivity, new OnClientStartedListener() {
+                    @Override
+                    public void onClientStarted() {
+                        SendSPA.this.connected = true;
+                        Log.v("fwknop2", SendSPA.config.juice_uuid.toString());
+                        try {
+                            client.connect(mActivity, config.juice_uuid, SendSPA.this, 2585);
+                        } catch (ServiceNotConnectedException ex) {
+                            Log.v("fwknop2", "not connected error");
+                        }
+                    }
+                    @Override
+                    public void onClientStopped() {
+                        Log.v("fwknop2", "client stopped");
+                        //   connectButton.setEnabled(false);
+                    }
+                });
+
+
+
+            }
+
             //sendSPA();
             pdLoading.dismiss();
+
+
+
+                if (!config.SSH_CMD.equalsIgnoreCase("") && !(config.SSH_CMD.contains("juice:")) ) {
+                String ssh_uri = "ssh://" + config.SSH_CMD +"@" + config.SERVER_IP + ":" + config.SERVER_PORT + "/#" + config.NICK_NAME;
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));
+                Log.v("fwknop2", ssh_uri);
+                    //i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
+                //i.setComponent(new ComponentName("org.connectbot", "org.connectbot.HostListActivity"));
+                ourAct.startActivity(i);
+            }
+
         }
+
     }
+
 }

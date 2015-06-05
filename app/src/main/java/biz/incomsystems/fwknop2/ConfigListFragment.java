@@ -161,8 +161,8 @@ public class ConfigListFragment extends ListFragment {
                 return true;
 
             case R.id.knock:
-                OurSender.ourCtx = getActivity();
-                OurSender.send(nick, getActivity());
+
+                OurSender.send(nick, this.getActivity());
 
             default:
                 return super.onContextItemSelected(item);
@@ -180,17 +180,18 @@ public class ConfigListFragment extends ListFragment {
         Log.v("fwknop2", "onUpdate runs");
     }
 
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-        // Activities containing this fragment must implement its callbacks.
-       // if (!(activity instanceof Callbacks)) {
-       //     throw new IllegalStateException("Activity must implement fragment's callbacks.");
-       // }
-
         mCallbacks = (Callbacks) activity;
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (!(OurSender.client == null)) {
+            OurSender.client.stop(getActivity());
+        }
     }
 
     @Override

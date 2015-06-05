@@ -18,10 +18,10 @@ package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -38,8 +38,13 @@ import android.widget.TextView;
 import android.content.Intent;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Toast;
+
+import com.sonelli.juicessh.pluginlibrary.PluginContract;
+
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.DomainValidator;
+
+import java.util.UUID;
 
 /**
  * A fragment representing a single Config detail screen.
@@ -48,12 +53,17 @@ import org.apache.commons.validator.routines.DomainValidator;
  * on handsets.
  */
 public class ConfigDetailFragment extends Fragment {
+    private ConnectionListLoader connectionListLoader;
+
     DBHelper mydb;
+    PluginContract myJuice;
     Config config;
     TextView txt_NickName ;  // objects representing the config options
     Spinner spn_allowip ;
     Spinner spn_configtype ;
     Spinner spn_ssh ;
+    Spinner spn_juice;
+    ConnectionSpinnerAdapter juice_adapt;
     TextView txt_allowIP ;
     LinearLayout lay_allowIP;
     LinearLayout lay_natIP;
@@ -61,6 +71,8 @@ public class ConfigDetailFragment extends Fragment {
     LinearLayout lay_serverCMD;
     LinearLayout lay_AccessPort;
     LinearLayout lay_fwTimeout;
+    LinearLayout lay_sshcmd;
+    TextView txt_ssh_cmd;
     String configtype = "Open Port";
 
     TextView txt_ports ;
@@ -94,6 +106,7 @@ public class ConfigDetailFragment extends Fragment {
     public ConfigDetailFragment() {
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,9 +128,9 @@ public class ConfigDetailFragment extends Fragment {
         inflater.inflate(R.menu.mainmenu, menu);
     }
 
-    public void onCheckboxClicked(View view) {
-
-        }
+//    public void onCheckboxClicked(View view) {
+//
+//        }
 
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -134,8 +147,6 @@ public class ConfigDetailFragment extends Fragment {
             }
         }
         if (id == R.id.save) {
-            Boolean b64_key_error = false;
-            Boolean b64_hmac_error = false;
             InetAddressValidator ipValidate = new InetAddressValidator();
             Context context = getActivity(); // We know we will use a toast, so set it up now
             int duration = Toast.LENGTH_LONG;
@@ -158,19 +169,19 @@ public class ConfigDetailFragment extends Fragment {
                 toast.setText("You Must supply a valid server address.");
                 toast.show();
                 //These are placeholders for future input validation
-            } else if (false){ // server udp port must make sense
-            } else if (false){ // firewall timeout must make sense
-            } else if (txt_KEY.getText().toString().equalsIgnoreCase("")){ //must have a key
-                toast.setText("You Must supply a Rijndael Key.");
-                toast.show();
-            } else if (b64_key_error){ //if key is base64, check if is b64 compat
-                toast.setText("Not a valid Base 64 key");
-                toast.show();
-            } else if (b64_hmac_error){ //if key is base64, check if is b64 compat
-                toast.setText("Not a valid Base 64 hmac");
-                toast.show();
-
-            //end input validation, actual saving below
+//            } else if (false){ // server udp port must make sense
+//            } else if (false){ // firewall timeout must make sense
+//            } else if (txt_KEY.getText().toString().equalsIgnoreCase("")){ //must have a key
+//                toast.setText("You Must supply a Rijndael Key.");
+//                toast.show();
+//            } else if (b64_key_error){ //if key is base64, check if is b64 compat
+//                toast.setText("Not a valid Base 64 key");
+//                toast.show();
+//            } else if (b64_hmac_error){ //if key is base64, check if is b64 compat
+//                toast.setText("Not a valid Base 64 hmac");
+//                toast.show();
+//
+//            //end input validation, actual saving below
             } else {
                 toast.show();
                 if (configtype.equalsIgnoreCase("Open Port")) {
@@ -206,19 +217,25 @@ public class ConfigDetailFragment extends Fragment {
 
                 config.SERVER_IP = txt_server_ip.getText().toString();
                 config.SERVER_PORT = txt_server_port.getText().toString();
-                config.SSH_CMD = "";  //TODO: Fix this
+                config.SSH_CMD = "";
+                if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("SSH Uri")) {
+                    config.SSH_CMD = txt_ssh_cmd.getText().toString();
+                    config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+                } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh")) {
+                    config.SSH_CMD = "juice:" + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition());
+                    config.juice_uuid = juice_adapt.getConnectionId(spn_juice.getSelectedItemPosition());
+                    Log.v("fwknop2", config.juice_uuid.toString());
+                } else {
+                    config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+                    config.SSH_CMD = "";
+                }
 
                 config.KEY = txt_KEY.getText().toString();       //key
                 config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
                 config.HMAC = txt_HMAC.getText().toString(); // hmac key
                 config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
                 mydb.updateConfig(context, config);
-                //Need to somehow call
                 Activity activity = getActivity();
-                //if(activity instanceof ConfigDetailActivity){
-                //    ConfigDetailActivity myactivity = (ConfigDetailActivity) activity;
-                //    myactivity.onItemSaved();
-                //} else
                 if(activity instanceof ConfigListActivity) {
                     ConfigListActivity myactivity = (ConfigListActivity) activity;
                     myactivity.onItemSaved();
@@ -231,8 +248,7 @@ public class ConfigDetailFragment extends Fragment {
 
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-       // super.onActivityResult(requestCode, resultCode, data);
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { // This handles the qrcode results
         if (requestCode == 0) {
 
             if (resultCode == Activity.RESULT_OK) {
@@ -274,10 +290,12 @@ public class ConfigDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_config_detail, container, false);
         active_Nick = getArguments().getString("item_id");
+        myJuice = new PluginContract();
+        // do something here to get the list of nicks
 
-        //fields from the config detail
+
+        //Handlers for the input fields
         txt_NickName = (TextView) rootView.findViewById(R.id.NickName);
-        //spinner below
         txt_allowIP = (TextView) rootView.findViewById(R.id.iptoallow);
         lay_allowIP = (LinearLayout) rootView.findViewById(R.id.iptoallowsl);
         lay_natIP = (LinearLayout) rootView.findViewById(R.id.natipsl);
@@ -292,15 +310,19 @@ public class ConfigDetailFragment extends Fragment {
         txt_nat_port = (TextView) rootView.findViewById(R.id.natport);
         lay_AccessPort = (LinearLayout) rootView.findViewById(R.id.AccessPortsl);
         lay_fwTimeout = (LinearLayout) rootView.findViewById(R.id.fwTimeoutl);
-
-
-
+        lay_sshcmd = (LinearLayout) rootView.findViewById(R.id.sshcmdsl);
+        txt_ssh_cmd = (TextView) rootView.findViewById(R.id.sshcmd);
         txt_KEY = (TextView) rootView.findViewById(R.id.passwd);
         txt_HMAC = (TextView) rootView.findViewById(R.id.hmac);
-
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
 
+        spn_juice = (Spinner) rootView.findViewById(R.id.juice_spn);
+        juice_adapt = new ConnectionSpinnerAdapter(getActivity());
+        spn_juice.setAdapter(juice_adapt);
+
+
+            //connectionListLoader.setOnLoadedListener(connectionListLoader.OnLoadedListener());
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
@@ -308,25 +330,16 @@ public class ConfigDetailFragment extends Fragment {
         spn_allowip.setAdapter(adapter);
         spn_allowip.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                // An item was selected. You can retrieve the selected item using
-                // parent.getItemAtPosition(pos)
-
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Allow IP")) {
                     lay_allowIP.setVisibility(View.VISIBLE);
                 } else {
                     lay_allowIP.setVisibility(View.GONE);
                 }
             }
-
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Another interface callback
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-
 
         spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
         ArrayAdapter<CharSequence> adapter_ssh = ArrayAdapter.createFromResource(getActivity(),
@@ -341,21 +354,45 @@ public class ConfigDetailFragment extends Fragment {
                 // parent.getItemAtPosition(pos)
 
                 if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("None")) {
+                    lay_sshcmd.setVisibility(View.GONE);
+                    spn_juice.setVisibility(View.GONE);
                     // blank the other options here
                 } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("SSH Uri")) {
                     // show the txt for the uri
+                    lay_sshcmd.setVisibility(View.VISIBLE);
+                    spn_juice.setVisibility(View.GONE);
                 } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Juicessh")) {
-                    // show the Juicessh spinner
+                    lay_sshcmd.setVisibility(View.GONE);
+                    //spn_juice.setVisibility(View.VISIBLE);
+
+                    if (connectionListLoader == null) {
+                        connectionListLoader = new ConnectionListLoader(getActivity(), juice_adapt);
+                        connectionListLoader.setOnLoadedListener(new ConnectionListLoader.OnLoadedListener() {
+                            @Override
+                            public void onLoaded() {  // This is so ugly...
+                                spn_juice.setVisibility(View.VISIBLE);
+                                if (config.SSH_CMD.contains("juice:") && spn_juice.getCount() > 0 ) {
+                                    for (int n = 0; n < spn_juice.getCount(); n++) {
+                                        Log.v("fwknop2", config.SSH_CMD);
+                                        Log.v("fwknop2", juice_adapt.getConnectionName(n));
+                                        if (config.SSH_CMD.contains(juice_adapt.getConnectionName(n))) {
+                                            Log.v("fwknop2", "got match!"+n );
+                                            spn_juice.setSelection(n);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        getActivity().getSupportLoaderManager().initLoader(0, null, connectionListLoader);
+                    } else {
+                        getActivity().getSupportLoaderManager().restartLoader(0, null, connectionListLoader);
+                    }
                 }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Another interface callback
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
-
-
 
         spn_configtype = (Spinner) rootView.findViewById(R.id.configtype);
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(getActivity(),
@@ -364,11 +401,7 @@ public class ConfigDetailFragment extends Fragment {
         spn_configtype.setAdapter(adapter2);
         spn_configtype.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                // An item was selected. You can retrieve the selected item using
-                // parent.getItemAtPosition(pos)
-
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
                 if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Open Port")) {
                     configtype = "Open Port";
                     lay_AccessPort.setVisibility(View.VISIBLE);
@@ -405,11 +438,10 @@ public class ConfigDetailFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Another interface callback
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        //Below is the loading of a saved config
         if (active_Nick.equalsIgnoreCase("New Config")) {
             txt_NickName.setText("");
         } else {
@@ -423,9 +455,7 @@ public class ConfigDetailFragment extends Fragment {
                 spn_allowip.setSelection(2);
                 txt_allowIP.setText(config.ACCESS_IP);
             }
-
             txt_ports.setText(config.PORTS);
-           // txt_udp_ports.setText(config.UDP_PORTS);
             txt_server_ip.setText(config.SERVER_IP);
             txt_server_port.setText(config.SERVER_PORT);
             txt_server_time.setText(config.SERVER_TIMEOUT);
@@ -440,25 +470,22 @@ public class ConfigDetailFragment extends Fragment {
             if (!config.SERVER_CMD.equalsIgnoreCase("")) {
                 spn_configtype.setSelection(2);
                 txt_server_cmd.setText(config.SERVER_CMD);
-                lay_serverCMD.setVisibility(View.VISIBLE);
             } else if (!config.NAT_IP.equalsIgnoreCase("")) {
                 spn_configtype.setSelection(1);
                 txt_ports.setText(config.PORTS);
                 txt_nat_ip.setText(config.NAT_IP);
                 txt_nat_port.setText(config.NAT_PORT);
                 txt_server_time.setText(config.SERVER_TIMEOUT);
-                lay_natIP.setVisibility(View.VISIBLE);
-                lay_natport.setVisibility(View.VISIBLE);
-                lay_AccessPort.setVisibility(View.VISIBLE);
-                lay_fwTimeout.setVisibility(View.VISIBLE);
             } else {
                 spn_configtype.setSelection(0);
-               // txt_ports.setText(config.PORTS);
-               // txt_server_time.setText(config.SERVER_TIMEOUT);
-               // lay_AccessPort.setVisibility(View.VISIBLE);
-               // lay_fwTimeout.setVisibility(View.VISIBLE);
-
-
+            }
+            if (config.SSH_CMD.equalsIgnoreCase("")) {
+                spn_ssh.setSelection(0);
+            } else if (config.SSH_CMD.contains("juice:")) {
+                spn_ssh.setSelection(2);
+            } else {
+                spn_ssh.setSelection(1);
+                txt_ssh_cmd.setText(config.SSH_CMD);
             }
         }
         return rootView;
