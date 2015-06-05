@@ -189,7 +189,7 @@ public class ConfigListFragment extends ListFragment {
     public void onDestroy() {
         super.onDestroy();
 
-        if (!(OurSender.client == null)) {
+        if (OurSender.isConnected) {
             OurSender.client.stop(getActivity());
         }
     }

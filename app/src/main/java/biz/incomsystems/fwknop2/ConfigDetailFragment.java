@@ -168,19 +168,7 @@ public class ConfigDetailFragment extends Fragment {
             }  else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())){ // check server entry. Must be a valid url or ip.
                 toast.setText("You Must supply a valid server address.");
                 toast.show();
-                //These are placeholders for future input validation
-//            } else if (false){ // server udp port must make sense
-//            } else if (false){ // firewall timeout must make sense
-//            } else if (txt_KEY.getText().toString().equalsIgnoreCase("")){ //must have a key
-//                toast.setText("You Must supply a Rijndael Key.");
-//                toast.show();
-//            } else if (b64_key_error){ //if key is base64, check if is b64 compat
-//                toast.setText("Not a valid Base 64 key");
-//                toast.show();
-//            } else if (b64_hmac_error){ //if key is base64, check if is b64 compat
-//                toast.setText("Not a valid Base 64 hmac");
-//                toast.show();
-//
+
 //            //end input validation, actual saving below
             } else {
                 toast.show();
@@ -444,6 +432,7 @@ public class ConfigDetailFragment extends Fragment {
         //Below is the loading of a saved config
         if (active_Nick.equalsIgnoreCase("New Config")) {
             txt_NickName.setText("");
+            config.SSH_CMD = "";
         } else {
             config = mydb.getConfig(active_Nick);
             txt_NickName.setText(active_Nick);

@@ -63,7 +63,7 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
     public PluginClient client;
     private volatile int sessionId;
     private volatile String sessionKey;
-    private volatile boolean isConnected = false;
+    public boolean isConnected = false;
     public String output;
 
     public native String sendSPAPacket();
@@ -129,7 +129,7 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
 
         SendSPA.this.sessionId = -1;
         SendSPA.this.sessionKey = null;
-        SendSPA.this.isConnected = false;
+        //SendSPA.this.isConnected = false;
     }
 
     public int send(String nick, final Activity ourAct) {
@@ -282,7 +282,7 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
                 client.start(mActivity, new OnClientStartedListener() {
                     @Override
                     public void onClientStarted() {
-                        SendSPA.this.connected = true;
+                        SendSPA.this.isConnected = true;
                         Log.v("fwknop2", SendSPA.config.juice_uuid.toString());
                         try {
                             client.connect(mActivity, config.juice_uuid, SendSPA.this, 2585);
