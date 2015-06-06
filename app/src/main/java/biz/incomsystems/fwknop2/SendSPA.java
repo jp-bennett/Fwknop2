@@ -17,13 +17,10 @@ This file is part of Fwknop2.
 package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
-import android.app.Application;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.database.Cursor;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -31,7 +28,6 @@ import android.util.Log;
 import com.sonelli.juicessh.pluginlibrary.PluginClient;
 import com.sonelli.juicessh.pluginlibrary.exceptions.ServiceNotConnectedException;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnClientStartedListener;
-import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionExecuteListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionFinishedListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionStartedListener;
 
@@ -41,9 +37,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.xbill.DNS.*;
 
-public class SendSPA extends FragmentActivity implements OnSessionStartedListener, OnSessionFinishedListener {
+public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListener {
     DBHelper mydb;
     public static Config config;
    Activity ourAct;
@@ -72,16 +67,10 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
     public String nat_access_str;
     public String server_cmd_str;
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.v("fwknop2", "Trying to attach");
-        try {
-            client.attach(SendSPA.this.sessionId, SendSPA.this.sessionKey);
-        } catch (ServiceNotConnectedException ex){
-            Log.v("fwknop2", "Error attaching");
-        }
-
+//    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+        Log.v("fwknop2", "onActivityResult");
         // This is important if you want to be able to interact with JuiceSSH sessions that you
         // have started otherwise the plugin won't have access.
         if(requestCode == 2585){
@@ -104,11 +93,12 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
 
     @Override
     public void onSessionCancelled() {
+        Log.v("fwknop2", "session cancelled");
     }
 
     @Override
     public void onSessionFinished() {
-
+        Log.v("fwknop2", "session finished");
         SendSPA.this.sessionId = -1;
         SendSPA.this.sessionKey = null;
         //SendSPA.this.isConnected = false;
@@ -151,6 +141,7 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
 
            final getExternalIP task = new getExternalIP(ourAct);
 
+
             task.execute();
         return 0;
     }
@@ -182,7 +173,7 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
             } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
 
                 try {
-                    if (false) { // eventually implement choice of resolver
+                   // if (false) { // eventually implement choice of resolver
                         HttpClient httpclient = new DefaultHttpClient();
                         HttpGet httpget = new HttpGet("http://whatismyip.akamai.com");
                         HttpResponse response;
@@ -195,18 +186,18 @@ public class SendSPA extends FragmentActivity implements OnSessionStartedListene
                                 Log.v("fwknop2", "Your external IP address is " + allowip_str);
                             }
                         }
-                    } else {
+                 //   } else {
 
-                        Resolver resolver = new SimpleResolver("208.67.222.222");
-                        Lookup lookup = new Lookup("myip.opendns.com", Type.A);
-                        lookup.setResolver(resolver);
-                        Record[] records = lookup.run();
-                        allowip_str = ((ARecord) records[0]).getAddress().toString();
-                        if (allowip_str.contains("/")) {
-                            allowip_str = allowip_str.split("/")[1];
-                        }
-                        Log.v("fwknop2", "Your external IP address is " + allowip_str);
-                    }
+         //               Resolver resolver = new SimpleResolver("208.67.222.222");
+        //                Lookup lookup = new Lookup("myip.opendns.com", Type.A);
+         //               lookup.setResolver(resolver);
+         //               Record[] records = lookup.run();
+         //               allowip_str = ((ARecord) records[0]).getAddress().toString();
+         //               if (allowip_str.contains("/")) {
+         //                   allowip_str = allowip_str.split("/")[1];
+         //               }
+         //               Log.v("fwknop2", "Your external IP address is " + allowip_str);
+         //           }
                 } catch (Exception ex) {
                     Log.e("fwknop2", "error " + ex);
                 }

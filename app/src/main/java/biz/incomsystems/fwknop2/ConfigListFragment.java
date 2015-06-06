@@ -131,6 +131,13 @@ public class ConfigListFragment extends ListFragment {
         }
     }
 
+        @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.v("fwknop2", "onActivityResult in fragment");
+            OurSender.onActivityResult(requestCode, resultCode, data); // have to call this manually as it isn't an activity class
+    }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -162,7 +169,7 @@ public class ConfigListFragment extends ListFragment {
 
             case R.id.knock:
 
-                OurSender.send(nick, this.getActivity());
+                OurSender.send(nick, getActivity());
 
             default:
                 return super.onContextItemSelected(item);

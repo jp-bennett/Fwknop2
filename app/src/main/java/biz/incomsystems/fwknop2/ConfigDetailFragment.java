@@ -239,6 +239,7 @@ public class ConfigDetailFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) { // This handles the qrcode results
+        Log.v("fwknop2", "Detail fragment activity result");
         if (requestCode == 0) {
 
             if (resultCode == Activity.RESULT_OK) {

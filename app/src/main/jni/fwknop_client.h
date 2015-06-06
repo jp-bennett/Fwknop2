@@ -35,7 +35,6 @@
 #include <sys/types.h>
 
 #include "config.h"
-#include "logutils.h"
 
 #define FKO_DEFAULT_PORT    62201
 #define MAX_PORT_STR_LEN    6
@@ -45,6 +44,17 @@
 #define MAX_B64_KEY_LEN     180
 #define MAX_LINE_LEN        1024
 #define MAX_PATH_LEN        1024
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+#include <android/log.h>
+#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "libfwknop",__VA_ARGS__)
+
+#ifdef	__cplusplus
+}
+#endif
 
 typedef struct fwknop_options
 {

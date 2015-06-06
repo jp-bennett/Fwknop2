@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 
 import java.util.List;
 
@@ -63,6 +64,26 @@ public class ConfigListActivity extends FragmentActivity
                     .findFragmentById(R.id.config_list))
                     .setActivateOnItemClick(true);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.v("fwknop2", "onActivityResult in activity");
+        for (Fragment fragment : getSupportFragmentManager().getFragments())
+        // this overcomes what may be a bug in the android framework. Pushes the result into fragment so it can get to the nested class.
+        {
+            if (fragment != null)
+            {
+                fragment.onActivityResult(requestCode, resultCode, data);
+            }
+        }
+
+        // This is important if you want to be able to interact with JuiceSSH sessions that you
+        // have started otherwise the plugin won't have access.
+        //if(requestCode == 2585){
+        //    client.gotActivityResult(requestCode, resultCode, data);
+       // }
     }
 
     public void onItemSaved() {
