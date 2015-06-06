@@ -81,16 +81,7 @@ public class ConfigListFragment extends ListFragment {
         @Override
         public void onItemSelected(String id) {
         }
-
     };
-
-    protected void onNewIntent(Intent intent) { // this updates the list of
-        mydb = new DBHelper(getActivity());
-        array_list = mydb.getAllConfigs();
-        customAdapter = (ArrayAdapter) getListAdapter();
-        customAdapter.notifyDataSetChanged();
-
-    }
 
     /**
      * The fragment's current callback object, which is notified of list item
@@ -134,8 +125,7 @@ public class ConfigListFragment extends ListFragment {
         @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.v("fwknop2", "onActivityResult in fragment");
-            OurSender.onActivityResult(requestCode, resultCode, data); // have to call this manually as it isn't an activity class
+        OurSender.onActivityResult(requestCode, resultCode, data); // have to call this manually as it isn't an activity class
     }
 
     @Override
@@ -156,7 +146,6 @@ public class ConfigListFragment extends ListFragment {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         customAdapter = (ArrayAdapter) getListAdapter();
-
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         String nick = ((TextView) info.targetView).getText().toString();
         switch (item.getItemId()) {
@@ -168,7 +157,6 @@ public class ConfigListFragment extends ListFragment {
                 return true;
 
             case R.id.knock:
-
                 OurSender.send(nick, getActivity());
 
             default:
@@ -177,12 +165,10 @@ public class ConfigListFragment extends ListFragment {
     }
 
     public void onUpdate() {
-       // customAdapter = (ArrayAdapter) getListAdapter();
         mydb = new DBHelper(getActivity());
         array_list.clear();
         array_list.addAll(mydb.getAllConfigs());
         customAdapter.notifyDataSetChanged();
-       // setListAdapter(customAdapter);
         mydb.close();
         Log.v("fwknop2", "onUpdate runs");
     }

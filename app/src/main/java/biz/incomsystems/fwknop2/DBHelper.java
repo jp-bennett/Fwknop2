@@ -139,11 +139,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 "NICK_NAME =  '" + nick + "'", null );
     }
 
-    public ArrayList<String> getAllConfigs()   // This returns an array of Nick Names in order
+    public ArrayList<String> getAllConfigs()   // This returns an array of Nick Names
     {
         ArrayList<String> array_list = new ArrayList<String>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res =  db.rawQuery( "select * from configs", null );
+        Cursor res =  db.rawQuery( "select * from configs ORDER BY NICK_NAME COLLATE NOCASE", null );
         res.moveToFirst();
         while(!res.isAfterLast()){
             array_list.add(res.getString(res.getColumnIndex(CONFIGS_COLUMN_NICK_NAME)));

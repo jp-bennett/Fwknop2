@@ -22,7 +22,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.InputType;
-import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -176,7 +175,9 @@ public class ConfigDetailFragment extends Fragment {
             } else if (txt_KEY.getText().toString().equalsIgnoreCase("")) {
                 toast.setText("You Must supply a Rijndael key.");
                 toast.show();
-
+            } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh") && juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()) == null) {
+                toast.setText("A connection must be saved in Juicessh before being used here.");
+                toast.show();
 //            //end input validation, actual saving below
             } else {
                 toast.show();
@@ -208,9 +209,7 @@ public class ConfigDetailFragment extends Fragment {
                 } else {
                     config.ACCESS_IP = txt_allowIP.getText().toString();
                 }
-                config.NICK_NAME = txt_NickName.getText().toString();  //nickname
-                //config.TCP_PORTS = txt_tcp_ports.getText().toString();
-
+                config.NICK_NAME = txt_NickName.getText().toString();
                 config.SERVER_IP = txt_server_ip.getText().toString();
                 config.SERVER_PORT = txt_server_port.getText().toString();
                 config.SSH_CMD = "";
@@ -220,17 +219,18 @@ public class ConfigDetailFragment extends Fragment {
                 } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh")) {
                     config.SSH_CMD = "juice:" + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition());
                     config.juice_uuid = juice_adapt.getConnectionId(spn_juice.getSelectedItemPosition());
-                    Log.v("fwknop2", config.juice_uuid.toString());
+                    Log.v("fwknop2", "Connection Name is: " + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()));
                 } else {
                     config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
                     config.SSH_CMD = "";
                 }
-
                 config.KEY = txt_KEY.getText().toString();       //key
                 config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
                 config.HMAC = txt_HMAC.getText().toString(); // hmac key
                 config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
                 mydb.updateConfig(context, config);
+
+                //this updates the list for one panel mode
                 Activity activity = getActivity();
                 if(activity instanceof ConfigListActivity) {
                     ConfigListActivity myactivity = (ConfigListActivity) activity;

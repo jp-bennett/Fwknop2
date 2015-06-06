@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.database.Cursor;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import com.sonelli.juicessh.pluginlibrary.PluginClient;
@@ -45,8 +44,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     ProgressDialog pdLoading;
     Boolean ready;
     public PluginClient client;
-    private volatile int sessionId;
-    private volatile String sessionKey;
     public boolean isConnected = false;
     public String output;
 
@@ -70,8 +67,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 //    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.v("fwknop2", "onActivityResult");
-        // This is important if you want to be able to interact with JuiceSSH sessions that you
-        // have started otherwise the plugin won't have access.
         if(requestCode == 2585){
             client.gotActivityResult(requestCode, resultCode, data);
         }
@@ -79,8 +74,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
     @Override
     public void onSessionStarted(int i, String s) {
-        SendSPA.this.sessionId = i;
-        SendSPA.this.sessionKey = s;
         SendSPA.this.isConnected = true;
         Log.v("fwknop2", "Trying to attach");
         try {
@@ -96,10 +89,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
     @Override
     public void onSessionFinished() {
-        Log.v("fwknop2", "session finished");
-        SendSPA.this.sessionId = -1;
-        SendSPA.this.sessionKey = null;
-        //SendSPA.this.isConnected = false;
     }
 
     public int send(String nick, final Activity ourAct) {
