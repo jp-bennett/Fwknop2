@@ -154,16 +154,27 @@ public class ConfigDetailFragment extends Fragment {
             TextView toastTV = (TextView) toastLayout.getChildAt(0);
             toastTV.setTextSize(30);
 
+
             //The following is all input validation
 
+            try {
+                if ((Integer.parseInt(txt_server_port.getText().toString()) > 0) && (Integer.parseInt(txt_server_port.getText().toString()) < 65535)) { // check for valid port
+                   txt_server_port.setText(String.valueOf(Integer.parseInt(txt_server_port.getText().toString())));
+                } else txt_server_port.setText(String.valueOf(62201));
+            } catch (NumberFormatException ex) {
+                txt_server_port.setText(String.valueOf(62201));
+            }
             if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
                 toast.setText("You Must choose a unique Nickname."); // choosing a used nick will just overwrite it. So really
                 toast.show();
             } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Allow IP") && (!ipValidate.isValid(txt_allowIP.getText().toString()))){ //Have to have a valid ip to allow, if using allow ip
                 toast.setText("You Must supply a valid IP address to 'Allow IP'.");
                 toast.show();
-            }  else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())){ // check server entry. Must be a valid url or ip.
+            }  else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())) { // check server entry. Must be a valid url or ip.
                 toast.setText("You Must supply a valid server address.");
+                toast.show();
+            } else if (txt_KEY.getText().toString().equalsIgnoreCase("")) {
+                toast.setText("You Must supply a Rijndael key.");
                 toast.show();
 
 //            //end input validation, actual saving below
