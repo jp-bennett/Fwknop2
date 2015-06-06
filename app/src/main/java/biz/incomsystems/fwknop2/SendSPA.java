@@ -69,7 +69,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
 //    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
         Log.v("fwknop2", "onActivityResult");
         // This is important if you want to be able to interact with JuiceSSH sessions that you
         // have started otherwise the plugin won't have access.
@@ -93,7 +92,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
     @Override
     public void onSessionCancelled() {
-        Log.v("fwknop2", "session cancelled");
     }
 
     @Override

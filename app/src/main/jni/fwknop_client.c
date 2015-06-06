@@ -134,6 +134,7 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     if(hmac_str != NULL) {
         hmac_str_len = (int)strlen(hmac_str);
     }
+    key_len = (int)strlen(passwd_str);
 
 
     if(strcmp(hmac_b64, "true") == 0) {

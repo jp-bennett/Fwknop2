@@ -130,11 +130,6 @@ public class ConfigDetailFragment extends Fragment {
         inflater.inflate(R.menu.mainmenu, menu);
     }
 
-//    public void onCheckboxClicked(View view) {
-//
-//        }
-
-
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.qr_code) {
@@ -162,7 +157,7 @@ public class ConfigDetailFragment extends Fragment {
             //The following is all input validation
 
             if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
-                toast.setText("You Must choose a unique Nickname.");
+                toast.setText("You Must choose a unique Nickname."); // choosing a used nick will just overwrite it. So really
                 toast.show();
             } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Allow IP") && (!ipValidate.isValid(txt_allowIP.getText().toString()))){ //Have to have a valid ip to allow, if using allow ip
                 toast.setText("You Must supply a valid IP address to 'Allow IP'.");
@@ -230,7 +225,6 @@ public class ConfigDetailFragment extends Fragment {
                     ConfigListActivity myactivity = (ConfigListActivity) activity;
                     myactivity.onItemSaved();
                 }
-
             }
         }
         return super.onOptionsItemSelected(item);
@@ -354,7 +348,6 @@ public class ConfigDetailFragment extends Fragment {
                     spn_juice.setVisibility(View.GONE);
                 } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Juicessh")) {
                     lay_sshcmd.setVisibility(View.GONE);
-                    //spn_juice.setVisibility(View.VISIBLE);
 
                     if (connectionListLoader == null) {
                         connectionListLoader = new ConnectionListLoader(getActivity(), juice_adapt);
@@ -364,10 +357,7 @@ public class ConfigDetailFragment extends Fragment {
                                 spn_juice.setVisibility(View.VISIBLE);
                                 if (config.SSH_CMD.contains("juice:") && spn_juice.getCount() > 0 ) {
                                     for (int n = 0; n < spn_juice.getCount(); n++) {
-                                        Log.v("fwknop2", config.SSH_CMD);
-                                        Log.v("fwknop2", juice_adapt.getConnectionName(n));
                                         if (config.SSH_CMD.contains(juice_adapt.getConnectionName(n))) {
-                                            Log.v("fwknop2", "got match!"+n );
                                             spn_juice.setSelection(n);
                                         }
                                     }
@@ -424,7 +414,6 @@ public class ConfigDetailFragment extends Fragment {
                     txt_server_time.setText("");
                 } else {
                     lay_serverCMD.setVisibility(View.GONE);
-
                 }
             }
 
