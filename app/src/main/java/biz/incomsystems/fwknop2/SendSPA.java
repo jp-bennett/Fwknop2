@@ -23,6 +23,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.database.Cursor;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.sonelli.juicessh.pluginlibrary.PluginClient;
 import com.sonelli.juicessh.pluginlibrary.exceptions.ServiceNotConnectedException;
@@ -36,6 +37,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.xbill.DNS.*;
+import org.apache.commons.validator.routines.InetAddressValidator;
 
 public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListener {
     DBHelper mydb;
@@ -151,9 +154,22 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             if (allowip_str.equalsIgnoreCase("Source IP")) {
                 allowip_str = "0.0.0.0";
             } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
-
+                InetAddressValidator ipValidate = new InetAddressValidator();
                 try {
-                   // if (false) { // eventually implement choice of resolver
+                    // eventually implement choice of resolver
+                    Resolver resolver = new SimpleResolver("208.67.222.222");
+                    Lookup lookup = new Lookup("myip.opendns.com", Type.A);
+                    lookup.setResolver(resolver);
+                    Record[] records = lookup.run();
+                    allowip_str = ((ARecord) records[0]).getAddress().toString();
+                    if (allowip_str.contains("/")) {
+                        allowip_str = allowip_str.split("/")[1];
+                    }
+                } catch (Exception ex) {
+                    Log.e("fwknop2", "error " + ex);
+                }
+                try {
+                    if (!(ipValidate.isValid(allowip_str))) {
                         HttpClient httpclient = new DefaultHttpClient();
                         HttpGet httpget = new HttpGet("http://whatismyip.akamai.com");
                         HttpResponse response;
@@ -166,33 +182,24 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                                 Log.v("fwknop2", "Your external IP address is " + allowip_str);
                             }
                         }
-                 //   } else {
-
-         //               Resolver resolver = new SimpleResolver("208.67.222.222");
-        //                Lookup lookup = new Lookup("myip.opendns.com", Type.A);
-         //               lookup.setResolver(resolver);
-         //               Record[] records = lookup.run();
-         //               allowip_str = ((ARecord) records[0]).getAddress().toString();
-         //               if (allowip_str.contains("/")) {
-         //                   allowip_str = allowip_str.split("/")[1];
-         //               }
-         //               Log.v("fwknop2", "Your external IP address is " + allowip_str);
-         //           }
+                    }
                 } catch (Exception ex) {
                     Log.e("fwknop2", "error " + ex);
+                }
+                if (!(ipValidate.isValid(allowip_str))) {
+                    Log.e("fwknop2", "Could not resolve external ip.");
+                    return "resolve failure";
                 }
             }
             if (!config.SERVER_CMD.equalsIgnoreCase("")) {
                 server_cmd_str = allowip_str + "," + config.SERVER_CMD;
             }
-
-            output = sendSPAPacket();
-            // Toast this message to indicate success or failure -- possibly do so in onPostExecute
-            return allowip_str;
+            return sendSPAPacket();
         }
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+            Toast.makeText(mActivity, result, Toast.LENGTH_LONG).show();
             if (config.SSH_CMD.contains("juice:")) {
                 ready = false;
                 client = new PluginClient();
