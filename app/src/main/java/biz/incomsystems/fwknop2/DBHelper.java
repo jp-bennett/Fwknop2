@@ -151,7 +151,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         res.close();
         db.close();
-        array_list.add("New Config");
+        //array_list.add("New Config");
         return array_list;
     }
 

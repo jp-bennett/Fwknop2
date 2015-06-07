@@ -25,11 +25,12 @@
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@android:id/text1"
-        style="?attr/spinnerDropDownItemStyle"
         android:singleLine="true"
+        style="?attr/spinnerDropDownItemStyle"
         android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="20sp"
         android:ellipsize="marquee" />
     <!-- From: file:/Volumes/Android/int/jb-mr2-ub-dev/frameworks/support/v7/appcompat/res/layout/support_simple_spinner_dropdown_item.xml -->
 

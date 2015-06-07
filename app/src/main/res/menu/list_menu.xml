@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/detail_help"
+        android:title="@string/detail_help" >
+    </item>
+    <item android:id="@+id/new_item"
+        android:title="New Config" >
+    </item>
+</menu>

@@ -333,7 +333,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
-            android:textSize="30sp"
+            android:textSize="20sp"
             />
     </LinearLayout>
     <LinearLayout android:id="@+id/sshcmdsl"
@@ -346,7 +346,7 @@
             android:id="@+id/sshcmdStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Username: "
+            android:text="User@address:port "
             android:textSize="20sp"
             />
         <EditText
@@ -371,7 +371,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:singleLine="true"
-            android:textSize="30sp"
+            android:textSize="20sp"
             />
     </LinearLayout>
 

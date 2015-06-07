@@ -66,7 +66,7 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     fid = (*env)->GetFieldID(env, c, "allowip_str", "Ljava/lang/String;");
     jstring jallowip = (*env)->GetObjectField(env, thiz, fid);
     const char *allowip_str = (*env)->GetStringUTFChars(env, jallowip, 0);
-    LOGV("%s", allowip_str);
+
     fid = (*env)->GetFieldID(env, c, "destip_str", "Ljava/lang/String;");
     jstring jdestip = (*env)->GetObjectField(env, thiz, fid);
     const char *destip_str = (*env)->GetStringUTFChars(env, jdestip, 0);
@@ -96,12 +96,12 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     const char *fw_timeout_str = (*env)->GetStringUTFChars(env, jfwtimeout, 0);
 
     fid = (*env)->GetFieldID(env, c, "nat_access_str", "Ljava/lang/String;");
-        jstring jnat_access_str = (*env)->GetObjectField(env, thiz, fid);
-        const char *nat_access_str = (*env)->GetStringUTFChars(env, jnat_access_str, 0);
+    jstring jnat_access_str = (*env)->GetObjectField(env, thiz, fid);
+    const char *nat_access_str = (*env)->GetStringUTFChars(env, jnat_access_str, 0);
 
-     fid = (*env)->GetFieldID(env, c, "server_cmd_str", "Ljava/lang/String;");
-            jstring jserver_cmd = (*env)->GetObjectField(env, thiz, fid);
-            const char *server_cmd_str = (*env)->GetStringUTFChars(env, jserver_cmd, 0);
+    fid = (*env)->GetFieldID(env, c, "server_cmd_str", "Ljava/lang/String;");
+    jstring jserver_cmd = (*env)->GetObjectField(env, thiz, fid);
+    const char *server_cmd_str = (*env)->GetStringUTFChars(env, jserver_cmd, 0);
 
     /* Sanity checks
     */
@@ -148,12 +148,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         }
         else
         {
-            LOGV("now to memcpy");
             memcpy(hmac_str, hmac_key_tmp, hmac_str_len);
         }
     }
 
-    LOGV("%s", passwd_b64);
     if(strcmp(passwd_b64, "true") == 0) {
         LOGV("Detected key b64");
         key_len = fko_base64_decode(passwd_str,
@@ -169,7 +167,6 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
             memcpy(passwd_str, key_tmp, key_len);
         }
     }
-    LOGV("%i", hmac_str_len);
     /* Using an HMAC is optional (currently)
     */
 
@@ -194,7 +191,6 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         message_type = FKO_COMMAND_MSG;
         fko_set_spa_message_type(ctx, message_type);
         res = fko_set_spa_message(ctx, server_cmd_str);
-        LOGV("server command: %s", server_cmd_str);
             if (res != FKO_SUCCESS) {
                 strcpy(res_msg, fko_errmsg("Error setting SPA request message", res));
                 goto cleanup;
@@ -234,7 +230,6 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     */
     if (nat_access_str[0] != 0x0){
         // if nat_access_str is not blank, push it into fko context
-        LOGV("Nat Access string is: %s", nat_access_str);
         res = fko_set_spa_nat_access(ctx, nat_access_str);
         if (res != FKO_SUCCESS) {
                     strcpy(res_msg, fko_errmsg("Error setting NAT string", res));

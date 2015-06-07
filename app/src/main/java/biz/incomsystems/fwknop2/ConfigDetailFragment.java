@@ -22,7 +22,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -126,12 +125,16 @@ public class ConfigDetailFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.mainmenu, menu);
+        inflater.inflate(R.menu.detail_menu, menu);
+
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.qr_code) {
+        if (id == R.id.detail_help) {
+            Intent detailIntent = new Intent(getActivity(), HelpActivity.class);
+            startActivity(detailIntent);
+        } else if (id == R.id.qr_code) {
             try {
                 Intent intent = new Intent("com.google.zxing.client.android.SCAN");
                 intent.putExtra("SCAN_MODE", "QR_CODE_MODE"); // "PRODUCT_MODE for bar codes
@@ -141,8 +144,7 @@ public class ConfigDetailFragment extends Fragment {
                 Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
                 startActivity(marketIntent);
             }
-        }
-        if (id == R.id.save) {
+        } else if (id == R.id.save) {
             InetAddressValidator ipValidate = new InetAddressValidator();
             Context context = getActivity(); // We know we will use a toast, so set it up now
             int duration = Toast.LENGTH_LONG;
@@ -156,15 +158,21 @@ public class ConfigDetailFragment extends Fragment {
 
             //The following is all input validation
 
+
             try {
                 if ((Integer.parseInt(txt_server_port.getText().toString()) > 0) && (Integer.parseInt(txt_server_port.getText().toString()) < 65535)) { // check for valid port
                    txt_server_port.setText(String.valueOf(Integer.parseInt(txt_server_port.getText().toString())));
-                } else txt_server_port.setText(String.valueOf(62201));
+                } else {
+                    txt_server_port.setText(String.valueOf(62201));
+                }
             } catch (NumberFormatException ex) {
                 txt_server_port.setText(String.valueOf(62201));
             }
             if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
                 toast.setText("You Must choose a unique Nickname."); // choosing a used nick will just overwrite it. So really
+                toast.show();
+            } else if (!(txt_ports.getText().toString().matches("tcp/\\d.*") || txt_ports.getText().toString().matches("udp/\\d.*"))) {
+                toast.setText("Access ports must be in the form of 'tcp/22'");
                 toast.show();
             } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Allow IP") && (!ipValidate.isValid(txt_allowIP.getText().toString()))){ //Have to have a valid ip to allow, if using allow ip
                 toast.setText("You Must supply a valid IP address to 'Allow IP'.");
@@ -219,7 +227,6 @@ public class ConfigDetailFragment extends Fragment {
                 } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh")) {
                     config.SSH_CMD = "juice:" + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition());
                     config.juice_uuid = juice_adapt.getConnectionId(spn_juice.getSelectedItemPosition());
-                    Log.v("fwknop2", "Connection Name is: " + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()));
                 } else {
                     config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
                     config.SSH_CMD = "";
@@ -235,8 +242,14 @@ public class ConfigDetailFragment extends Fragment {
                 if(activity instanceof ConfigListActivity) {
                     ConfigListActivity myactivity = (ConfigListActivity) activity;
                     myactivity.onItemSaved();
+
+                } else {
+                    ConfigDetailActivity myactivity = (ConfigDetailActivity) activity;
+                    myactivity.onBackPressed();
                 }
             }
+        } else {
+            return false;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -244,11 +257,8 @@ public class ConfigDetailFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) { // This handles the qrcode results
-        Log.v("fwknop2", "Detail fragment activity result");
         if (requestCode == 0) {
-
             if (resultCode == Activity.RESULT_OK) {
-
                 String contents = data.getStringExtra("SCAN_RESULT");
                 for (String stanzas: contents.split(" ")){
                     String[] tmp = stanzas.split(":");
@@ -287,8 +297,6 @@ public class ConfigDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_config_detail, container, false);
         active_Nick = getArguments().getString("item_id");
         myJuice = new PluginContract();
-        // do something here to get the list of nicks
-
 
         //Handlers for the input fields
         txt_NickName = (TextView) rootView.findViewById(R.id.NickName);
@@ -317,8 +325,6 @@ public class ConfigDetailFragment extends Fragment {
         juice_adapt = new ConnectionSpinnerAdapter(getActivity());
         spn_juice.setAdapter(juice_adapt);
 
-
-            //connectionListLoader.setOnLoadedListener(connectionListLoader.OnLoadedListener());
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
@@ -348,7 +354,6 @@ public class ConfigDetailFragment extends Fragment {
                                        int pos, long id) {
                 // An item was selected. You can retrieve the selected item using
                 // parent.getItemAtPosition(pos)
-
                 if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("None")) {
                     lay_sshcmd.setVisibility(View.GONE);
                     spn_juice.setVisibility(View.GONE);
@@ -433,7 +438,7 @@ public class ConfigDetailFragment extends Fragment {
         });
 
         //Below is the loading of a saved config
-        if (active_Nick.equalsIgnoreCase("New Config")) {
+        if (active_Nick.equalsIgnoreCase("")) {
             txt_NickName.setText("");
             config.SSH_CMD = "";
             txt_HMAC.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);

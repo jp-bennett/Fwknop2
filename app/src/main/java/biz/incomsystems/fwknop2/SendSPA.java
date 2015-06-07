@@ -40,7 +40,6 @@ import org.apache.http.util.EntityUtils;
 public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListener {
     DBHelper mydb;
     public static Config config;
-   Activity ourAct;
     ProgressDialog pdLoading;
     Boolean ready;
     public PluginClient client;
@@ -66,7 +65,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
 //    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.v("fwknop2", "onActivityResult");
         if(requestCode == 2585){
             client.gotActivityResult(requestCode, resultCode, data);
         }
@@ -75,11 +73,10 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     @Override
     public void onSessionStarted(int i, String s) {
         SendSPA.this.isConnected = true;
-        Log.v("fwknop2", "Trying to attach");
         try {
             client.attach(i,s);
         } catch (ServiceNotConnectedException ex){
-            Log.v("fwknop2", "Error attaching");
+            Log.e("fwknop2", "Error attaching");
         }
     }
 
@@ -124,11 +121,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         } else {
             hmac_b64 = "false";
         }
-        Log.v("fwknop2", config.juice_uuid.toString());
-
            final getExternalIP task = new getExternalIP(ourAct);
-
-
             task.execute();
         return 0;
     }
@@ -208,11 +201,10 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                     @Override
                     public void onClientStarted() {
                         SendSPA.this.isConnected = true;
-                        Log.v("fwknop2", SendSPA.config.juice_uuid.toString());
                         try {
                             client.connect(mActivity, config.juice_uuid, SendSPA.this, 2585);
                         } catch (ServiceNotConnectedException ex) {
-                            Log.v("fwknop2", "not connected error");
+                            Log.e("fwknop2", "not connected error");
                         }
                     }
                     @Override
@@ -223,15 +215,12 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             }
 
             pdLoading.dismiss();
-                if (!config.SSH_CMD.equalsIgnoreCase("") && !(config.SSH_CMD.contains("juice:")) ) {
-                String ssh_uri = "ssh://" + config.SSH_CMD +"@" + config.SERVER_IP + ":" + config.SERVER_PORT + "/#" + config.NICK_NAME;
+            if (!config.SSH_CMD.equalsIgnoreCase("") && !(config.SSH_CMD.contains("juice:")) ) {
+
+                String ssh_uri = "ssh://" + config.SSH_CMD + "/#" + config.NICK_NAME;
                 Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));
-                Log.v("fwknop2", ssh_uri);
-                ourAct.startActivity(i);
+                mActivity.startActivity(i);
             }
-
         }
-
     }
-
 }

@@ -2,6 +2,7 @@
     <string name="app_name">Fwknop2</string>
     <string name="title_config_detail">Config Detail</string>
     <string name="QR_Code">Capture qr</string>
+    <string name="detail_help">Help</string>
     <string name="Save">Save config</string>
     <string name="Delete">Delete config</string>
     <string name="knock">Send knock</string>
@@ -20,4 +21,35 @@
         <item>SSH Uri</item>
         <item>Juicessh</item>
     </string-array>
+    <string name="help_page">
+ <![CDATA[
+ <p>
+ Welcome to fwknop2! This app is for the sending of SPA Packets to a Linux host or router, mainly
+ for opening ports in an iptables firewall. More info
+ <a href="https://www.cipherdyne.org/fwknop/">at the Cipherdyne web site</a>.
+ </p>
+ <p>
+ Get started by selecting "New Config" from the menu, and then filling in at least "Nickname", "Server Address",
+ and "Rijndael Key." If you are using luci-app-fwknop on an Openwrt router, you can select the "Capture qr" option from the menu,
+  and use a qr code generated on the router to auto fill the key and hmac data.
+  </p>
+<p>If Juicessh is installed, you can autostart a saved Juicessh connection by sellecting Juicessh from the
+ "Run SSH App" menu, and after a brief delay, choosing the desired connection. If you want to use a different
+  SSH app, select "SSH Uri", and then type in your desired Username to connect as. This will use the system\'s
+  default ssh client to try to connect to the port you are opening.
+ </p>
+ <p>
+  Once the data is filled in, select "Save Config" from the menu. Then, to send a SPA knock, long tap the
+   Saved config you want to use, and select "Send Knock"
+ </p>
+
+ <p>Credits: Based on fwknop and libfko written by <a href="https://www.cipherdyne.org/fwknop/"> Michael Rash</a></p>
+ <p>This app was written by <a href="http://incomsystems.biz/"> Jonathan Bennett</a></p>
+ <p>This app is open source software. The source can be found  <a href="https://github.com/oneru/Fwknop2">on github</a>. Please report any bugs here.</p>
+ <p> The fwknop2 icon is derived from on a photo by <a href="https://www.flickr.com/photos/anemoneprojectors/5330583056/">Peter O\'Connor</a></p>
+
+ <b>Tap the back button to get started.</b>
+ </p>
+ ]]>
+ </string>
 </resources>

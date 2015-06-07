@@ -16,12 +16,13 @@ This file is part of Fwknop2.
  */
 package biz.incomsystems.fwknop2;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ import java.util.List;
 public class ConfigListActivity extends FragmentActivity
         implements ConfigListFragment.Callbacks {
     ConfigDetailFragment fragment;
-    private boolean mTwoPane; // Whether in two-pane mode.
+    public boolean mTwoPane; // Whether in two-pane mode.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +65,18 @@ public class ConfigListActivity extends FragmentActivity
                     .findFragmentById(R.id.config_list))
                     .setActivateOnItemClick(true);
         }
+        SharedPreferences prefs = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+        boolean haveWeShownPreferences = prefs.getBoolean("HaveShownPrefs", false);
+
+        if (!haveWeShownPreferences) {
+            Intent detailIntent = new Intent(this, HelpActivity.class);
+            startActivity(detailIntent);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.v("fwknop2", "onActivityResult in activity");
         for (Fragment fragment : getSupportFragmentManager().getFragments())
         // this overcomes what may be a bug in the android framework. Pushes the result into fragment so it can get to the nested class.
         {

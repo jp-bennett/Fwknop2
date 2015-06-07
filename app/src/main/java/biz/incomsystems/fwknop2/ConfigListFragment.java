@@ -17,11 +17,13 @@ This file is part of Fwknop2.
 package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +47,7 @@ import java.util.ArrayList;
  */
 public class ConfigListFragment extends ListFragment {
     public ArrayAdapter customAdapter;
+    private AdapterView.AdapterContextMenuInfo info;
     ArrayList array_list = new ArrayList();
     DBHelper mydb;
     SendSPA OurSender;
@@ -100,6 +103,7 @@ public class ConfigListFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mydb = new DBHelper(getActivity());
         array_list = mydb.getAllConfigs();
         OurSender = new SendSPA();
@@ -111,6 +115,12 @@ public class ConfigListFragment extends ListFragment {
         setListAdapter(customAdapter);
     }
 
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.list_menu, menu);
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -120,8 +130,31 @@ public class ConfigListFragment extends ListFragment {
                 && savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
         }
-    }
 
+    }
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.detail_help) {
+            Intent detailIntent = new Intent(getActivity(), HelpActivity.class);
+            startActivity(detailIntent);
+        } else if (id == R.id.new_item) {
+            Activity activity = getActivity();
+            ConfigListActivity myactivity = (ConfigListActivity) activity;
+            if (myactivity.mTwoPane){
+                mCallbacks.onItemSelected("");
+                getListView().setItemChecked(mActivatedPosition, false);
+            } else {
+                Intent detailIntent = new Intent(getActivity(), ConfigDetailActivity.class);
+                detailIntent.putExtra(ConfigDetailFragment.ARG_ITEM_ID, "");
+                startActivity(detailIntent);
+            }
+
+
+        } else {
+            return false;
+        }
+        return true;
+    }
         @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -140,23 +173,23 @@ public class ConfigListFragment extends ListFragment {
         super.onCreateContextMenu(menu, v, menuInfo);
 
         MenuInflater inflater = this.getActivity().getMenuInflater();
-        inflater.inflate(R.menu.listmenu, menu);
+        inflater.inflate(R.menu.list_longtap_menu, menu);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         customAdapter = (ArrayAdapter) getListAdapter();
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        String nick = ((TextView) info.targetView).getText().toString();
+        info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
             case R.id.delete: // Deleting the selected option
-                mydb.deleteConfig(nick);
-                array_list.remove(info.position);
-                customAdapter.notifyDataSetChanged();
-                mydb.close();
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
                 return true;
 
             case R.id.knock:
+                String nick = ((TextView) info.targetView).getText().toString();
                 OurSender.send(nick, getActivity());
 
             default:
@@ -170,8 +203,27 @@ public class ConfigListFragment extends ListFragment {
         array_list.addAll(mydb.getAllConfigs());
         customAdapter.notifyDataSetChanged();
         mydb.close();
-        Log.v("fwknop2", "onUpdate runs");
     }
+    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    //Yes button clicked
+
+                    String nick = ((TextView) info.targetView).getText().toString();
+                    mydb.deleteConfig(nick);
+                    array_list.remove(info.position);
+                    customAdapter.notifyDataSetChanged();
+
+                    break;
+
+                case DialogInterface.BUTTON_NEGATIVE:
+                    //No button clicked
+                    break;
+            }
+        }
+    };
 
     @Override
     public void onAttach(Activity activity) {
@@ -198,9 +250,6 @@ public class ConfigListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
-
-        // Notify the active callbacks interface (the activity, if the
-        // fragment is attached to one) that an item has been selected.
         mCallbacks.onItemSelected(this.getListAdapter().getItem(position).toString());
     }
 

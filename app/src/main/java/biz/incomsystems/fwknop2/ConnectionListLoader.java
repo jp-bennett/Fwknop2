@@ -8,7 +8,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
 import com.sonelli.juicessh.pluginlibrary.PluginContract;
-import biz.incomsystems.fwknop2.ConnectionSpinnerAdapter;
 
 public class ConnectionListLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
