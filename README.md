@@ -2,13 +2,20 @@
 
 ## Introduction
 This repository contains the *Fwknop2* client for using Single Packet
-Authorization from Android phones.
+Authorization from Android phones. Here are a few screenshots to illustrate
+*Fwknop2* action. We start with the initial startup screen after installation:
 
 ![alt text][Fwknop2-startup]
 [Fwknop2-startup]: /doc/Android_fwknop2_startup.png "Fwknop2 Startup"
 
+Now, add an encryption key and an HMAC key associated with a SPA server named
+"spaserver":
+
 ![alt text][Fwknop2-config]
 [Fwknop2-config]: /doc/Android_fwknop2_config.png "Fwknop2 Configuration"
+
+Fianlly, send the SPA packet, and then SSH will be accessiable from the Android
+phone:
 
 ![alt text][Fwknop2-send-SPA-packet]
 [Fwknop2-send-SPA-packet]: /doc/Android_fwknop2_send_SPA_packet.png "Fwknop2 Send SPA packet"
