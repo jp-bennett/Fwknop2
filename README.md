@@ -14,7 +14,7 @@ Now, add an encryption key and an HMAC key associated with a SPA server named
 ![alt text][Fwknop2-config]
 [Fwknop2-config]: /doc/Android_fwknop2_config.png "Fwknop2 Configuration"
 
-Fianlly, send the SPA packet, and then SSH will be accessiable from the Android
+Finally, send the SPA packet, and then SSH will be accessiable from the Android
 phone:
 
 ![alt text][Fwknop2-send-SPA-packet]
@@ -22,7 +22,7 @@ phone:
 
 ## License
 *Fwknop2* is released as open source software under the terms of
-the **GNU General Public License (GPL v2)**. The latest release can be found
+the **GNU General Public License v2 or later (GPLv2+)**. The latest release can be found
 at [https://github.com/oneru/Fwknop2/releases](https://github.com/oneru/Fwknop2/releases)
 
 ## Contact
