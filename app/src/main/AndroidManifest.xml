@@ -14,6 +14,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ConfigListActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,11 +24,13 @@
         </activity>
         <activity
             android:name="biz.incomsystems.fwknop2.HelpActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
         <activity
             android:name=".ConfigDetailActivity"
             android:label="@string/title_config_detail"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:parentActivityName=".ConfigListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
