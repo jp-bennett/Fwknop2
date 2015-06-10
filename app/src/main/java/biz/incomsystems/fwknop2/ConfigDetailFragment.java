@@ -171,6 +171,18 @@ public class ConfigDetailFragment extends Fragment {
             if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
                 toast.setText("You Must choose a unique Nickname."); // choosing a used nick will just overwrite it. So really
                 toast.show();
+            } else if(chkb64hmac.isChecked() && txt_HMAC.getText().toString().length() % 4 != 0) { // base64 must have a multiple of 4 length
+                toast.setText("Hmac is not a valid Base64, not a multiple of 4.");
+                toast.show();
+            } else if(chkb64hmac.isChecked() && !(txt_HMAC.getText().toString().matches("^[A-Za-z0-9+/]+={0,2}$"))) { // looks for disallowed b64 characters
+                toast.setText("Hmac is not a valid Base64, Contains disallowed characters.");
+                toast.show();
+            } else if(chkb64key.isChecked() && txt_KEY.getText().toString().length() % 4 != 0) {
+                toast.setText("Key is not a valid Base64, not a multiple of 4.");
+                toast.show();
+            } else if(chkb64key.isChecked() && !(txt_KEY.getText().toString().matches("^[A-Za-z0-9+/]+={0,2}$"))) { // looks for disallowed b64 characters
+                toast.setText("Key is not a valid Base64, Contains disallowed characters.");
+                toast.show();
             } else if (!(txt_ports.getText().toString().matches("tcp/\\d.*") || txt_ports.getText().toString().matches("udp/\\d.*"))) {
                 toast.setText("Access ports must be in the form of 'tcp/22'");
                 toast.show();
