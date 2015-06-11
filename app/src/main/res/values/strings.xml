@@ -30,8 +30,9 @@
  </p>
  <p>
  Get started by selecting "New Config" from the menu, and then filling in at least "Nickname", "Server Address",
- and "Rijndael Key." If you are using luci-app-fwknop on an Openwrt router, you can select the "Capture qr" option from the menu,
-  and use a qr code generated on the router to auto fill the key and hmac data.
+ and "Rijndael Key." It is also recommended to set an "HMAC Key" as well for strong authentication of SPA packets.
+ If you are using luci-app-fwknop on an Openwrt router, you can select the "Capture qr" option from the menu,
+ and use a qr code generated on the router to auto fill the encryption and HMAC keys.
   </p>
 <p>If Juicessh is installed, you can autostart a saved Juicessh connection by sellecting Juicessh from the
  "Run SSH App" menu, and after a brief delay, choosing the desired connection. If you want to use a different
