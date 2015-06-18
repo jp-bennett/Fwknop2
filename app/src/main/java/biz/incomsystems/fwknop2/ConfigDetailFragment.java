@@ -18,6 +18,7 @@ package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -375,26 +376,39 @@ public class ConfigDetailFragment extends Fragment {
                     lay_sshcmd.setVisibility(View.VISIBLE);
                     spn_juice.setVisibility(View.GONE);
                 } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Juicessh")) {
-                    lay_sshcmd.setVisibility(View.GONE);
+                    if(getActivity().checkCallingOrSelfPermission("com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS") == PackageManager.PERMISSION_GRANTED) {
 
-                    if (connectionListLoader == null) {
-                        connectionListLoader = new ConnectionListLoader(getActivity(), juice_adapt);
-                        connectionListLoader.setOnLoadedListener(new ConnectionListLoader.OnLoadedListener() {
-                            @Override
-                            public void onLoaded() {  // This is so ugly...
-                                spn_juice.setVisibility(View.VISIBLE);
-                                if (config.SSH_CMD.contains("juice:") && spn_juice.getCount() > 0 ) {
-                                    for (int n = 0; n < spn_juice.getCount(); n++) {
-                                        if (config.SSH_CMD.contains(juice_adapt.getConnectionName(n))) {
-                                            spn_juice.setSelection(n);
+                        lay_sshcmd.setVisibility(View.GONE);
+
+                        if (connectionListLoader == null) {
+                            connectionListLoader = new ConnectionListLoader(getActivity(), juice_adapt);
+                            connectionListLoader.setOnLoadedListener(new ConnectionListLoader.OnLoadedListener() {
+                                @Override
+                                public void onLoaded() {  // This is so ugly...
+                                    spn_juice.setVisibility(View.VISIBLE);
+                                    if (config.SSH_CMD.contains("juice:") && spn_juice.getCount() > 0) {
+                                        for (int n = 0; n < spn_juice.getCount(); n++) {
+                                            if (config.SSH_CMD.contains(juice_adapt.getConnectionName(n))) {
+                                                spn_juice.setSelection(n);
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        });
-                        getActivity().getSupportLoaderManager().initLoader(0, null, connectionListLoader);
+                            });
+                            getActivity().getSupportLoaderManager().initLoader(0, null, connectionListLoader);
+                        } else {
+                            getActivity().getSupportLoaderManager().restartLoader(0, null, connectionListLoader);
+                        }
                     } else {
-                        getActivity().getSupportLoaderManager().restartLoader(0, null, connectionListLoader);
+                        Context context = getActivity();
+                        CharSequence text = "Fwknop2 does not have permission to access Juicessh connection list. Please reinstall Fwknop2.";
+                        int duration = Toast.LENGTH_LONG;
+                        Toast toast = Toast.makeText(context, text, duration);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        LinearLayout toastLayout = (LinearLayout) toast.getView();
+                        TextView toastTV = (TextView) toastLayout.getChildAt(0);
+                        toastTV.setTextSize(30);
+                        toast.show();
                     }
                 }
             }
