@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,6 +47,8 @@ import com.sonelli.juicessh.pluginlibrary.PluginContract;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.DomainValidator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -58,6 +61,7 @@ public class ConfigDetailFragment extends Fragment {
     private ConnectionListLoader connectionListLoader;
 
     DBHelper mydb;
+    Boolean juiceInstalled;
     PluginContract myJuice;
     Config config;
     TextView txt_NickName ;  // objects representing the config options
@@ -108,13 +112,22 @@ public class ConfigDetailFragment extends Fragment {
     public ConfigDetailFragment() {
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         config = new Config();
         mydb = new DBHelper(getActivity()); // grabbing a database instance
         active_Nick = getArguments().getString(ARG_ITEM_ID); // This populates active_Nick with index of the selected config
+
+        PackageManager pm = getActivity().getPackageManager();
+        try {
+            pm.getPackageInfo("com.sonelli.juicessh", PackageManager.GET_ACTIVITIES);
+            juiceInstalled = true;
+            Log.v("fwknop2", "installed");
+        } catch (PackageManager.NameNotFoundException e) {
+            juiceInstalled = false;
+            Log.v("fwknop2", "not installed");
+        }
     }
 
     @Override
@@ -319,10 +332,6 @@ public class ConfigDetailFragment extends Fragment {
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
 
-        spn_juice = (Spinner) rootView.findViewById(R.id.juice_spn);
-        juice_adapt = new ConnectionSpinnerAdapter(getActivity());
-        spn_juice.setAdapter(juice_adapt);
-
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
@@ -337,15 +346,28 @@ public class ConfigDetailFragment extends Fragment {
                     lay_allowIP.setVisibility(View.GONE);
                 }
             }
+
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
-        ArrayAdapter<CharSequence> adapter_ssh = ArrayAdapter.createFromResource(getActivity(),
-                R.array.ssh_options, android.R.layout.simple_spinner_item);
+        ArrayList<String> list = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
+        ArrayAdapter<String> adapter_ssh = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item,list);
         adapter_ssh.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_ssh.setAdapter(adapter_ssh);
+        spn_juice = (Spinner) rootView.findViewById(R.id.juice_spn);
+
+        if (juiceInstalled) {
+            juice_adapt = new ConnectionSpinnerAdapter(getActivity());
+            spn_juice.setAdapter(juice_adapt);
+        } else {
+            list.remove("Juicessh");
+            adapter_ssh.notifyDataSetChanged();
+        }
+
         spn_ssh.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
@@ -445,7 +467,8 @@ public class ConfigDetailFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         //Below is the loading of a saved config
@@ -491,7 +514,7 @@ public class ConfigDetailFragment extends Fragment {
             }
             if (config.SSH_CMD.equalsIgnoreCase("")) {
                 spn_ssh.setSelection(0);
-            } else if (config.SSH_CMD.contains("juice:")) {
+            } else if (config.SSH_CMD.contains("juice:") && juiceInstalled) {
                 spn_ssh.setSelection(2);
             } else {
                 spn_ssh.setSelection(1);
