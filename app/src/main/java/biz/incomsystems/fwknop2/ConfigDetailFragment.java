@@ -19,7 +19,6 @@ package biz.incomsystems.fwknop2;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.InputType;
@@ -40,6 +39,8 @@ import android.content.Intent;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.sonelli.juicessh.pluginlibrary.PluginContract;
 
 import org.apache.commons.validator.routines.InetAddressValidator;
@@ -137,13 +138,10 @@ public class ConfigDetailFragment extends Fragment {
             startActivity(detailIntent);
         } else if (id == R.id.qr_code) {
             try {
-                Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-                intent.putExtra("SCAN_MODE", "QR_CODE_MODE"); // "PRODUCT_MODE for bar codes
-                startActivityForResult(intent, 0);
+                IntentIntegrator.forSupportFragment(this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES).initiateScan();
+                //startActivityForResult(intent, 0);
             } catch (Exception e) { // This is where the play store is called if the app is not installed
-                Uri marketUri = Uri.parse("market://details?id=com.google.zxing.client.android");
-                Intent marketIntent = new Intent(Intent.ACTION_VIEW,marketUri);
-                startActivity(marketIntent);
+
             }
         } else if (id == R.id.save) {
             InetAddressValidator ipValidate = new InetAddressValidator();
@@ -269,39 +267,26 @@ public class ConfigDetailFragment extends Fragment {
 
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) { // This handles the qrcode results
-        if (requestCode == 0) {
-            if (resultCode == Activity.RESULT_OK) {
-                String contents = data.getStringExtra("SCAN_RESULT");
-                for (String stanzas: contents.split(" ")){
-                    String[] tmp = stanzas.split(":");
-                    if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
-                        txt_KEY.setText(tmp[1]);
-                        chkb64key.setChecked(true);
-                    } else  if (tmp[0].equalsIgnoreCase("KEY")) {
-                        txt_KEY.setText(tmp[1]);
-                        chkb64key.setChecked(false);
-                    } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
-                        txt_HMAC.setText(tmp[1]);
-                        chkb64hmac.setChecked(true);
-                    } else if (tmp[0].equalsIgnoreCase( "HMAC_KEY")) {
-                            txt_HMAC.setText(tmp[1]);
-                            chkb64hmac.setChecked(false);
-                    }
-                }// end for loop
-            }
-            if(resultCode == Activity.RESULT_CANCELED){
-                //handle cancel
-                Context context = getActivity();
-                CharSequence text = " QR Code Canceled";
-                int duration = Toast.LENGTH_LONG;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                LinearLayout toastLayout = (LinearLayout) toast.getView();
-                TextView toastTV = (TextView) toastLayout.getChildAt(0);
-                toastTV.setTextSize(30);
-                toast.show();
-            }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { // Handle the qr code results
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if ((scanResult != null) && (scanResult.getContents() != null)) {
+            String contents = scanResult.getContents();
+            for (String stanzas: contents.split(" ")){
+                String[] tmp = stanzas.split(":");
+                if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
+                   txt_KEY.setText(tmp[1]);
+                    chkb64key.setChecked(true);
+                } else  if (tmp[0].equalsIgnoreCase("KEY")) {
+                    txt_KEY.setText(tmp[1]);
+                    chkb64key.setChecked(false);
+                } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
+                    txt_HMAC.setText(tmp[1]);
+                    chkb64hmac.setChecked(true);
+                } else if (tmp[0].equalsIgnoreCase( "HMAC_KEY")) {
+                    txt_HMAC.setText(tmp[1]);
+                    chkb64hmac.setChecked(false);
+                }
+            }// end for loop
         }
     }
     @Override

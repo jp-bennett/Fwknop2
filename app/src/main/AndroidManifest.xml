@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS"/>
     <uses-permission android:name="com.sonelli.juicessh.api.v1.permission.OPEN_SESSIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         tools:replace="android:icon,android:theme"
