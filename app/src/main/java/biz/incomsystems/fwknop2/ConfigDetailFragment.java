@@ -246,7 +246,7 @@ public class ConfigDetailFragment extends Fragment {
                 config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
                 config.HMAC = txt_HMAC.getText().toString(); // hmac key
                 config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
-                mydb.updateConfig(context, config);
+                mydb.updateConfig(config);
 
                 //this updates the list for one panel mode
                 Activity activity = getActivity();

@@ -102,7 +102,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateConfig  ( Context ctx, Config config)//  Automatically does either an update or insert based on NICK_NAME
+    public boolean updateConfig  (Config config)//  Automatically does either an update or insert based on NICK_NAME
     {
         // do more input validation here? return error?
         SQLiteDatabase db = this.getWritableDatabase();

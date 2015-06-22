@@ -79,30 +79,6 @@ public class ConnectionSpinnerAdapter extends CursorAdapter {
         return name;
     }
 
-    /**
-     * Returns the index of the connections' position in the adapter list
-     *
-     * @param id The ID of the connection to look for
-     * @return The position index, or -1 if it doesn't exist
-     */
-    public int getIndexOfConnection(String id) {
-
-        Cursor cursor = getCursor();
-        if (id != null && cursor != null) {
-            while (cursor.moveToNext()) {
-                int column = cursor.getColumnIndex(PluginContract.Connections.COLUMN_ID);
-                if (column > -1) {
-                    if (id.equals(cursor.getString(column))) {
-                        return cursor.getPosition();
-                    }
-                }
-            }
-        }
-
-        return -1;
-
-    }
-
     @Override
     public boolean areAllItemsEnabled() {
         return false;

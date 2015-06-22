@@ -51,7 +51,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     Boolean ready;
     public PluginClient client;
     public boolean isConnected = false;
-    public String output;
 
     public native String sendSPAPacket();
 
