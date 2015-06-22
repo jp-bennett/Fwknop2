@@ -191,9 +191,9 @@ public class ConfigDetailFragment extends Fragment {
             }  else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())) { // check server entry. Must be a valid url or ip.
                 toast.setText("You Must supply a valid server address.");
                 toast.show();
-            } else if (txt_KEY.getText().toString().equalsIgnoreCase("")) {
-                toast.setText("You Must supply a Rijndael key.");
-                toast.show();
+//            } else if (txt_KEY.getText().toString().equalsIgnoreCase("")) {
+//                toast.setText("You Must supply a Rijndael key.");
+//                toast.show();
             } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh") && juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()) == null) {
                 toast.setText("A connection must be saved in Juicessh before being used here.");
                 toast.show();

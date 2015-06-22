@@ -17,12 +17,16 @@ This file is part of Fwknop2.
 package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.database.Cursor;
+import android.text.InputType;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.sonelli.juicessh.pluginlibrary.PluginClient;
@@ -124,8 +128,40 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         } else {
             hmac_b64 = "false";
         }
-           final getExternalIP task = new getExternalIP(ourAct);
+        if (passwd_str.equalsIgnoreCase("")) { //here is where we prompt for a key
+
+
+            AlertDialog.Builder alert = new AlertDialog.Builder(ourAct);
+
+            alert.setTitle("Rijndael Key");
+            final EditText input = new EditText(ourAct);
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            alert.setView(input);
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    passwd_str = input.getText().toString();
+                    if (!(passwd_str.equalsIgnoreCase(""))) {
+                        final getExternalIP task = new getExternalIP(ourAct);
+                        task.execute();
+                    } else {
+                        Toast.makeText(ourAct, "Key cannot be blank.", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
+        } else {
+            final getExternalIP task = new getExternalIP(ourAct);
             task.execute();
+        }
         return 0;
     }
 
