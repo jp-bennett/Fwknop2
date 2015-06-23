@@ -195,7 +195,7 @@ public class ConfigDetailFragment extends Fragment {
             } else if(chkb64key.isChecked() && !(txt_KEY.getText().toString().matches("^[A-Za-z0-9+/]+={0,2}$"))) { // looks for disallowed b64 characters
                 toast.setText(getString(R.string.key64_xchars));
                 toast.show();
-            } else if (!(txt_ports.getText().toString().matches("tcp/\\d.*") || txt_ports.getText().toString().matches("udp/\\d.*"))) {
+            } else if (!(txt_ports.getText().toString().matches("tcp/\\d.*") || txt_ports.getText().toString().matches("udp/\\d.*") || configtype.equalsIgnoreCase("Server Command"))) {
                 toast.setText(getText(R.string.port_format));
                 toast.show();
             } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Allow IP") && (!ipValidate.isValid(txt_allowIP.getText().toString()))){ //Have to have a valid ip to allow, if using allow ip
@@ -350,8 +350,8 @@ public class ConfigDetailFragment extends Fragment {
         });
 
         spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
-        ArrayList<String> list = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
-        ArrayAdapter<String> adapter_ssh = new ArrayAdapter<String>(getActivity(),
+        ArrayList<String> list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
+        ArrayAdapter<String> adapter_ssh = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_item,list);
         adapter_ssh.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_ssh.setAdapter(adapter_ssh);
