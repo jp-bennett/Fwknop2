@@ -65,10 +65,9 @@
   Once the data is filled in, select "Save Config" from the menu. Then, to send a SPA knock, long tap the
    Saved config you want to use, and select "Send Knock"
  </p>
-
+ <p>This app is open source software, Licensed GPLv2+. The source can be found  <a href="https://github.com/oneru/Fwknop2">on github</a>. Please report any bugs here.</p>
  <p>Credits: Based on fwknop and libfko written by <a href="https://www.cipherdyne.org/fwknop/"> Michael Rash</a></p>
  <p>This app was written by <a href="http://incomsystems.biz/"> Jonathan Bennett</a></p>
- <p>This app is open source software, Licensed GPLv2+. The source can be found  <a href="https://github.com/oneru/Fwknop2">on github</a>. Please report any bugs here.</p>
  <p> The fwknop2 icon is derived from on a photo by <a href="https://www.flickr.com/photos/anemoneprojectors/5330583056/">Peter O\'Connor</a></p>
 
  <b>Tap the back button to get started.</b>
