@@ -5,7 +5,23 @@
     <string name="detail_help">Help</string>
     <string name="Save">Save config</string>
     <string name="Delete">Delete config</string>
+    <string name="unique_nick">You Must choose a unique Nickname.</string>
+    <string name="hmac64_x4">Hmac is not a valid Base64, not a multiple of 4.</string>
+    <string name="hmac64_xchars">Hmac is not a valid Base64, Contains disallowed characters.</string>
+    <string name="key64_x4">Key is not a valid Base64, not a multiple of 4.</string>
+    <string name="key64_xchars">Key is not a valid Base64, Contains disallowed characters.</string>
+    <string name="port_format">Access ports must be in the form of \'tcp/22\'</string>
+    <string name="valid_ip">You Must supply a valid IP address to \'Allow IP\'.</string>
+    <string name="valid_server">You Must supply a valid server address.</string>
     <string name="knock">Send knock</string>
+    <string name="juice_first">A connection must be saved in Juicessh before being used here.</string>
+    <string name="blank_key">Key cannot be blank.</string>
+    <string name="Rijndael_Key">Rijndael Key</string>
+    <string name="saving">Saving config</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="sending">Sending&#8230;</string>
+    <string name="juice_permissions">Fwknop2 does not have permission to access Juicessh connection list. Please reinstall Fwknop2.</string>
     <string-array name="spinner_options">
         <item>Resolve IP</item>
         <item>Source IP</item>

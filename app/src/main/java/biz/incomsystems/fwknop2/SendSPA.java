@@ -132,25 +132,24 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
             AlertDialog.Builder alert = new AlertDialog.Builder(ourAct);
 
-            alert.setTitle("Rijndael Key");
+            alert.setTitle(ourAct.getResources().getText(R.string.Rijndael_Key));
             final EditText input = new EditText(ourAct);
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             alert.setView(input);
 
-            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            alert.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     passwd_str = input.getText().toString();
                     if (!(passwd_str.equalsIgnoreCase(""))) {
                         final getExternalIP task = new getExternalIP(ourAct);
                         task.execute();
                     } else {
-                        Toast.makeText(ourAct, "Key cannot be blank.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(ourAct, ourAct.getResources().getText(R.string.blank_key), Toast.LENGTH_LONG).show();
                     }
                 }
             });
 
-
-            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            alert.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     // Canceled.
                 }
@@ -175,7 +174,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         protected void onPreExecute() {
             super.onPreExecute();
             pdLoading = new ProgressDialog(mActivity);
-            pdLoading.setMessage("\tSending...");
+            pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
             pdLoading.show();
         }
         @Override

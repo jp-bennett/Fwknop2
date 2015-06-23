@@ -160,7 +160,7 @@ public class ConfigDetailFragment extends Fragment {
             InetAddressValidator ipValidate = new InetAddressValidator();
             Context context = getActivity(); // We know we will use a toast, so set it up now
             int duration = Toast.LENGTH_LONG;
-            CharSequence text = "Saving config";
+            CharSequence text = getString(R.string.saving);
             Toast toast = Toast.makeText(context, text, duration);
             toast.setGravity(Gravity.CENTER, 0, 0);
             LinearLayout toastLayout = (LinearLayout) toast.getView();
@@ -181,34 +181,31 @@ public class ConfigDetailFragment extends Fragment {
                 txt_server_port.setText(String.valueOf(62201));
             }
             if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
-                toast.setText("You Must choose a unique Nickname."); // choosing a used nick will just overwrite it. So really
+                toast.setText(getString(R.string.unique_nick)); // choosing a used nick will just overwrite it. So really
                 toast.show();
             } else if(chkb64hmac.isChecked() && txt_HMAC.getText().toString().length() % 4 != 0) { // base64 must have a multiple of 4 length
-                toast.setText("Hmac is not a valid Base64, not a multiple of 4.");
+                toast.setText(getString(R.string.hmac64_x4));
                 toast.show();
             } else if(chkb64hmac.isChecked() && !(txt_HMAC.getText().toString().matches("^[A-Za-z0-9+/]+={0,2}$"))) { // looks for disallowed b64 characters
-                toast.setText("Hmac is not a valid Base64, Contains disallowed characters.");
+                toast.setText(getString(R.string.hmac64_xchars));
                 toast.show();
             } else if(chkb64key.isChecked() && txt_KEY.getText().toString().length() % 4 != 0) {
-                toast.setText("Key is not a valid Base64, not a multiple of 4.");
+                toast.setText(getString(R.string.key64_x4));
                 toast.show();
             } else if(chkb64key.isChecked() && !(txt_KEY.getText().toString().matches("^[A-Za-z0-9+/]+={0,2}$"))) { // looks for disallowed b64 characters
-                toast.setText("Key is not a valid Base64, Contains disallowed characters.");
+                toast.setText(getString(R.string.key64_xchars));
                 toast.show();
             } else if (!(txt_ports.getText().toString().matches("tcp/\\d.*") || txt_ports.getText().toString().matches("udp/\\d.*"))) {
-                toast.setText("Access ports must be in the form of 'tcp/22'");
+                toast.setText(getText(R.string.port_format));
                 toast.show();
             } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Allow IP") && (!ipValidate.isValid(txt_allowIP.getText().toString()))){ //Have to have a valid ip to allow, if using allow ip
-                toast.setText("You Must supply a valid IP address to 'Allow IP'.");
+                toast.setText(getText(R.string.valid_ip));
                 toast.show();
             }  else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())) { // check server entry. Must be a valid url or ip.
-                toast.setText("You Must supply a valid server address.");
+                toast.setText(getText(R.string.valid_server));
                 toast.show();
-//            } else if (txt_KEY.getText().toString().equalsIgnoreCase("")) {
-//                toast.setText("You Must supply a Rijndael key.");
-//                toast.show();
-            } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh") && juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()) == null) {
-                toast.setText("A connection must be saved in Juicessh before being used here.");
+            } else if ((spn_ssh.getSelectedItemPosition() == 2) && (juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()) == null)) {
+                toast.setText(getText(R.string.juice_first));
                 toast.show();
 //            //end input validation, actual saving below
             } else {
@@ -234,9 +231,9 @@ public class ConfigDetailFragment extends Fragment {
                 } else {
                     config.SERVER_CMD = "";
                 }
-                if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Resolve IP")) {
-                    config.ACCESS_IP = spn_allowip.getSelectedItem().toString();
-                } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Source IP")) {
+                if (spn_allowip.getSelectedItemPosition() == 0) {
+                    config.ACCESS_IP = "Resolve IP";
+                } else if (spn_allowip.getSelectedItemPosition() == 1) {
                     config.ACCESS_IP = "0.0.0.0";
                 } else {
                     config.ACCESS_IP = txt_allowIP.getText().toString();
@@ -340,7 +337,7 @@ public class ConfigDetailFragment extends Fragment {
         spn_allowip.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Allow IP")) {
+                if (pos == 2) {
                     lay_allowIP.setVisibility(View.VISIBLE);
                 } else {
                     lay_allowIP.setVisibility(View.GONE);
@@ -364,7 +361,7 @@ public class ConfigDetailFragment extends Fragment {
             juice_adapt = new ConnectionSpinnerAdapter(getActivity());
             spn_juice.setAdapter(juice_adapt);
         } else {
-            list.remove("Juicessh");
+            list.remove(2);
             adapter_ssh.notifyDataSetChanged();
         }
 
@@ -374,15 +371,15 @@ public class ConfigDetailFragment extends Fragment {
                                        int pos, long id) {
                 // An item was selected. You can retrieve the selected item using
                 // parent.getItemAtPosition(pos)
-                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("None")) {
+                if (pos == 0) {
                     lay_sshcmd.setVisibility(View.GONE);
                     spn_juice.setVisibility(View.GONE);
                     // blank the other options here
-                } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("SSH Uri")) {
+                } else if (pos == 1) {
                     // show the txt for the uri
                     lay_sshcmd.setVisibility(View.VISIBLE);
                     spn_juice.setVisibility(View.GONE);
-                } else if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Juicessh")) {
+                } else if (pos == 2) {
                     if(getActivity().checkCallingOrSelfPermission("com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS") == PackageManager.PERMISSION_GRANTED) {
 
                         lay_sshcmd.setVisibility(View.GONE);
@@ -408,7 +405,7 @@ public class ConfigDetailFragment extends Fragment {
                         }
                     } else {
                         Context context = getActivity();
-                        CharSequence text = "Fwknop2 does not have permission to access Juicessh connection list. Please reinstall Fwknop2.";
+                        CharSequence text = getText(R.string.juice_permissions);
                         int duration = Toast.LENGTH_LONG;
                         Toast toast = Toast.makeText(context, text, duration);
                         toast.setGravity(Gravity.CENTER, 0, 0);
@@ -432,7 +429,7 @@ public class ConfigDetailFragment extends Fragment {
         spn_configtype.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Open Port")) {
+                if (pos== 0) {
                     configtype = "Open Port";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
@@ -443,7 +440,7 @@ public class ConfigDetailFragment extends Fragment {
                     lay_AccessPort.setVisibility(View.GONE);
                     lay_fwTimeout.setVisibility(View.GONE);
                 }
-                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Nat Access")) {
+                if (pos == 1) {
                     configtype = "Nat Access";
                     txt_server_cmd.setText("");
                     lay_AccessPort.setVisibility(View.VISIBLE);
@@ -454,7 +451,7 @@ public class ConfigDetailFragment extends Fragment {
                     lay_natIP.setVisibility(View.GONE);
                     lay_natport.setVisibility(View.GONE);
                 }
-                if (parent.getItemAtPosition(pos).toString().equalsIgnoreCase("Server Command")) {
+                if (pos == 2) {
                     configtype = "Server Command";
                     lay_serverCMD.setVisibility(View.VISIBLE);
                     txt_ports.setText("");
