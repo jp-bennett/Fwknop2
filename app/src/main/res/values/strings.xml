@@ -23,6 +23,11 @@
     <string name="sending">Sending&#8230;</string>
     <string name="new_config">New config</string>
     <string name="juice_permissions">Fwknop2 does not have permission to access Juicessh connection list. Please reinstall Fwknop2.</string>
+    <string name="description_short">A new fwknop client to send SPA packets to an fwknopd server</string>
+    <string name="description_long">Fwknop2 allows you to send spa packets to an fwknopd service to remotely open ports on a Linux machine or a router running OpenWrt.
+        Fwknop2 has the ability to launch an ssh client to start the login process through the newly opened port.
+        It also includes the ability to import keys via QR codes.</string>
+
     <string-array name="spinner_options">
         <item>Resolve IP</item>
         <item>Source IP</item>
