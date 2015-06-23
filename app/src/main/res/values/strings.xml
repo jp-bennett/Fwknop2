@@ -21,6 +21,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="sending">Sending&#8230;</string>
+    <string name="new_config">New config</string>
     <string name="juice_permissions">Fwknop2 does not have permission to access Juicessh connection list. Please reinstall Fwknop2.</string>
     <string-array name="spinner_options">
         <item>Resolve IP</item>

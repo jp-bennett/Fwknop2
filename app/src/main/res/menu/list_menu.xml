@@ -4,6 +4,6 @@
         android:title="@string/detail_help" >
     </item>
     <item android:id="@+id/new_item"
-        android:title="New Config" >
+        android:title="@string/new_config" >
     </item>
 </menu>
