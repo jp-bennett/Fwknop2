@@ -21,7 +21,7 @@
             android:id="@+id/NickNameStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nickname: "
+            android:text="@string/config_nickname"
             android:textSize="20sp"
             />
         <EditText
@@ -43,7 +43,7 @@
             android:id="@+id/destIPStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Server Address: "
+            android:text="@string/config_saddress"
             android:textSize="20sp"
             />
         <EditText
@@ -65,7 +65,7 @@
             android:id="@+id/destPortStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Server UDP Port: "
+            android:text="@string/config_udp_port"
             android:textSize="20sp"
             />
         <EditText
@@ -87,7 +87,7 @@
             android:id="@+id/passwdStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rijndael Key: "
+            android:text="@string/config_rkey"
             android:textSize="20sp"
             />
         <EditText
@@ -105,7 +105,7 @@
         android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Key Is Base 64 "
+        android:text="@string/config_b64_key"
         />
     <LinearLayout android:id="@+id/hmacl"
         android:orientation="horizontal"
@@ -116,7 +116,7 @@
             android:id="@+id/hmacStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="HMAC Key: "
+            android:text="@string/config_hmackey"
             android:textSize="20sp"
             />
         <EditText
@@ -134,7 +134,7 @@
         android:textSize="20sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="HMAC Is Base 64"
+        android:text="@string/config_hmac64"
         />
 
     <LinearLayout android:id="@+id/allowipl"
@@ -146,7 +146,7 @@
             android:id="@+id/allowipstr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Allow IP: "
+            android:text="@string/config_allowIP"
             android:textSize="20sp"
             />
          <Spinner
@@ -168,7 +168,7 @@
             android:id="@+id/iptoallowStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="IP to allow: "
+            android:text="@string/config_allowedIP"
             android:textSize="20sp"
             />
         <EditText
@@ -190,7 +190,7 @@
             android:id="@+id/configtypestr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Message Type: "
+            android:text="@string/config_mtype"
             android:textSize="20sp"
             />
         <Spinner
@@ -211,7 +211,7 @@
             android:id="@+id/AccessPortsStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Access Ports: "
+            android:text="@string/config_Aports"
             android:textSize="20sp"
             />
         <EditText
@@ -233,7 +233,7 @@
             android:id="@+id/fwTimeoutStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Firewall Timeout: "
+            android:text="@string/config_Ftimeout"
             android:textSize="20sp"
             />
         <EditText
@@ -256,7 +256,7 @@
             android:id="@+id/natipStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Internal IP: "
+            android:text="@string/config_InternalIP"
             android:textSize="20sp"
             />
         <EditText
@@ -279,7 +279,7 @@
             android:id="@+id/natportStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Internal Port: "
+            android:text="@string/config_internal_port"
             android:textSize="20sp"
             />
         <EditText
@@ -302,7 +302,7 @@
             android:id="@+id/servercmdStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Server Command: "
+            android:text="@string/config_cmd"
             android:textSize="20sp"
             />
         <EditText
@@ -324,7 +324,7 @@
             android:id="@+id/sshstr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Run SSH App: "
+            android:text="@string/config_ssh_app"
             android:textSize="20sp"
             />
         <Spinner
@@ -346,7 +346,7 @@
             android:id="@+id/sshcmdStr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User@address:port "
+            android:text="@string/config_ssh_uri"
             android:textSize="20sp"
             />
         <EditText

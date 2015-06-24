@@ -74,4 +74,21 @@
  </p>
  ]]>
  </string>
+    <string name="config_nickname">Nickname:</string>
+    <string name="config_saddress">Server Address:</string>
+    <string name="config_udp_port">Server UDP Port:</string>
+    <string name="config_rkey">Rijndael Key:</string>
+    <string name="config_b64_key">Key Is Base 64</string>
+    <string name="config_hmackey">HMAC Key:</string>
+    <string name="config_hmac64">HMAC Is Base 64</string>
+    <string name="config_allowIP">Allow IP:</string>
+    <string name="config_allowedIP">IP to allow:</string>
+    <string name="config_mtype">Message Type:</string>
+    <string name="config_Aports">Access Ports:</string>
+    <string name="config_Ftimeout">Firewall Timeout:</string>
+    <string name="config_InternalIP">Internal IP:</string>
+    <string name="config_internal_port">Internal Port:</string>
+    <string name="config_cmd">Server Command:</string>
+    <string name="config_ssh_app">Run SSH App:</string>
+    <string name="config_ssh_uri">User@address:port</string>
 </resources>
