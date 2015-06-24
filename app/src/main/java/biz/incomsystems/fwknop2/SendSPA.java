@@ -196,11 +196,12 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                     lookup.setResolver(resolver);
                     Record[] records = lookup.run();
                     allowip_str = ((ARecord) records[0]).getAddress().toString();
+                    Log.v("fwknop2", "Your external IP address is " + allowip_str);
                     if (allowip_str.contains("/")) {
                         allowip_str = allowip_str.split("/")[1];
                     }
                 } catch (Exception ex) {
-                    Log.e("fwknop2", "error " + ex);
+                    Log.e("fwknop2", "dns error " + ex);
                 }
                 try {
                     if (!(ipValidate.isValid(allowip_str))) {

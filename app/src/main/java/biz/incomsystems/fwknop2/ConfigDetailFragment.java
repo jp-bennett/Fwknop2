@@ -350,8 +350,8 @@ public class ConfigDetailFragment extends Fragment {
         });
 
         spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
-        ArrayList<String> list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
-        ArrayAdapter<String> adapter_ssh = new ArrayAdapter<>(getActivity(),
+        ArrayList<String> list = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
+        ArrayAdapter<String> adapter_ssh = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_spinner_item,list);
         adapter_ssh.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_ssh.setAdapter(adapter_ssh);
