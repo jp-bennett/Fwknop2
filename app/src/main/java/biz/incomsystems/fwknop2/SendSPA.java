@@ -19,8 +19,10 @@ package biz.incomsystems.fwknop2;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.database.Cursor;
@@ -35,14 +37,13 @@ import com.sonelli.juicessh.pluginlibrary.listeners.OnClientStartedListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionFinishedListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionStartedListener;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.xbill.DNS.*;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListener {
     DBHelper mydb;
@@ -69,7 +70,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public String nat_access_str;
     public String server_cmd_str;
 
-//    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 2585){
             client.gotActivityResult(requestCode, resultCode, data);
@@ -116,7 +116,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         if (!nat_ip_str.equalsIgnoreCase("")) {
             nat_access_str = nat_ip_str + "," + nat_port_str;
         }
-
         if (config.KEY_BASE64) {
             passwd_b64 = "true";
         } else {
@@ -129,14 +128,11 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         }
         if (passwd_str.equalsIgnoreCase("")) { //here is where we prompt for a key
 
-
             AlertDialog.Builder alert = new AlertDialog.Builder(ourAct);
-
             alert.setTitle(ourAct.getResources().getText(R.string.Rijndael_Key));
             final EditText input = new EditText(ourAct);
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             alert.setView(input);
-
             alert.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     passwd_str = input.getText().toString();
@@ -148,13 +144,11 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                     }
                 }
             });
-
             alert.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     // Canceled.
                 }
             });
-
             alert.show();
         } else {
             final getExternalIP task = new getExternalIP(ourAct);
@@ -177,6 +171,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
             pdLoading.show();
         }
+
         @Override
         protected String doInBackground(Void... params) {
             try {
@@ -184,37 +179,42 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             } catch (Exception ex) {
                 Log.e("fwknop2", "Could not load libfko: " + ex);
             }
-
             if (allowip_str.equalsIgnoreCase("Source IP")) {
                 allowip_str = "0.0.0.0";
             } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
+
+
                 InetAddressValidator ipValidate = new InetAddressValidator();
-                try {
-                    // eventually implement choice of resolver
-                    Resolver resolver = new SimpleResolver("208.67.222.222");
-                    Lookup lookup = new Lookup("myip.opendns.com", Type.A);
-                    lookup.setResolver(resolver);
-                    Record[] records = lookup.run();
-                    allowip_str = ((ARecord) records[0]).getAddress().toString();
-                    Log.v("fwknop2", "Your external IP address is " + allowip_str);
-                    if (allowip_str.contains("/")) {
-                        allowip_str = allowip_str.split("/")[1];
+                SharedPreferences prefs = mActivity.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+                if (prefs.getBoolean("EnableDns", true)) {
+                    try {
+                        Resolver resolver = new SimpleResolver("208.67.222.222");
+                        Lookup lookup = new Lookup("myip.opendns.com", Type.A);
+                        lookup.setResolver(resolver);
+                        Record[] records = lookup.run();
+                        allowip_str = ((ARecord) records[0]).getAddress().toString();
+                        Log.v("fwknop2", "Your external IP address is " + allowip_str);
+                        if (allowip_str.contains("/")) {
+                            allowip_str = allowip_str.split("/")[1];
+                        }
+                    } catch (Exception ex) {
+                        Log.e("fwknop2", "dns error " + ex);
                     }
-                } catch (Exception ex) {
-                    Log.e("fwknop2", "dns error " + ex);
                 }
+
                 try {
                     if (!(ipValidate.isValid(allowip_str))) {
-                        HttpClient httpclient = new DefaultHttpClient();
-                        HttpGet httpget = new HttpGet("http://whatismyip.akamai.com");
-                        HttpResponse response;
-                        response = httpclient.execute(httpget);
-                        HttpEntity entity = response.getEntity();
-                        if (entity != null) {
-                            long len = entity.getContentLength();
-                            if (len != -1 && len < 1024) {
-                                allowip_str = EntityUtils.toString(entity);
+                        Pattern p = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
+                        URL url = new URL(prefs.getString("ipSource", "http://whatismyip.akamai.com"));
+                        BufferedReader bufferReader = new BufferedReader(new InputStreamReader(url.openStream()));
+                        String result;
+                        while ((result = bufferReader.readLine()) != null) {
+                            Log.v("fwknop2", result);
+                            Matcher m = p.matcher(result);
+                            if (m.find()) {
+                                allowip_str = m.group();
                                 Log.v("fwknop2", "Your external IP address is " + allowip_str);
+                                break;
                             }
                         }
                     }
@@ -223,7 +223,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 }
                 if (!(ipValidate.isValid(allowip_str))) {
                     Log.e("fwknop2", "Could not resolve external ip.");
-                    return "resolve failure";
+                    return mActivity.getString(R.string.error_resolve);
                 }
             }
             if (!config.SERVER_CMD.equalsIgnoreCase("")) {
@@ -231,6 +231,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             }
             return sendSPAPacket();
         }
+
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
@@ -238,7 +239,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             if (config.SSH_CMD.contains("juice:")) {
                 ready = false;
                 client = new PluginClient();
-
                 client.start(mActivity, new OnClientStartedListener() {
                     @Override
                     public void onClientStarted() {
@@ -258,7 +258,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
             pdLoading.dismiss();
             if (!config.SSH_CMD.equalsIgnoreCase("") && !(config.SSH_CMD.contains("juice:")) ) {
-
                 String ssh_uri = "ssh://" + config.SSH_CMD + "/#" + config.NICK_NAME;
                 Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));
                 mActivity.startActivity(i);

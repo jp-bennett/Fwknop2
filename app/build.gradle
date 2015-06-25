@@ -55,6 +55,7 @@ dependencies {
     compile 'com.android.support:support-v4:22.1.1'
     compile('commons-validator:commons-validator:1.4.1') {
         exclude group: 'commons-collections', module: 'commons-collections'
+        exclude group: 'commons-logging', module: 'commons-logging'
     }
     compile 'dnsjava:dnsjava:2.1.7'
     compile 'com.google.zxing:core:3.2.0'

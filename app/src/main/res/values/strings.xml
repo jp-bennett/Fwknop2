@@ -91,4 +91,11 @@
     <string name="config_cmd">Server Command:</string>
     <string name="config_ssh_app">Run SSH App:</string>
     <string name="config_ssh_uri">User@address:port</string>
+    <string name="config_http_url">Http or https address to query to find our IP:</string>
+    <string name="config_dns">Try to retrieve our ip using dns first.</string>
+    <string name="config_button_save">Save settings</string>
+    <string name="configure">Configure</string>
+    <string name="config_button_default">Default</string>
+    <string name="error_resolve">resolve failure</string>
+    <string name="my_ip_source_error">URL must be in the form of http://whatismyip.akamai.com or https://api.ipify.org</string>
 </resources>

@@ -29,6 +29,10 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
         <activity
+            android:name=".GeneralConfigActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+        <activity
             android:name=".ConfigDetailActivity"
             android:label="@string/title_config_detail"
             android:configChanges="orientation|keyboardHidden|screenSize"

@@ -6,4 +6,7 @@
     <item android:id="@+id/new_item"
         android:title="@string/new_config" >
     </item>
+    <item android:id="@+id/detail_config"
+        android:title="@string/configure" >
+    </item>
 </menu>

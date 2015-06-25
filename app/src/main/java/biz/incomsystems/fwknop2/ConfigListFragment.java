@@ -150,6 +150,9 @@ public class ConfigListFragment extends ListFragment {
             }
 
 
+        } else if (id == R.id.detail_config) {
+            Intent detailIntent = new Intent(getActivity(), GeneralConfigActivity.class);
+            startActivity(detailIntent);
         } else {
             return false;
         }
