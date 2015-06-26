@@ -178,7 +178,9 @@ public class ConfigDetailFragment extends Fragment {
                     txt_server_port.setText(String.valueOf(62201));
                 }
             } catch (NumberFormatException ex) {
-                txt_server_port.setText(String.valueOf(62201));
+                if (!txt_server_port.getText().toString().equalsIgnoreCase("random")) {
+                    txt_server_port.setText(String.valueOf(62201));
+                }
             }
             if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
                 toast.setText(getString(R.string.unique_nick)); // choosing a used nick will just overwrite it. So really

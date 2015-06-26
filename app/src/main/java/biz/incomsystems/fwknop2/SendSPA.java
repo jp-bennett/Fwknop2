@@ -42,6 +42,7 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -125,6 +126,11 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             hmac_b64 = "true";
         } else {
             hmac_b64 = "false";
+        }
+        if (config.SERVER_PORT.equalsIgnoreCase("random")) {
+            Random r = new Random();
+            int random_port = r.nextInt(65535 - 10000) + 10000;
+            config.SERVER_PORT = String.valueOf(random_port);
         }
         if (passwd_str.equalsIgnoreCase("")) { //here is where we prompt for a key
 
