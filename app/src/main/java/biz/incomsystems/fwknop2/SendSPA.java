@@ -41,9 +41,13 @@ import org.xbill.DNS.*;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URL;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -255,6 +259,25 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                         DatagramSocket s = new DatagramSocket();
                         s.send(p);
                         s.close();
+                    } else if (config.PROTOCOL.equalsIgnoreCase("tcp")) {
+                        Socket s = new Socket(resolved_IP, Integer.parseInt(config.SERVER_PORT));
+                        OutputStream out = s.getOutputStream();
+                        PrintWriter output = new PrintWriter(out);
+                        output.print(spaPacket);
+                        output.flush();
+                        output.close();
+                        out.flush();
+                        out.close();
+                        s.close();
+                    } else if (config.PROTOCOL.equalsIgnoreCase("http")) {
+                        spaPacket = spaPacket.replace("+", "-");
+                        spaPacket = spaPacket.replace("/", "_");
+                        URL packet = new URL("http://" + config.SERVER_IP + "/" + spaPacket);
+                        HttpURLConnection conn = (HttpURLConnection)packet.openConnection();
+                        conn.setRequestMethod("GET");
+                        conn.connect();
+                        conn.getResponseCode();
+                        conn.disconnect();
                     }
                 } catch (Exception ex) {
                     return ex.toString();

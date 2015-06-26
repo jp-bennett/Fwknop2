@@ -80,6 +80,7 @@ public class ConfigDetailFragment extends Fragment {
     LinearLayout lay_sshcmd;
     TextView txt_ssh_cmd;
     String configtype = "Open Port";
+    Spinner spn_protocol;
 
     TextView txt_ports ;
 //    TextView txt_udp_ports ;
@@ -262,6 +263,17 @@ public class ConfigDetailFragment extends Fragment {
                 config.HMAC = txt_HMAC.getText().toString(); // hmac key
                 config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
                 config.LEGACY = chkblegacy.isChecked();
+                switch (spn_protocol.getSelectedItemPosition()) {
+                    case 0:
+                        config.PROTOCOL = "udp";
+                        break;
+                    case 1:
+                        config.PROTOCOL = "tcp";
+                        break;
+                    case 2:
+                        config.PROTOCOL = "http";
+                        break;
+                }
                 mydb.updateConfig(config);
 
                 //this updates the list for one panel mode
@@ -356,7 +368,12 @@ public class ConfigDetailFragment extends Fragment {
             }
         });
 
-        spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
+        spn_protocol = (Spinner) rootView.findViewById(R.id.spn_protocol);
+        ArrayAdapter<CharSequence> adapter_protocol = ArrayAdapter.createFromResource(getActivity(),
+                R.array.spinner_protocol, android.R.layout.simple_spinner_item);
+        spn_protocol.setAdapter(adapter_protocol);
+        adapter_protocol.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
         ArrayList<String> list = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
         ArrayAdapter<String> adapter_ssh = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_spinner_item,list);
@@ -525,6 +542,13 @@ public class ConfigDetailFragment extends Fragment {
                 txt_ssh_cmd.setText(config.SSH_CMD);
             }
                 chkblegacy.setChecked(config.LEGACY);
+            if(config.PROTOCOL.equalsIgnoreCase("tcp")) {
+                spn_protocol.setSelection(1);
+            } else if(config.PROTOCOL.equalsIgnoreCase("http")) {
+                spn_protocol.setSelection(2);
+            } else {
+                spn_protocol.setSelection(0);
+            }
         }
         return rootView;
     }

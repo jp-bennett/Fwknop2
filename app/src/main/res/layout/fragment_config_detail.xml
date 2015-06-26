@@ -85,6 +85,31 @@
             android:textSize="20sp"
             />
     </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/protocolStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/config_protocol"
+            android:textSize="20sp"
+            />
+        <Spinner
+            android:id="@+id/spn_protocol"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:textSize="20sp"
+            />
+
+    </LinearLayout>
+
+
+
     <LinearLayout android:id="@+id/passwdl"
         android:orientation="horizontal"
         android:layout_width="fill_parent"
