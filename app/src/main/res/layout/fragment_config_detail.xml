@@ -56,6 +56,13 @@
             android:textSize="20sp"
             />
     </LinearLayout>
+    <CheckBox
+        android:id="@+id/chkblegacy"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/config_legacy"
+        />
     <LinearLayout android:id="@+id/destPortl"
         android:orientation="horizontal"
         android:layout_width="fill_parent"

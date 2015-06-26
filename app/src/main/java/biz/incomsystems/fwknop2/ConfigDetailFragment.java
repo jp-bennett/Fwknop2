@@ -93,6 +93,7 @@ public class ConfigDetailFragment extends Fragment {
     CheckBox chkb64key ;
     TextView txt_HMAC ;
     CheckBox chkb64hmac ;
+    CheckBox chkblegacy;
 
     /**
      * The fragment argument representing the item ID that this fragment
@@ -185,6 +186,9 @@ public class ConfigDetailFragment extends Fragment {
             if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
                 toast.setText(getString(R.string.unique_nick)); // choosing a used nick will just overwrite it. So really
                 toast.show();
+            } else if ((chkblegacy.isChecked() && chkb64hmac.isChecked()) || (chkblegacy.isChecked() && !txt_HMAC.getText().toString().equalsIgnoreCase(""))) {
+                toast.setText("Cannot use HMAC with legacy mode");
+                toast.show();
             } else if(chkb64hmac.isChecked() && txt_HMAC.getText().toString().length() % 4 != 0) { // base64 must have a multiple of 4 length
                 toast.setText(getString(R.string.hmac64_x4));
                 toast.show();
@@ -209,8 +213,7 @@ public class ConfigDetailFragment extends Fragment {
             } else if ((spn_ssh.getSelectedItemPosition() == 2) && (juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()) == null)) {
                 toast.setText(getText(R.string.juice_first));
                 toast.show();
-//            //end input validation, actual saving below
-            } else {
+            } else { // validated so now we save
                 toast.show();
                 if (configtype.equalsIgnoreCase("Open Port")) {
                     config.PORTS = txt_ports.getText().toString();
@@ -258,6 +261,7 @@ public class ConfigDetailFragment extends Fragment {
                 config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
                 config.HMAC = txt_HMAC.getText().toString(); // hmac key
                 config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
+                config.LEGACY = chkblegacy.isChecked();
                 mydb.updateConfig(config);
 
                 //this updates the list for one panel mode
@@ -270,6 +274,7 @@ public class ConfigDetailFragment extends Fragment {
                     ConfigDetailActivity myactivity = (ConfigDetailActivity) activity;
                     myactivity.onBackPressed();
                 }
+
             }
         } else {
             return false;
@@ -330,7 +335,7 @@ public class ConfigDetailFragment extends Fragment {
         txt_HMAC = (TextView) rootView.findViewById(R.id.hmac);
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
-
+        chkblegacy = (CheckBox) rootView.findViewById(R.id.chkblegacy);
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
@@ -519,6 +524,7 @@ public class ConfigDetailFragment extends Fragment {
                 spn_ssh.setSelection(1);
                 txt_ssh_cmd.setText(config.SSH_CMD);
             }
+                chkblegacy.setChecked(config.LEGACY);
         }
         return rootView;
     }

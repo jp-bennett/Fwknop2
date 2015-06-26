@@ -71,6 +71,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public String nat_port_str;
     public String nat_access_str;
     public String server_cmd_str;
+    public String legacy;
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 2585){
@@ -125,6 +126,11 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             hmac_b64 = "true";
         } else {
             hmac_b64 = "false";
+        }
+        if (config.LEGACY) {
+            legacy = "true";
+        } else {
+            legacy = "false";
         }
         if (config.SERVER_PORT.equalsIgnoreCase("random")) {
             Random r = new Random();

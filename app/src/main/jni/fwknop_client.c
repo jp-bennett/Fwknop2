@@ -97,6 +97,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     jstring jserver_cmd = (*env)->GetObjectField(env, thiz, fid);
     const char *server_cmd_str = (*env)->GetStringUTFChars(env, jserver_cmd, 0);
 
+    fid = (*env)->GetFieldID(env, c, "legacy", "Ljava/lang/String;");
+        jstring jlegacy = (*env)->GetObjectField(env, thiz, fid);
+        const char *legacy = (*env)->GetStringUTFChars(env, jlegacy, 0);
+
     /* Sanity checks
     */
     if(access_str == NULL) {
@@ -120,6 +124,9 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         hmac_str_len = (int)strlen(hmac_str);
     }
     key_len = (int)strlen(passwd_str);
+    if(legacy == NULL) {
+    sprintf(legacy, "false");
+    }
 
 
     if(strcmp(hmac_b64, "true") == 0) {
@@ -199,6 +206,12 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
 
     /* Set the HMAC mode if necessary
     */
+    if (strcmp(legacy, "true") == 0) {
+        res = fko_set_spa_encryption_mode(ctx, FKO_ENC_MODE_CBC_LEGACY_IV);
+        if (key_len > 16) {
+            key_len = 16;
+        }
+    }
     if (hmac_str_len > 0) {
         res = fko_set_spa_hmac_type(ctx, FKO_DEFAULT_HMAC_MODE);
         if (res != FKO_SUCCESS) {
