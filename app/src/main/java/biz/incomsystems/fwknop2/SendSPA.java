@@ -66,8 +66,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public String passwd_b64;
     public String hmac_str;
     public String hmac_b64;
-    public String destip_str;
-    public String destport_str;
     public String fw_timeout_str;
     public String nat_ip_str;
     public String nat_port_str;
@@ -244,15 +242,14 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             if (spaPacket != null) {
                 InetAddress resolved_IP;
                 try {
-                    Log.v("fwknopd2", config.SERVER_IP);
                     resolved_IP = InetAddress.getByName(config.SERVER_IP);
-                    Log.v("fwknopd2", resolved_IP.toString());
-                    byte[] spaBytes = spaPacket.getBytes();
-                    Log.v("fwknopd2", "" + Integer.parseInt(config.SERVER_PORT));
-                    DatagramPacket p = new DatagramPacket(spaBytes, spaBytes.length, resolved_IP, Integer.parseInt(config.SERVER_PORT));
-                    DatagramSocket s = new DatagramSocket();
-                    s.send(p);
-                    s.close();
+                    if (config.PROTOCOL.equalsIgnoreCase("udp")) {
+                        byte[] spaBytes = spaPacket.getBytes();
+                        DatagramPacket p = new DatagramPacket(spaBytes, spaBytes.length, resolved_IP, Integer.parseInt(config.SERVER_PORT));
+                        DatagramSocket s = new DatagramSocket();
+                        s.send(p);
+                        s.close();
+                    }
                 } catch (Exception ex) {
                     return ex.toString();
                 }

@@ -18,4 +18,6 @@ public class Config {
     public Boolean HMAC_BASE64;
     public String SSH_CMD;
     public UUID juice_uuid;
+    public Boolean LEGACY;
+    public String PROTOCOL;
 }

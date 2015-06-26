@@ -28,7 +28,7 @@ import java.util.UUID;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "fwknop.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String CONFIGS_TABLE_NAME = "configs";
     public static final String CONFIGS_COLUMN_ID = "id";
     public static final String CONFIGS_COLUMN_NICK_NAME = "NICK_NAME";
@@ -46,6 +46,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CONFIGS_COLUMN_HMAC_BASE64 = "HMAC_BASE64";
     public static final String CONFIGS_COLUMN_SSH_CMD = "SSH_CMD";
     public static final String CONFIGS_COLUMN_JUICE_UUID = "JUICE_UUID";
+    public static final String CONFIGS_COLUMN_LEGACY = "LEGACY";
+    public static final String CONFIGS_COLUMN_PROTOCOL = "PROTOCOL";
 
     public DBHelper(Context context)
     {
@@ -72,17 +74,22 @@ public class DBHelper extends SQLiteOpenHelper {
                         CONFIGS_COLUMN_SERVER_CMD + " text, " +
                         CONFIGS_COLUMN_HMAC_BASE64 + " integer," +
                         CONFIGS_COLUMN_SSH_CMD + " text, " +
-                        CONFIGS_COLUMN_JUICE_UUID + " text " +
+                        CONFIGS_COLUMN_JUICE_UUID + " text, " +
+                        CONFIGS_COLUMN_LEGACY + " integer, " +
+                        CONFIGS_COLUMN_PROTOCOL + " text " +
                         ")"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // This needs to be updated if we update the app in a way that changes the DB format
-        db.execSQL("DROP TABLE IF EXISTS configs");
-        onCreate(db);
-
+        if (oldVersion == 1) {
+            db.execSQL("ALTER TABLE "+ CONFIGS_TABLE_NAME + " ADD COLUMN " +
+                    CONFIGS_COLUMN_LEGACY + " INTEGER DEFAULT 0");
+            db.execSQL("ALTER TABLE "+ CONFIGS_TABLE_NAME + " ADD COLUMN " +
+                    CONFIGS_COLUMN_PROTOCOL + " STRING DEFAULT 'udp'");
+            oldVersion = 2;
+        }
     }
 
     public Cursor getData(String id) { // returns cursor so the config detail fragment can load a saved config
@@ -102,7 +109,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateConfig  (Config config)//  Automatically does either an update or insert based on NICK_NAME
+    public boolean updateConfig  (Config config)
     {
         // do more input validation here? return error?
         SQLiteDatabase db = this.getWritableDatabase();
@@ -122,6 +129,8 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(CONFIGS_COLUMN_NAT_PORT, config.NAT_PORT);
         contentValues.put(CONFIGS_COLUMN_SSH_CMD, config.SSH_CMD);
         contentValues.put(CONFIGS_COLUMN_JUICE_UUID, config.juice_uuid.toString());
+        contentValues.put(CONFIGS_COLUMN_LEGACY, config.LEGACY);
+        contentValues.put(CONFIGS_COLUMN_PROTOCOL, config.PROTOCOL);
 
         if (CheckNickIsUnique(config.NICK_NAME)) {
             db.update("configs", contentValues, "NICK_NAME='" + config.NICK_NAME + "'", null);
@@ -174,6 +183,8 @@ public class DBHelper extends SQLiteOpenHelper {
         config.SERVER_CMD = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SERVER_CMD));
         config.SSH_CMD = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_SSH_CMD));
         config.juice_uuid = UUID.fromString(CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_JUICE_UUID)));
+        config.PROTOCOL = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_PROTOCOL));
+        config.LEGACY = (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_LEGACY)) == 1);
 
         CurrentIndex.close();
 
