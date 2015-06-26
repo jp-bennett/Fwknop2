@@ -97,5 +97,7 @@
     <string name="configure">Configure</string>
     <string name="config_button_default">Default</string>
     <string name="error_resolve">resolve failure</string>
+    <string name="success">Success!</string>
+    <string name="spa_failure">Failure generating SPA data</string>
     <string name="my_ip_source_error">URL must be in the form of http://whatismyip.akamai.com or https://api.ipify.org</string>
 </resources>

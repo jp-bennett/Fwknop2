@@ -50,7 +50,9 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     int key_len, hmac_key_len;
     char res_msg[MSG_BUFSIZE+1] = {0};
     char spa_msg[MSG_BUFSIZE+1] = {0};
+    jstring ourSpa;
     char *key_tmp[MAX_KEY_LEN+1] = {0}, *hmac_key_tmp[MAX_KEY_LEN+1] = {0};
+
 
     LOGV("**** Init fwknop ****");
 
@@ -66,14 +68,6 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     fid = (*env)->GetFieldID(env, c, "allowip_str", "Ljava/lang/String;");
     jstring jallowip = (*env)->GetObjectField(env, thiz, fid);
     const char *allowip_str = (*env)->GetStringUTFChars(env, jallowip, 0);
-
-    fid = (*env)->GetFieldID(env, c, "destip_str", "Ljava/lang/String;");
-    jstring jdestip = (*env)->GetObjectField(env, thiz, fid);
-    const char *destip_str = (*env)->GetStringUTFChars(env, jdestip, 0);
-
-    fid = (*env)->GetFieldID(env, c, "destport_str", "Ljava/lang/String;");
-    jstring jdestport = (*env)->GetObjectField(env, thiz, fid);
-    const char *destport_str = (*env)->GetStringUTFChars(env, jdestport, 0);
 
     fid = (*env)->GetFieldID(env, c, "passwd_str", "Ljava/lang/String;");
     jstring jpasswd = (*env)->GetObjectField(env, thiz, fid);
@@ -113,14 +107,6 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         sprintf(res_msg, "Error: Invalid or missing allow IP");
         goto cleanup2;
     }
-    if(destip_str == NULL) {
-        sprintf(res_msg, "Error: Invalid or missing destination IP");
-        goto cleanup2;
-    }
-    if(destport_str == NULL) {
-        sprintf(res_msg, "Error: Invalid or missing destination port");
-        goto cleanup2;
-    }
     if(passwd_str == NULL) {
         sprintf(res_msg, "Error: Invalid or missing password");
         goto cleanup2;
@@ -129,7 +115,6 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         sprintf(res_msg, "Error: Invalid or missing firewall timeout value");
         goto cleanup2;
     }
-
 
     if(hmac_str != NULL) {
         hmac_str_len = (int)strlen(hmac_str);
@@ -170,10 +155,6 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     /* Using an HMAC is optional (currently)
     */
 
-    /* Set our spa server info
-    */
-    opts.spa_server_str = (char*)destip_str;
-    opts.spa_dst_port   = atoi(destport_str);
     message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
 
     /* Intialize the context
@@ -254,22 +235,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         goto cleanup;
     }
 
-    /* --DSS NOTE:  At this point, we could just return the SPA data
-     *              to the caller and use the Java network libs to send
-     *              the packet and eliminate the spa_comm code altogether.
-    */
 
-    /* Send the spa data packet
+    /* Generate the spa data packet
     */
-    res = send_spa_packet(&opts);
-
-    if (res < 0) {
-        sprintf(res_msg, "Error: send_spa_packet: packet not sent.");
-    } else if (res == 0) {
-        sprintf(res_msg, "Error: send_spa_packet: Empty packet sent.");
-    } else {
-        sprintf(res_msg, "SPA Packet sent successfully.");
-    }
+    ourSpa = (*env)->NewStringUTF(env, opts.spa_data);
 
 cleanup:
     /* Release the resources used by the fko context.
@@ -281,21 +250,13 @@ cleanup2:
     */
     (*env)->ReleaseStringUTFChars(env, jaccess, access_str);
     (*env)->ReleaseStringUTFChars(env, jallowip, allowip_str);
-    (*env)->ReleaseStringUTFChars(env, jdestip, destip_str);
-    (*env)->ReleaseStringUTFChars(env, jdestport, destport_str);
     (*env)->ReleaseStringUTFChars(env, jpasswd, passwd_str);
     (*env)->ReleaseStringUTFChars(env, jpasswd_b64, passwd_b64);
     (*env)->ReleaseStringUTFChars(env, jhmac, hmac_str);
     (*env)->ReleaseStringUTFChars(env, jhmac_b64, hmac_b64);
     (*env)->ReleaseStringUTFChars(env, jfwtimeout, fw_timeout_str);
     (*env)->ReleaseStringUTFChars(env, jnat_access_str, nat_access_str);
-
-    /* Log and return a string of success or error message.
-     * This can be enhanced semantically with codes.
-    */
-    LOGV("%s", res_msg);
-
-    return (*env)->NewStringUTF(env, res_msg);
+    return ourSpa;
 }
 
 /***EOF***/

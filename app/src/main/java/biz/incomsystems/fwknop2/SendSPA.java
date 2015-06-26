@@ -41,6 +41,9 @@ import org.xbill.DNS.*;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -106,8 +109,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         access_str = config.PORTS;
         passwd_str = config.KEY;
         hmac_str = config.HMAC;
-        destip_str = config.SERVER_IP;
-        destport_str = config.SERVER_PORT;
         fw_timeout_str = config.SERVER_TIMEOUT;
         allowip_str = config.ACCESS_IP;
         nat_ip_str = config.NAT_IP;
@@ -166,6 +167,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     private class getExternalIP extends AsyncTask<Void, Void, String>
     {
         private Activity mActivity;
+        private String spaPacket;
         public getExternalIP (Activity activity) {
             mActivity = activity;
         }
@@ -180,6 +182,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
         @Override
         protected String doInBackground(Void... params) {
+            InetAddressValidator ipValidate = new InetAddressValidator();
+
             try {
                 System.load(mActivity.getFilesDir().getParentFile().getPath() + "/lib/libfwknop.so");
             } catch (Exception ex) {
@@ -190,7 +194,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
 
 
-                InetAddressValidator ipValidate = new InetAddressValidator();
+
                 SharedPreferences prefs = mActivity.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
                 if (prefs.getBoolean("EnableDns", true)) {
                     try {
@@ -235,15 +239,34 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             if (!config.SERVER_CMD.equalsIgnoreCase("")) {
                 server_cmd_str = allowip_str + "," + config.SERVER_CMD;
             }
-            return sendSPAPacket();
+            spaPacket = sendSPAPacket();
+            Log.v("fwknopd2", spaPacket);
+            if (spaPacket != null) {
+                InetAddress resolved_IP;
+                try {
+                    Log.v("fwknopd2", config.SERVER_IP);
+                    resolved_IP = InetAddress.getByName(config.SERVER_IP);
+                    Log.v("fwknopd2", resolved_IP.toString());
+                    byte[] spaBytes = spaPacket.getBytes();
+                    Log.v("fwknopd2", "" + Integer.parseInt(config.SERVER_PORT));
+                    DatagramPacket p = new DatagramPacket(spaBytes, spaBytes.length, resolved_IP, Integer.parseInt(config.SERVER_PORT));
+                    DatagramSocket s = new DatagramSocket();
+                    s.send(p);
+                    s.close();
+                } catch (Exception ex) {
+                    return ex.toString();
+                }
+                return mActivity.getResources().getText(R.string.success).toString();
+            } else return mActivity.getResources().getText(R.string.spa_failure).toString();//"Failure generating SPA data";
         }
 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             Toast.makeText(mActivity, result, Toast.LENGTH_LONG).show();
+            Log.v("fwknop2", result);
             if (config.SSH_CMD.contains("juice:")) {
-                ready = false;
+                ready = false; //probably not needed
                 client = new PluginClient();
                 client.start(mActivity, new OnClientStartedListener() {
                     @Override
