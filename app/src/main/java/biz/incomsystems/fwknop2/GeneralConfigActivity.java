@@ -37,7 +37,7 @@ public class GeneralConfigActivity extends FragmentActivity {
     }
 
     public void saveSettings(View view) {
-        if (txt_url.getText().toString().matches("(.*)://(.*)")) {
+        if (txt_url.getText().toString().matches("(.+)://(.+)")) {
             String[] tmp = txt_url.getText().toString().split("://");
             if (tmp[0].equalsIgnoreCase("http") || tmp[0].equalsIgnoreCase("https")){
                 if (DomainValidator.getInstance().isValid(tmp[1])) {

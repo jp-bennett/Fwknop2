@@ -23,7 +23,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-
+import android.view.View;
 import java.util.List;
 
 /**
@@ -46,11 +46,15 @@ public class ConfigListActivity extends FragmentActivity
         implements ConfigListFragment.Callbacks {
     ConfigDetailFragment fragment;
     public boolean mTwoPane; // Whether in two-pane mode.
+    public String selected_nick;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_config_list);
+        ((ConfigListFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.config_list))
+                .setActivateOnItemClick(true);
 
         if (findViewById(R.id.config_detail_container) != null) {
             // The detail container view will be present only in the
@@ -59,11 +63,6 @@ public class ConfigListActivity extends FragmentActivity
             // activity should be in two-pane mode.
             mTwoPane = true;
 
-            // In two-pane mode, list items should be given the
-            // 'activated' state when touched.
-            ((ConfigListFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.config_list))
-                    .setActivateOnItemClick(true);
         }
         SharedPreferences prefs = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         boolean haveWeShownPreferences = prefs.getBoolean("HaveShownPrefs", false);
@@ -109,6 +108,8 @@ public class ConfigListActivity extends FragmentActivity
      */
     @Override
     public void onItemSelected(String nick) {
+        findViewById(R.id.btn_send).setVisibility(View.VISIBLE);
+        selected_nick = nick;
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
@@ -120,19 +121,9 @@ public class ConfigListActivity extends FragmentActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.config_detail_container, fragment)
                     .commit();
-
-        } else {
-            // In single-pane mode, simply start the detail activity
-            // for the selected item ID.
-            Intent detailIntent = new Intent(this, ConfigDetailActivity.class);
-            detailIntent.putExtra(ConfigDetailFragment.ARG_ITEM_ID, nick);
-            startActivity(detailIntent);
         }
     }
-    //public void onCheckboxClicked(View view) {
-    //    fragment.onCheckboxClicked(view);
-    //}
-
+    
     protected void onNewIntent(Intent intent) {
         super. onNewIntent(intent);
         setIntent(intent);

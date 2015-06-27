@@ -14,6 +14,7 @@
     <string name="valid_ip">You Must supply a valid IP address to \'Allow IP\'.</string>
     <string name="valid_server">You Must supply a valid server address.</string>
     <string name="knock">Send knock</string>
+    <string name="edit">Edit config</string>
     <string name="juice_first">A connection must be saved in Juicessh before being used here.</string>
     <string name="blank_key">Key cannot be blank.</string>
     <string name="Rijndael_Key">Rijndael Key</string>
@@ -108,4 +109,5 @@
     <string name="my_ip_source_error">URL must be in the form of http://whatismyip.akamai.com or https://api.ipify.org</string>
     <string name="config_legacy">Use Legacy Mode</string>
     <string name="config_protocol">Protocol:</string>
+    <string name="menu_send_knock">Send Knock</string>
 </resources>

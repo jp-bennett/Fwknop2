@@ -23,15 +23,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import java.util.ArrayList;
 
 
@@ -104,6 +106,36 @@ public class ConfigListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_list, container, false);
+        Button button = (Button)rootView.findViewById(R.id.btn_send);
+        button.setOnClickListener(
+                new View.OnClickListener() {
+                    public void onClick(View v) {
+                        String nick = ((ConfigListActivity)getActivity()).selected_nick;
+                        OurSender.send(nick, getActivity());
+                    }
+
+                });
+        return rootView;
+    }
+
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        super.onCreateOptionsMenu(menu, inflater);
+
+
+        inflater.inflate(R.menu.list_menu, menu);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mydb = new DBHelper(getActivity());
         array_list = mydb.getAllConfigs();
         OurSender = new SendSPA();
@@ -113,17 +145,6 @@ public class ConfigListFragment extends ListFragment {
                 android.R.id.text1,
                 array_list);
         setListAdapter(customAdapter);
-    }
-
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.list_menu, menu);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         // Restore the previously serialized activated item position.
         if (savedInstanceState != null
@@ -188,12 +209,12 @@ public class ConfigListFragment extends ListFragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
                         .setNegativeButton("No", dialogClickListener).show();
-
                 return true;
 
-            case R.id.knock:
-                String nick = ((TextView) info.targetView).getText().toString();
-                OurSender.send(nick, getActivity());
+            case R.id.edit:
+                Intent detailIntent = new Intent(getActivity(), ConfigDetailActivity.class);
+                detailIntent.putExtra(ConfigDetailFragment.ARG_ITEM_ID, ((TextView) info.targetView).getText().toString());
+                startActivity(detailIntent);
 
             default:
                 return super.onContextItemSelected(item);
