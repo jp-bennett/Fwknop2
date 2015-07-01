@@ -84,12 +84,6 @@ public class ConfigListActivity extends FragmentActivity
                 fragment.onActivityResult(requestCode, resultCode, data);
             }
         }
-
-        // This is important if you want to be able to interact with JuiceSSH sessions that you
-        // have started otherwise the plugin won't have access.
-        //if(requestCode == 2585){
-        //    client.gotActivityResult(requestCode, resultCode, data);
-       // }
     }
 
     public void onItemSaved() {
@@ -100,7 +94,6 @@ public class ConfigListActivity extends FragmentActivity
             }
         }
     }
-
 
     /**
      * Callback method from {@link ConfigListFragment.Callbacks}
@@ -123,7 +116,7 @@ public class ConfigListActivity extends FragmentActivity
                     .commit();
         }
     }
-    
+
     protected void onNewIntent(Intent intent) {
         super. onNewIntent(intent);
         setIntent(intent);

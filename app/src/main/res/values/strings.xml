@@ -69,8 +69,8 @@
   default ssh client to try to connect to the port you are opening.
  </p>
  <p>
-  Once the data is filled in, select "Save Config" from the menu. Then, to send a SPA knock, long tap the
-   Saved config you want to use, and select "Send Knock"
+  Once the data is filled in, select "Save Config" from the menu. Then, to send a SPA knock, select the
+   Saved config you want to use, and tap the "Send Knock" button at the bottom of the list.
  </p>
  <p>This app is open source software, Licensed GPLv2+. The source can be found  <a href="https://github.com/oneru/Fwknop2">on github</a>. Please report any bugs here.</p>
  <p>Credits: Based on fwknop and libfko written by <a href="https://www.cipherdyne.org/fwknop/"> Michael Rash</a></p>
