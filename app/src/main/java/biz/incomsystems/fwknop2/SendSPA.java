@@ -289,33 +289,35 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+            pdLoading.dismiss();
+
             Toast.makeText(mActivity, result, Toast.LENGTH_LONG).show();
             Log.v("fwknop2", result);
-            if (config.SSH_CMD.contains("juice:")) {
-                ready = false; //probably not needed
-                client = new PluginClient();
-                client.start(mActivity, new OnClientStartedListener() {
-                    @Override
-                    public void onClientStarted() {
-                        SendSPA.this.isConnected = true;
-                        try {
-                            client.connect(mActivity, config.juice_uuid, SendSPA.this, 2585);
-                        } catch (ServiceNotConnectedException ex) {
-                            Log.e("fwknop2", "not connected error");
+            if (result.contains("Success")) {
+                if (config.SSH_CMD.contains("juice:")) {
+                    ready = false; //probably not needed
+                    client = new PluginClient();
+                    client.start(mActivity, new OnClientStartedListener() {
+                        @Override
+                        public void onClientStarted() {
+                            SendSPA.this.isConnected = true;
+                            try {
+                                client.connect(mActivity, config.juice_uuid, SendSPA.this, 2585);
+                            } catch (ServiceNotConnectedException ex) {
+                                Log.e("fwknop2", "not connected error");
+                            }
                         }
-                    }
-                    @Override
-                    public void onClientStopped() {
-                        Log.v("fwknop2", "client stopped");
-                    }
-                });
-            }
+                        @Override
+                        public void onClientStopped() {
+                            Log.v("fwknop2", "client stopped");
+                        }
+                    });
 
-            pdLoading.dismiss();
-            if (!config.SSH_CMD.equalsIgnoreCase("") && !(config.SSH_CMD.contains("juice:")) ) {
-                String ssh_uri = "ssh://" + config.SSH_CMD + "/#" + config.NICK_NAME;
-                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));
-                mActivity.startActivity(i);
+                } else if (!config.SSH_CMD.equalsIgnoreCase("")) {
+                    String ssh_uri = "ssh://" + config.SSH_CMD + "/#" + config.NICK_NAME;
+                    Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));
+                    mActivity.startActivity(i);
+                }
             }
         }
     }
