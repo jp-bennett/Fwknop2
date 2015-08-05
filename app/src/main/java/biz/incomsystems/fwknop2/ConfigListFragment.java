@@ -53,6 +53,7 @@ public class ConfigListFragment extends ListFragment {
     ArrayList array_list = new ArrayList();
     DBHelper mydb;
     SendSPA OurSender;
+    Button button;
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -113,7 +114,7 @@ public class ConfigListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
-        Button button = (Button)rootView.findViewById(R.id.btn_send);
+        button = (Button)rootView.findViewById(R.id.btn_send);
         button.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
@@ -163,8 +164,13 @@ public class ConfigListFragment extends ListFragment {
             ConfigListActivity myactivity = (ConfigListActivity) activity;
             if (myactivity.mTwoPane){
                 mCallbacks.onItemSelected("");
-                getListView().setItemChecked(mActivatedPosition, false);
+                //this.getListView().setItemChecked(mActivatedPosition, false);
+                button.setVisibility(View.INVISIBLE);
+                getListView().clearChoices();
+                customAdapter.notifyDataSetChanged();
+
             } else {
+                button.setVisibility(View.INVISIBLE);
                 Intent detailIntent = new Intent(getActivity(), ConfigDetailActivity.class);
                 detailIntent.putExtra(ConfigDetailFragment.ARG_ITEM_ID, "");
                 startActivity(detailIntent);
