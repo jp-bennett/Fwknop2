@@ -223,7 +223,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 try {
                     if (!(ipValidate.isValid(allowip_str))) {
                         Pattern p = Pattern.compile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)");
-                        URL url = new URL(prefs.getString("ipSource", "http://whatismyip.akamai.com"));
+                        URL url = new URL(prefs.getString("ipSource", "https://api.ipify.org"));
                         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(url.openStream()));
                         String result;
                         while ((result = bufferReader.readLine()) != null) {
