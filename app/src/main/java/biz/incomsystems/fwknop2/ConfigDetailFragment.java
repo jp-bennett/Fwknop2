@@ -165,9 +165,6 @@ public class ConfigDetailFragment extends Fragment {
             CharSequence text = getString(R.string.saving);
             Toast toast = Toast.makeText(context, text, duration);
             toast.setGravity(Gravity.CENTER, 0, 0);
-            LinearLayout toastLayout = (LinearLayout) toast.getView();
-            TextView toastTV = (TextView) toastLayout.getChildAt(0);
-            toastTV.setTextSize(30);
 
 
             //The following is all input validation
