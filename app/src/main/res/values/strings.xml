@@ -108,6 +108,7 @@
     <string name="spa_failure">Failure generating SPA data</string>
     <string name="my_ip_source_error">URL must be in the form of http://whatismyip.akamai.com or https://api.ipify.org</string>
     <string name="config_legacy">Use Legacy Mode</string>
+    <string name="config_random">Use Random Server Port</string>
     <string name="config_protocol">Protocol:</string>
     <string name="menu_send_knock">Send Knock</string>
 </resources>

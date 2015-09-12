@@ -33,6 +33,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -78,6 +79,7 @@ public class ConfigDetailFragment extends Fragment {
     LinearLayout lay_AccessPort;
     LinearLayout lay_fwTimeout;
     LinearLayout lay_sshcmd;
+    LinearLayout lay_serverPort;
     TextView txt_ssh_cmd;
     String configtype = "Open Port";
     Spinner spn_protocol;
@@ -95,6 +97,7 @@ public class ConfigDetailFragment extends Fragment {
     TextView txt_HMAC ;
     CheckBox chkb64hmac ;
     CheckBox chkblegacy;
+    CheckBox chkbrandom;
 
     /**
      * The fragment argument representing the item ID that this fragment
@@ -243,7 +246,11 @@ public class ConfigDetailFragment extends Fragment {
                 }
                 config.NICK_NAME = txt_NickName.getText().toString();
                 config.SERVER_IP = txt_server_ip.getText().toString();
-                config.SERVER_PORT = txt_server_port.getText().toString();
+                if (chkbrandom.isChecked()) {
+                 config.SERVER_PORT = "random";
+                } else {
+                    config.SERVER_PORT = txt_server_port.getText().toString();
+                }
                 config.SSH_CMD = "";
                 if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("SSH Uri")) {
                     config.SSH_CMD = txt_ssh_cmd.getText().toString();
@@ -329,6 +336,7 @@ public class ConfigDetailFragment extends Fragment {
         lay_natIP = (LinearLayout) rootView.findViewById(R.id.natipsl);
         lay_natport = (LinearLayout) rootView.findViewById(R.id.natportsl);
         lay_serverCMD = (LinearLayout) rootView.findViewById(R.id.servercmdsl);
+        lay_serverPort = (LinearLayout) rootView.findViewById(R.id.destPortl);
         txt_ports = (TextView) rootView.findViewById(R.id.AccessPorts);
         txt_server_ip = (TextView) rootView.findViewById(R.id.destIP);
         txt_server_port = (TextView) rootView.findViewById(R.id.destPort);
@@ -345,6 +353,7 @@ public class ConfigDetailFragment extends Fragment {
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
         chkblegacy = (CheckBox) rootView.findViewById(R.id.chkblegacy);
+        chkbrandom = (CheckBox) rootView.findViewById(R.id.chkbrandom);
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
@@ -364,6 +373,19 @@ public class ConfigDetailFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+        chkbrandom.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean ischecked) {
+                if (ischecked) {
+                    lay_serverPort.setVisibility(View.GONE);
+                } else {
+                    lay_serverPort.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+
+
 
         spn_protocol = (Spinner) rootView.findViewById(R.id.spn_protocol);
         ArrayAdapter<CharSequence> adapter_protocol = ArrayAdapter.createFromResource(getActivity(),
@@ -508,7 +530,10 @@ public class ConfigDetailFragment extends Fragment {
             }
             txt_ports.setText(config.PORTS);
             txt_server_ip.setText(config.SERVER_IP);
-            txt_server_port.setText(config.SERVER_PORT);
+            txt_server_port.setText(config.SERVER_PORT); // check for random
+            if (config.SERVER_PORT.equalsIgnoreCase("random")){
+                chkbrandom.setChecked(true);
+            }
             txt_server_time.setText(config.SERVER_TIMEOUT);
             txt_KEY.setText(config.KEY);
             if (config.KEY_BASE64) {
