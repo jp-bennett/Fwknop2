@@ -63,7 +63,7 @@
  If you are using luci-app-fwknop on an Openwrt router, you can select the "Capture qr" option from the menu,
  and use a qr code generated on the router to auto fill the encryption and HMAC keys.
   </p>
-<p>If Juicessh is installed, you can autostart a saved Juicessh connection by sellecting Juicessh from the
+<p>If Juicessh is installed, you can autostart a saved Juicessh connection by selecting Juicessh from the
  "Run SSH App" menu, and after a brief delay, choosing the desired connection. If you want to use a different
   SSH app, select "SSH Uri", and then type in your desired Username to connect as. This will use the system\'s
   default ssh client to try to connect to the port you are opening.
@@ -74,8 +74,8 @@
  </p>
  <p>This app is open source software, Licensed GPLv2+. The source can be found  <a href="https://github.com/oneru/Fwknop2">on github</a>. Please report any bugs here.</p>
  <p>Credits: Based on fwknop and libfko written by <a href="https://www.cipherdyne.org/fwknop/"> Michael Rash</a></p>
- <p>This app was written by <a href="http://incomsystems.biz/"> Jonathan Bennett</a></p>
- <p> The fwknop2 icon is derived from on a photo by <a href="https://www.flickr.com/photos/anemoneprojectors/5330583056/">Peter O\'Connor</a></p>
+ <p>This app was written by <a href="http://incomsystems.biz/">Jonathan Bennett</a></p>
+ <p>The fwknop2 icon is derived from a photo by <a href="https://www.flickr.com/photos/anemoneprojectors/5330583056/">Peter O\'Connor</a></p>
 
  <b>Tap the back button to get started.</b>
  </p>
