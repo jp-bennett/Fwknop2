@@ -193,7 +193,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             InetAddressValidator ipValidate = new InetAddressValidator();
 
             try {
-                System.load(mActivity.getFilesDir().getParentFile().getPath() + "/lib/libfwknop.so");
+                System.loadLibrary("fwknop");
             } catch (Exception ex) {
                 Log.e("fwknop2", "Could not load libfko: " + ex);
             }
