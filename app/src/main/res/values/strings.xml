@@ -39,6 +39,7 @@
         <item>Resolve IP</item>
         <item>Source IP</item>
         <item>Allow IP</item>
+        <item>Prompt IP</item>
     </string-array>
     <string-array name="configtype_options">
         <item>Open Port</item>
@@ -111,4 +112,5 @@
     <string name="config_random">Use Random Server Port</string>
     <string name="config_protocol">Protocol:</string>
     <string name="menu_send_knock">Send Knock</string>
+    <string name="libLoadError">Could not load libfko</string>
 </resources>

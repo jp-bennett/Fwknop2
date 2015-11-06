@@ -31,6 +31,8 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import com.sonelli.juicessh.pluginlibrary.PluginClient;
 import com.sonelli.juicessh.pluginlibrary.exceptions.ServiceNotConnectedException;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnClientStartedListener;
@@ -56,6 +58,7 @@ import java.util.regex.Pattern;
 public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListener {
     DBHelper mydb;
     public static Config config;
+    Activity ourAct;
     ProgressDialog pdLoading;
     Boolean ready;
     public PluginClient client;
@@ -80,6 +83,20 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 2585){
             client.gotActivityResult(requestCode, resultCode, data);
+        } else {
+            IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if ((scanResult != null) && (scanResult.getContents() != null)) {
+                String contents = scanResult.getContents();
+                Log.v("fwknop2", contents);
+                for (String stanzas: contents.split(" ")){
+                    String[] tmp = stanzas.split(":");
+                    if (tmp[0].equalsIgnoreCase("CLIENT_IP")) {
+                        allowip_str = (tmp[1]);
+                    }
+                }// end for loop
+                final getExternalIP task = new getExternalIP(ourAct);
+                task.execute();
+            }
         }
     }
 
@@ -101,7 +118,10 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public void onSessionFinished() {
     }
 
-    public int send(String nick, final Activity ourAct) {
+    public int send(String nick, final Activity newAct) {
+        ourAct = newAct;
+        final InetAddressValidator ipValidate = new InetAddressValidator();
+        final IntentIntegrator getQR = new IntentIntegrator(ourAct);
         mydb = new DBHelper(ourAct);
         config = new Config();
         config = mydb.getConfig(nick);
@@ -141,36 +161,78 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             int random_port = r.nextInt(65535 - 10000) + 10000;
             config.SERVER_PORT = String.valueOf(random_port);
         }
-        if (passwd_str.equalsIgnoreCase("")) { //here is where we prompt for a key
 
-            AlertDialog.Builder alert = new AlertDialog.Builder(ourAct);
-            alert.setTitle(ourAct.getResources().getText(R.string.Rijndael_Key));
+            final AlertDialog.Builder IPPrompt = new AlertDialog.Builder(ourAct);
+            IPPrompt.setTitle("Source IP");
             final EditText input = new EditText(ourAct);
-            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            alert.setView(input);
-            alert.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            IPPrompt.setView(input);
+            IPPrompt.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    passwd_str = input.getText().toString();
-                    if (!(passwd_str.equalsIgnoreCase(""))) {
+                    allowip_str = input.getText().toString();
+                    if (ipValidate.isValid(allowip_str)) {
                         final getExternalIP task = new getExternalIP(ourAct);
                         task.execute();
+                    } else {
+                        Toast.makeText(ourAct, "invalid ip", Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+            IPPrompt.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+            IPPrompt.setNeutralButton("Scan QR", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Scan a qr code.
+                    try {
+                        getQR.initiateScan();
+                        //startActivityForResult(intent, 0);
+                    } catch (Exception e) { // This is where the play store is called if the app is not installed
+
+                    }
+                }
+            });
+
+
+        if (passwd_str.equalsIgnoreCase("")) { //here is where we prompt for a key
+
+            AlertDialog.Builder PassPrompt = new AlertDialog.Builder(ourAct);
+            PassPrompt.setTitle(ourAct.getResources().getText(R.string.Rijndael_Key));
+            final EditText inputPass = new EditText(ourAct);
+            inputPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            PassPrompt.setView(inputPass);
+            PassPrompt.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    passwd_str = inputPass.getText().toString();
+                    if (!(passwd_str.equalsIgnoreCase(""))) {
+                        if (allowip_str.equalsIgnoreCase("Prompt IP")) {
+                            IPPrompt.show();
+                        } else {
+                            final getExternalIP task = new getExternalIP(ourAct);
+                            task.execute();
+                        }
                     } else {
                         Toast.makeText(ourAct, ourAct.getResources().getText(R.string.blank_key), Toast.LENGTH_LONG).show();
                     }
                 }
             });
-            alert.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
+            PassPrompt.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     // Canceled.
                 }
             });
-            alert.show();
+            PassPrompt.show();
+        } else if (allowip_str.equalsIgnoreCase("Prompt IP")) {
+            IPPrompt.show();
         } else {
             final getExternalIP task = new getExternalIP(ourAct);
             task.execute();
         }
         return 0;
     }
+
 
     private class getExternalIP extends AsyncTask<Void, Void, String>
     {
@@ -196,6 +258,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 System.loadLibrary("fwknop");
             } catch (Exception ex) {
                 Log.e("fwknop2", "Could not load libfko: " + ex);
+                return mActivity.getString(R.string.libLoadError);
             }
             if (allowip_str.equalsIgnoreCase("Source IP")) {
                 allowip_str = "0.0.0.0";
@@ -248,7 +311,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 server_cmd_str = allowip_str + "," + config.SERVER_CMD;
             }
             spaPacket = sendSPAPacket();
-            Log.v("fwknopd2", spaPacket);
+                
             if (spaPacket != null) {
                 InetAddress resolved_IP;
                 try {

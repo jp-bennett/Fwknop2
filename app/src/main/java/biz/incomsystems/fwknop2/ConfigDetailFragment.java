@@ -241,8 +241,10 @@ public class ConfigDetailFragment extends Fragment {
                     config.ACCESS_IP = "Resolve IP";
                 } else if (spn_allowip.getSelectedItemPosition() == 1) {
                     config.ACCESS_IP = "0.0.0.0";
-                } else {
+                } else if (spn_allowip.getSelectedItemPosition() == 2){
                     config.ACCESS_IP = txt_allowIP.getText().toString();
+                } else if (spn_allowip.getSelectedItemPosition() == 3) {
+                    config.ACCESS_IP = "Prompt IP";
                 }
                 config.NICK_NAME = txt_NickName.getText().toString();
                 config.SERVER_IP = txt_server_ip.getText().toString();
@@ -521,6 +523,8 @@ public class ConfigDetailFragment extends Fragment {
                 spn_allowip.setSelection(0);
             } else if (config.ACCESS_IP.equalsIgnoreCase("0.0.0.0")) {
                 spn_allowip.setSelection(1);
+            } else if (config.ACCESS_IP.equalsIgnoreCase("Prompt IP")) {
+                spn_allowip.setSelection(3);
             } else {
                 spn_allowip.setSelection(2);
                 txt_allowIP.setText(config.ACCESS_IP);

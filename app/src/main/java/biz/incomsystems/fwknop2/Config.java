@@ -20,4 +20,6 @@ public class Config {
     public UUID juice_uuid;
     public Boolean LEGACY;
     public String PROTOCOL;
+    public String DIGEST_TYPE;
+    public String HMAC_TYPE;
 }
