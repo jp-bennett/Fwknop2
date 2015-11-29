@@ -53,6 +53,7 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     int key_len, hmac_key_len;
     char res_msg[MSG_BUFSIZE+1] = {0};
     char spa_msg[MSG_BUFSIZE+1] = {0};
+    char nat_msg[MSG_BUFSIZE+1] = {0};
     jstring ourSpa;
     char *key_tmp[MAX_KEY_LEN+1] = {0}, *hmac_key_tmp[MAX_KEY_LEN+1] = {0};
 
@@ -104,13 +105,17 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     jstring jnat_access_str = (*env)->GetObjectField(env, thiz, fid);
     const char *nat_access_str = (*env)->GetStringUTFChars(env, jnat_access_str, 0);
 
+    fid = (*env)->GetFieldID(env, c, "nat_local", "Ljava/lang/String;");
+    jstring jnat_local = (*env)->GetObjectField(env, thiz, fid);
+    const char *nat_local = (*env)->GetStringUTFChars(env, jnat_local, 0);
+
     fid = (*env)->GetFieldID(env, c, "server_cmd_str", "Ljava/lang/String;");
     jstring jserver_cmd = (*env)->GetObjectField(env, thiz, fid);
     const char *server_cmd_str = (*env)->GetStringUTFChars(env, jserver_cmd, 0);
 
     fid = (*env)->GetFieldID(env, c, "legacy", "Ljava/lang/String;");
-        jstring jlegacy = (*env)->GetObjectField(env, thiz, fid);
-        const char *legacy = (*env)->GetStringUTFChars(env, jlegacy, 0);
+    jstring jlegacy = (*env)->GetObjectField(env, thiz, fid);
+    const char *legacy = (*env)->GetStringUTFChars(env, jlegacy, 0);
 
     /* Sanity checks
     */
@@ -255,13 +260,12 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     */
     if (nat_access_str[0] != 0x0){
         // if nat_access_str is not blank, push it into fko context
-        if (strncmp(nat_access_str, "127.0.0.1", 9) == 0) {
+        if (strncmp(nat_local, "true", 4) == 0) {
             message_type = FKO_CLIENT_TIMEOUT_LOCAL_NAT_ACCESS_MSG;
-            res = fko_set_spa_message_type(ctx, message_type);
+            fko_set_spa_message_type(ctx, message_type);
             LOGV("Finished setting local-nat.");
-        } else {
-            res = fko_set_spa_nat_access(ctx, nat_access_str);
         }
+        res = fko_set_spa_nat_access(ctx, nat_access_str);
         if (res != FKO_SUCCESS) {
                     strcpy(res_msg, fko_errmsg("Error setting NAT string", res));
                     goto cleanup;
@@ -326,6 +330,7 @@ cleanup2:
     (*env)->ReleaseStringUTFChars(env, jhmac_type, set_hmac_type);
     (*env)->ReleaseStringUTFChars(env, jfwtimeout, fw_timeout_str);
     (*env)->ReleaseStringUTFChars(env, jnat_access_str, nat_access_str);
+    (*env)->ReleaseStringUTFChars(env, jnat_local, nat_local);
     return ourSpa;
 }
 

@@ -77,6 +77,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public String nat_ip_str;
     public String nat_port_str;
     public String nat_access_str;
+    public String nat_local;
     public String server_cmd_str;
     public String legacy;
     public String digest_type;
@@ -314,12 +315,23 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 Log.e("fwknop2", "Invalid Source IP");
                 return mActivity.getString(R.string.error_resolve);
             }
-            spaPacket = sendSPAPacket();
+            InetAddress resolved_IP;  //we need to resolve the server's IP, particularly for the nat-local case.
+            try {
+                resolved_IP = InetAddress.getByName(config.SERVER_IP);
+            } catch (Exception ex) {
+                return ex.toString();
+            }
+            if (config.NAT_IP.equalsIgnoreCase("127.0.0.1")) { //if Nat-local
+                nat_access_str = resolved_IP.getHostAddress() + "," +config.NAT_PORT; //The nat-local address is the public ip
+                nat_local = "true"; // let the jni function know that we are doing nat-local
 
+            }
+
+            spaPacket = sendSPAPacket();
             if (spaPacket != null) {
-                InetAddress resolved_IP;
+                //InetAddress resolved_IP;
                 try {
-                    resolved_IP = InetAddress.getByName(config.SERVER_IP);
+                    //resolved_IP = InetAddress.getByName(config.SERVER_IP);
                     if (config.PROTOCOL.equalsIgnoreCase("udp")) {
                         byte[] spaBytes = spaPacket.getBytes();
                         DatagramPacket p = new DatagramPacket(spaBytes, spaBytes.length, resolved_IP, Integer.parseInt(config.SERVER_PORT));

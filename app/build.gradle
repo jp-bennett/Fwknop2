@@ -32,7 +32,7 @@ android {
         applicationId "org.cipherdyne.fwknop2"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 12
+        versionCode 13
         versionName "1.2-Alpha2"
         ndk {
             moduleName 'libfwknop'
