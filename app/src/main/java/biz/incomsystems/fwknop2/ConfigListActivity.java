@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import java.util.List;
 
@@ -42,7 +43,7 @@ import java.util.List;
  * {@link ConfigListFragment.Callbacks} interface
  * to listen for item selections.
  */
-public class ConfigListActivity extends FragmentActivity
+public class ConfigListActivity extends AppCompatActivity
         implements ConfigListFragment.Callbacks {
     ConfigDetailFragment fragment;
     public boolean mTwoPane; // Whether in two-pane mode.
@@ -55,6 +56,8 @@ public class ConfigListActivity extends FragmentActivity
         ((ConfigListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.config_list))
                 .setActivateOnItemClick(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         if (findViewById(R.id.config_detail_container) != null) {
             // The detail container view will be present only in the

@@ -79,11 +79,13 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public String nat_access_str;
     public String server_cmd_str;
     public String legacy;
+    public String digest_type;
+    public String hmac_type;
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 2585){
+        if(requestCode == 2585){ //This request code is specifically for juicessh
             client.gotActivityResult(requestCode, resultCode, data);
-        } else {
+        } else { // This will match a qr code captured IP
             IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             if ((scanResult != null) && (scanResult.getContents() != null)) {
                 String contents = scanResult.getContents();
@@ -141,6 +143,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         if (!nat_ip_str.equalsIgnoreCase("")) {
             nat_access_str = nat_ip_str + "," + nat_port_str;
         }
+        digest_type = config.DIGEST_TYPE;
+        hmac_type = config.HMAC_TYPE;
         if (config.KEY_BASE64) {
             passwd_b64 = "true";
         } else {
@@ -161,43 +165,42 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             int random_port = r.nextInt(65535 - 10000) + 10000;
             config.SERVER_PORT = String.valueOf(random_port);
         }
-
-            final AlertDialog.Builder IPPrompt = new AlertDialog.Builder(ourAct);
-            IPPrompt.setTitle("Source IP");
-            final EditText input = new EditText(ourAct);
-            input.setInputType(InputType.TYPE_CLASS_TEXT);
-            IPPrompt.setView(input);
-            IPPrompt.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    allowip_str = input.getText().toString();
-                    if (ipValidate.isValid(allowip_str)) {
-                        final getExternalIP task = new getExternalIP(ourAct);
-                        task.execute();
-                    } else {
-                        Toast.makeText(ourAct, "invalid ip", Toast.LENGTH_LONG).show();
-                    }
+        final AlertDialog.Builder IPPrompt = new AlertDialog.Builder(ourAct);
+        IPPrompt.setTitle("Source IP");
+        final EditText input = new EditText(ourAct);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        IPPrompt.setView(input);
+        IPPrompt.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                allowip_str = input.getText().toString();
+                if (ipValidate.isValid(allowip_str)) {
+                    final getExternalIP task = new getExternalIP(ourAct);
+                    task.execute();
+                } else {
+                    Toast.makeText(ourAct, "invalid ip", Toast.LENGTH_LONG).show();
                 }
-            });
-            IPPrompt.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    // Canceled.
+            }
+        });
+        IPPrompt.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+        IPPrompt.setNeutralButton("Scan QR", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Scan a qr code.
+                try {
+                    getQR.initiateScan();
+                    //startActivityForResult(intent, 0);
+                } catch (Exception e) {
+                    Log.e("fwknop2", "Could not capture QR: " + e);
                 }
-            });
-            IPPrompt.setNeutralButton("Scan QR", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    // Scan a qr code.
-                    try {
-                        getQR.initiateScan();
-                        //startActivityForResult(intent, 0);
-                    } catch (Exception e) { // This is where the play store is called if the app is not installed
-
-                    }
-                }
-            });
+            }
+        });
 
 
         if (passwd_str.equalsIgnoreCase("")) { //here is where we prompt for a key
-
+            //sadly, Android is retarded, and there is no way to wait for the user to finish with the dialog.
             AlertDialog.Builder PassPrompt = new AlertDialog.Builder(ourAct);
             PassPrompt.setTitle(ourAct.getResources().getText(R.string.Rijndael_Key));
             final EditText inputPass = new EditText(ourAct);
@@ -302,16 +305,17 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 } catch (Exception ex) {
                     Log.e("fwknop2", "error " + ex);
                 }
-                if (!(ipValidate.isValid(allowip_str))) {
-                    Log.e("fwknop2", "Could not resolve external ip.");
-                    return mActivity.getString(R.string.error_resolve);
-                }
+
             }
             if (!config.SERVER_CMD.equalsIgnoreCase("")) {
                 server_cmd_str = allowip_str + "," + config.SERVER_CMD;
             }
+            if (!(ipValidate.isValid(allowip_str))) {
+                Log.e("fwknop2", "Invalid Source IP");
+                return mActivity.getString(R.string.error_resolve);
+            }
             spaPacket = sendSPAPacket();
-                
+
             if (spaPacket != null) {
                 InetAddress resolved_IP;
                 try {

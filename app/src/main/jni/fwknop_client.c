@@ -27,6 +27,7 @@
 
 #include "fwknop_client.h"
 #include "fko.h"
+#include "libfko/fko.h"
 
 /* Format error message.
  */
@@ -47,6 +48,8 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
 
     int res, hmac_str_len = 0;
     short message_type;
+    short digest_type = FKO_DIGEST_SHA256;
+    short hmac_type = FKO_HMAC_SHA256;
     int key_len, hmac_key_len;
     char res_msg[MSG_BUFSIZE+1] = {0};
     char spa_msg[MSG_BUFSIZE+1] = {0};
@@ -77,6 +80,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     jstring jpasswd_b64 = (*env)->GetObjectField(env, thiz, fid);
     const char *passwd_b64 = (*env)->GetStringUTFChars(env, jpasswd_b64, 0);
 
+    fid = (*env)->GetFieldID(env, c, "digest_type", "Ljava/lang/String;");
+    jstring jdigest_type = (*env)->GetObjectField(env, thiz, fid);
+    char *set_digest_type = (*env)->GetStringUTFChars(env, jdigest_type, 0);
+
     fid = (*env)->GetFieldID(env, c, "hmac_str", "Ljava/lang/String;");
     jstring jhmac = (*env)->GetObjectField(env, thiz, fid);
     char *hmac_str = (*env)->GetStringUTFChars(env, jhmac, 0);
@@ -84,6 +91,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     fid = (*env)->GetFieldID(env, c, "hmac_b64", "Ljava/lang/String;");
     jstring jhmac_b64 = (*env)->GetObjectField(env, thiz, fid);
     const char *hmac_b64 = (*env)->GetStringUTFChars(env, jhmac_b64, 0);
+
+    fid = (*env)->GetFieldID(env, c, "hmac_type", "Ljava/lang/String;");
+    jstring jhmac_type = (*env)->GetObjectField(env, thiz, fid);
+    char *set_hmac_type = (*env)->GetStringUTFChars(env, jhmac_type, 0);
 
     fid = (*env)->GetFieldID(env, c, "fw_timeout_str", "Ljava/lang/String;");
     jstring jfwtimeout = (*env)->GetObjectField(env, thiz, fid);
@@ -159,10 +170,14 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
             memcpy(passwd_str, key_tmp, key_len);
         }
     }
-    /* Using an HMAC is optional (currently)
+    /* Using an HMAC is optional in the pre-rfc mode.
     */
 
-    message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
+    if (server_cmd_str[0] != 0x0) {
+        message_type = FKO_COMMAND_MSG;
+    } else {
+        message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
+    }
 
     /* Intialize the context
     */
@@ -212,13 +227,29 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
             key_len = 16;
         }
     }
+
+
     if (hmac_str_len > 0) {
-        res = fko_set_spa_hmac_type(ctx, FKO_DEFAULT_HMAC_MODE);
+        if (strcmp(set_hmac_type, "MD5") == 0) {
+            hmac_type = FKO_HMAC_MD5;
+        } else if (strcmp(set_hmac_type, "SHA1") == 0) {
+            hmac_type = FKO_HMAC_SHA1;
+        } else if (strcmp(set_hmac_type, "SHA256") == 0) {
+            hmac_type = FKO_HMAC_SHA256;
+        } else if (strcmp(set_hmac_type, "SHA384") == 0) {
+            hmac_type = FKO_HMAC_SHA384;
+        } else if (strcmp(set_hmac_type, "SHA512") == 0) {
+            hmac_type = FKO_HMAC_SHA512;
+        }
+
+        res = fko_set_spa_hmac_type(ctx, hmac_type);
         if (res != FKO_SUCCESS) {
             strcpy(res_msg, fko_errmsg("Error setting SPA HMAC type", res));
             goto cleanup;
         }
     }
+
+    LOGV("Finished setting hmac type.");
 
     /* Set Nat
     */
@@ -230,7 +261,24 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
                     goto cleanup;
                 }
     }
-
+    LOGV("Setting digest type to %s.", set_digest_type);
+    if (strcmp(set_digest_type, "MD5") == 0) {
+        digest_type = FKO_HMAC_MD5;
+    } else if (strcmp(set_digest_type, "SHA1") == 0) {
+        digest_type = FKO_HMAC_SHA1;
+    } else if (strcmp(set_digest_type, "SHA256") == 0) {
+        digest_type = FKO_HMAC_SHA256;
+    } else if (strcmp(set_digest_type, "SHA384") == 0) {
+        digest_type = FKO_HMAC_SHA384;
+    } else if (strcmp(set_digest_type, "SHA512") == 0) {
+        digest_type = FKO_HMAC_SHA512;
+    }
+    res = fko_set_spa_digest_type(ctx, digest_type);
+    if (res != FKO_SUCCESS) {
+        strcpy(res_msg, fko_errmsg("Error setting SPA digest type", res));
+        goto cleanup;
+    }
+    LOGV("Finished setting digest type.");
 
 
     /* Finalize the context data (Encrypt and encode).
@@ -241,6 +289,7 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         strcpy(res_msg, fko_errmsg("Error generating SPA data", res));
         goto cleanup;
     }
+    LOGV("Finished finalize.");
 
     res = fko_get_spa_data(ctx, &opts.spa_data);
     if (res != FKO_SUCCESS) {
@@ -265,8 +314,10 @@ cleanup2:
     (*env)->ReleaseStringUTFChars(env, jallowip, allowip_str);
     (*env)->ReleaseStringUTFChars(env, jpasswd, passwd_str);
     (*env)->ReleaseStringUTFChars(env, jpasswd_b64, passwd_b64);
+    (*env)->ReleaseStringUTFChars(env, jdigest_type, set_digest_type);
     (*env)->ReleaseStringUTFChars(env, jhmac, hmac_str);
     (*env)->ReleaseStringUTFChars(env, jhmac_b64, hmac_b64);
+    (*env)->ReleaseStringUTFChars(env, jhmac_type, set_hmac_type);
     (*env)->ReleaseStringUTFChars(env, jfwtimeout, fw_timeout_str);
     (*env)->ReleaseStringUTFChars(env, jnat_access_str, nat_access_str);
     return ourSpa;

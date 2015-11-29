@@ -45,9 +45,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.sonelli.juicessh.pluginlibrary.PluginContract;
 
-import org.apache.commons.validator.routines.InetAddressValidator;
-import org.apache.commons.validator.routines.DomainValidator;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -83,9 +80,10 @@ public class ConfigDetailFragment extends Fragment {
     TextView txt_ssh_cmd;
     String configtype = "Open Port";
     Spinner spn_protocol;
+    Spinner spn_DigestType;
+    Spinner spn_HMACType;
 
     TextView txt_ports ;
-//    TextView txt_udp_ports ;
     TextView txt_server_ip ;
     TextView txt_server_port ;
     TextView txt_server_time ;
@@ -139,7 +137,7 @@ public class ConfigDetailFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setHasOptionsMenu(true);
-
+        setMenuVisibility(true);
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -162,129 +160,118 @@ public class ConfigDetailFragment extends Fragment {
 
             }
         } else if (id == R.id.save) {
-            InetAddressValidator ipValidate = new InetAddressValidator();
             Context context = getActivity(); // We know we will use a toast, so set it up now
             int duration = Toast.LENGTH_LONG;
             CharSequence text = getString(R.string.saving);
             Toast toast = Toast.makeText(context, text, duration);
             toast.setGravity(Gravity.CENTER, 0, 0);
-
-
-            //The following is all input validation
-
-
-            try {
-                if ((Integer.parseInt(txt_server_port.getText().toString()) > 0) && (Integer.parseInt(txt_server_port.getText().toString()) < 65535)) { // check for valid port
-                   txt_server_port.setText(String.valueOf(Integer.parseInt(txt_server_port.getText().toString())));
-                } else {
-                    txt_server_port.setText(String.valueOf(62201));
-                }
-            } catch (NumberFormatException ex) {
-                if (!txt_server_port.getText().toString().equalsIgnoreCase("random")) {
-                    txt_server_port.setText(String.valueOf(62201));
-                }
+            //We load the entered info into the class, and then call the validate function
+            config.MESSAGE_TYPE = configtype;
+            if (configtype.equalsIgnoreCase("Open Port")) {//messagetype = configtype
+                config.PORTS = txt_ports.getText().toString();
+                config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+            } else {
+                config.PORTS = "";
+                config.SERVER_TIMEOUT = "";
             }
-            if (txt_NickName.getText().toString().equalsIgnoreCase("")) { // Need to create a new Nick
-                toast.setText(getString(R.string.unique_nick)); // choosing a used nick will just overwrite it. So really
-                toast.show();
-            } else if ((chkblegacy.isChecked() && chkb64hmac.isChecked()) || (chkblegacy.isChecked() && !txt_HMAC.getText().toString().equalsIgnoreCase(""))) {
-                toast.setText("Cannot use HMAC with legacy mode");
-                toast.show();
-            } else if(chkb64hmac.isChecked() && txt_HMAC.getText().toString().length() % 4 != 0) { // base64 must have a multiple of 4 length
-                toast.setText(getString(R.string.hmac64_x4));
-                toast.show();
-            } else if(chkb64hmac.isChecked() && !(txt_HMAC.getText().toString().matches("^[A-Za-z0-9+/]+={0,2}$"))) { // looks for disallowed b64 characters
-                toast.setText(getString(R.string.hmac64_xchars));
-                toast.show();
-            } else if(chkb64key.isChecked() && txt_KEY.getText().toString().length() % 4 != 0) {
-                toast.setText(getString(R.string.key64_x4));
-                toast.show();
-            } else if(chkb64key.isChecked() && !(txt_KEY.getText().toString().matches("^[A-Za-z0-9+/]+={0,2}$"))) { // looks for disallowed b64 characters
-                toast.setText(getString(R.string.key64_xchars));
-                toast.show();
-            } else if (!(txt_ports.getText().toString().matches("tcp/\\d.*") || txt_ports.getText().toString().matches("udp/\\d.*") || configtype.equalsIgnoreCase("Server Command"))) {
-                toast.setText(getText(R.string.port_format));
-                toast.show();
-            } else if (spn_allowip.getSelectedItem().toString().equalsIgnoreCase("Allow IP") && (!ipValidate.isValid(txt_allowIP.getText().toString()))){ //Have to have a valid ip to allow, if using allow ip
-                toast.setText(getText(R.string.valid_ip));
-                toast.show();
-            }  else if (!ipValidate.isValid(txt_server_ip.getText().toString()) && !DomainValidator.getInstance().isValid(txt_server_ip.getText().toString())) { // check server entry. Must be a valid url or ip.
-                toast.setText(getText(R.string.valid_server));
-                toast.show();
-            } else if ((spn_ssh.getSelectedItemPosition() == 2) && (juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition()) == null)) {
-                toast.setText(getText(R.string.juice_first));
-                toast.show();
-            } else { // validated so now we save
-                toast.show();
-                if (configtype.equalsIgnoreCase("Open Port")) {
-                    config.PORTS = txt_ports.getText().toString();
-                    config.SERVER_TIMEOUT = txt_server_time.getText().toString();
-                } else {
-                    config.PORTS = "";
-                    config.SERVER_TIMEOUT = "";
-                }
-                if (configtype.equalsIgnoreCase("Nat Access")) {
-                    config.NAT_IP = txt_nat_ip.getText().toString();
-                    config.NAT_PORT = txt_nat_port.getText().toString();
-                    config.PORTS = txt_ports.getText().toString();
-                    config.SERVER_TIMEOUT = txt_server_time.getText().toString();
-                } else {
-                    config.NAT_IP = "";
-                    config.NAT_PORT = "";
-                }
-                if (configtype.equalsIgnoreCase("Server Command")) {
-                    config.SERVER_CMD = txt_server_cmd.getText().toString();
-                } else {
-                    config.SERVER_CMD = "";
-                }
-                if (spn_allowip.getSelectedItemPosition() == 0) {
-                    config.ACCESS_IP = "Resolve IP";
-                } else if (spn_allowip.getSelectedItemPosition() == 1) {
-                    config.ACCESS_IP = "0.0.0.0";
-                } else if (spn_allowip.getSelectedItemPosition() == 2){
-                    config.ACCESS_IP = txt_allowIP.getText().toString();
-                } else if (spn_allowip.getSelectedItemPosition() == 3) {
-                    config.ACCESS_IP = "Prompt IP";
-                }
-                config.NICK_NAME = txt_NickName.getText().toString();
-                config.SERVER_IP = txt_server_ip.getText().toString();
-                if (chkbrandom.isChecked()) {
-                 config.SERVER_PORT = "random";
-                } else {
-                    config.SERVER_PORT = txt_server_port.getText().toString();
-                }
+            if (configtype.equalsIgnoreCase("Nat Access")) {
+                config.NAT_IP = txt_nat_ip.getText().toString();
+                config.NAT_PORT = txt_nat_port.getText().toString();
+                config.PORTS = txt_ports.getText().toString();
+                config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+            } else {
+                config.NAT_IP = "";
+                config.NAT_PORT = "";
+            }
+            if (configtype.equalsIgnoreCase("Server Command")) {
+                config.SERVER_CMD = txt_server_cmd.getText().toString();
+            } else {
+                config.SERVER_CMD = "";
+            }
+            if (spn_allowip.getSelectedItemPosition() == 0) {
+                config.ACCESS_IP = "Resolve IP";
+            } else if (spn_allowip.getSelectedItemPosition() == 1) {
+                config.ACCESS_IP = "0.0.0.0";
+            } else if (spn_allowip.getSelectedItemPosition() == 2){
+                config.ACCESS_IP = txt_allowIP.getText().toString();
+            } else if (spn_allowip.getSelectedItemPosition() == 3) {
+                config.ACCESS_IP = "Prompt IP";
+            }
+            config.NICK_NAME = txt_NickName.getText().toString();
+            config.SERVER_IP = txt_server_ip.getText().toString();
+            if (chkbrandom.isChecked()) {
+             config.SERVER_PORT = "random";
+            } else {
+                config.SERVER_PORT = txt_server_port.getText().toString();
+            }
+            config.SSH_CMD = "";
+            if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("SSH Uri")) {
+                config.SSH_CMD = txt_ssh_cmd.getText().toString();
+                config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+            } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh")) {
+                config.SSH_CMD = "juice:" + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition());
+                config.juice_uuid = juice_adapt.getConnectionId(spn_juice.getSelectedItemPosition());
+            } else {
+                config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
                 config.SSH_CMD = "";
-                if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("SSH Uri")) {
-                    config.SSH_CMD = txt_ssh_cmd.getText().toString();
-                    config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-                } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh")) {
-                    config.SSH_CMD = "juice:" + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition());
-                    config.juice_uuid = juice_adapt.getConnectionId(spn_juice.getSelectedItemPosition());
-                } else {
-                    config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
-                    config.SSH_CMD = "";
-                }
-                config.KEY = txt_KEY.getText().toString();       //key
-                config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
-                config.HMAC = txt_HMAC.getText().toString(); // hmac key
-                config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
-                config.LEGACY = chkblegacy.isChecked();
-                switch (spn_protocol.getSelectedItemPosition()) {
-                    case 0:
-                        config.PROTOCOL = "udp";
-                        break;
-                    case 1:
-                        config.PROTOCOL = "tcp";
-                        break;
-                    case 2:
-                        config.PROTOCOL = "http";
-                        break;
-                }
-                mydb.updateConfig(config);
+            }
+            config.KEY = txt_KEY.getText().toString();       //key
+            config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
+            config.HMAC = txt_HMAC.getText().toString(); // hmac key
+            config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
+            config.LEGACY = chkblegacy.isChecked();
+            switch (spn_protocol.getSelectedItemPosition()) {
+                case 0:
+                    config.PROTOCOL = "udp";
+                    break;
+                case 1:
+                    config.PROTOCOL = "tcp";
+                    break;
+                case 2:
+                    config.PROTOCOL = "http";
+                    break;
+            }
+            switch (spn_DigestType.getSelectedItemPosition()) {
+                case 0:
+                    config.DIGEST_TYPE = "MD5";
+                    break;
+                case 1:
+                    config.DIGEST_TYPE = "SHA1";
+                    break;
+                case 2:
+                    config.DIGEST_TYPE = "SHA256";
+                    break;
+                case 3:
+                    config.DIGEST_TYPE = "SHA384";
+                    break;
+                case 4:
+                    config.DIGEST_TYPE = "SHA512";
+                    break;
+            }
+            switch (spn_HMACType.getSelectedItemPosition()) {
+                case 0:
+                    config.HMAC_TYPE = "MD5";
+                    break;
+                case 1:
+                    config.HMAC_TYPE = "SHA1";
+                    break;
+                case 2:
+                    config.HMAC_TYPE = "SHA256";
+                    break;
+                case 3:
+                    config.HMAC_TYPE = "SHA384";
+                    break;
+                case 4:
+                    config.HMAC_TYPE = "SHA512";
+                    break;
+            }
 
-                //this updates the list for one panel mode
+
+            int isValid = config.Is_Valid();
+            if (isValid == 0) {
+                mydb.updateConfig(config);
                 Activity activity = getActivity();
-                if(activity instanceof ConfigListActivity) {
+                if(activity instanceof ConfigListActivity) {//this updates the list for one panel mode
                     ConfigListActivity myactivity = (ConfigListActivity) activity;
                     myactivity.onItemSaved();
 
@@ -292,8 +279,12 @@ public class ConfigDetailFragment extends Fragment {
                     ConfigDetailActivity myactivity = (ConfigDetailActivity) activity;
                     myactivity.onBackPressed();
                 }
-
+            } else {
+                toast.setText(getString(isValid));
+                toast.show();
             }
+
+
         } else {
             return false;
         }
@@ -301,7 +292,7 @@ public class ConfigDetailFragment extends Fragment {
     }
 
 
-    @Override
+    @Override // Handle the qr code results
     public void onActivityResult(int requestCode, int resultCode, Intent data) { // Handle the qr code results
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
         if ((scanResult != null) && (scanResult.getContents() != null)) {
@@ -324,7 +315,7 @@ public class ConfigDetailFragment extends Fragment {
             }// end for loop
         }
     }
-    @Override
+    @Override  //This is all the setup stuff for this fragment.
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_config_detail, container, false);
@@ -394,7 +385,22 @@ public class ConfigDetailFragment extends Fragment {
                 R.array.spinner_protocol, android.R.layout.simple_spinner_item);
         spn_protocol.setAdapter(adapter_protocol);
         adapter_protocol.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
+
+        spn_DigestType = (Spinner) rootView.findViewById(R.id.spn_DigestType);
+        ArrayAdapter<CharSequence> adapter_DigestType = ArrayAdapter.createFromResource(getActivity(),
+                R.array.spinner_digest_type, android.R.layout.simple_spinner_item);
+        spn_DigestType.setAdapter(adapter_DigestType);
+        adapter_protocol.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_DigestType.setSelection(2);
+
+        spn_HMACType = (Spinner) rootView.findViewById(R.id.spn_HMACType);
+        ArrayAdapter<CharSequence> adapter_HMAC_Type = ArrayAdapter.createFromResource(getActivity(),
+                R.array.spinner_digest_type, android.R.layout.simple_spinner_item);
+        spn_HMACType.setAdapter(adapter_HMAC_Type);
+        adapter_protocol.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_HMACType.setSelection(2);
+
+        spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
         ArrayList<String> list = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
         ArrayAdapter<String> adapter_ssh = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_spinner_item,list);
@@ -544,7 +550,7 @@ public class ConfigDetailFragment extends Fragment {
             if (config.HMAC_BASE64) {
                 chkb64hmac.setChecked(true);
             } else { chkb64hmac.setChecked(false);}
-            if (!config.SERVER_CMD.equalsIgnoreCase("")) {
+            if (!config.SERVER_CMD.equalsIgnoreCase("")) { //can move this logic elsewhere
                 spn_configtype.setSelection(2);
                 txt_server_cmd.setText(config.SERVER_CMD);
             } else if (!config.NAT_IP.equalsIgnoreCase("")) {
@@ -571,6 +577,29 @@ public class ConfigDetailFragment extends Fragment {
                 spn_protocol.setSelection(2);
             } else {
                 spn_protocol.setSelection(0);
+            }
+            if (config.DIGEST_TYPE.equalsIgnoreCase("MD5")) {
+                spn_DigestType.setSelection(0);
+            } else if (config.DIGEST_TYPE.equalsIgnoreCase("SHA1")) {
+                spn_DigestType.setSelection(1);
+            } else if (config.DIGEST_TYPE.equalsIgnoreCase("SHA256")) {
+                spn_DigestType.setSelection(2);
+            } else if (config.DIGEST_TYPE.equalsIgnoreCase("SHA384")) {
+                spn_DigestType.setSelection(3);
+            } else if (config.DIGEST_TYPE.equalsIgnoreCase("SHA512")) {
+                spn_DigestType.setSelection(4);
+            }
+
+            if (config.HMAC_TYPE.equalsIgnoreCase("MD5")) {
+                spn_HMACType.setSelection(0);
+            } else if (config.HMAC_TYPE.equalsIgnoreCase("SHA1")) {
+                spn_HMACType.setSelection(1);
+            } else if (config.HMAC_TYPE.equalsIgnoreCase("SHA256")) {
+                spn_HMACType.setSelection(2);
+            } else if (config.HMAC_TYPE.equalsIgnoreCase("SHA384")) {
+                spn_HMACType.setSelection(3);
+            } else if (config.HMAC_TYPE.equalsIgnoreCase("SHA512")) {
+                spn_HMACType.setSelection(4);
             }
         }
         return rootView;

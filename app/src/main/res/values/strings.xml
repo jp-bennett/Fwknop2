@@ -34,7 +34,13 @@
         <item>TCP</item>
         <item>HTTP</item>
     </string-array>
-
+    <string-array name="spinner_digest_type">
+        <item>MD5</item>
+        <item>SHA1</item>
+        <item>SHA256</item>
+        <item>SHA384</item>
+        <item>SHA512</item>
+    </string-array>
     <string-array name="spinner_options">
         <item>Resolve IP</item>
         <item>Source IP</item>
@@ -87,6 +93,8 @@
     <string name="config_udp_port">Server Port:</string>
     <string name="config_rkey">Rijndael Key:</string>
     <string name="config_b64_key">Key Is Base 64</string>
+    <string name="config_digest_type">SPA Digest Type</string>
+    <string name="config_HMAC_type">SPA HMAC Type</string>
     <string name="config_hmackey">HMAC Key:</string>
     <string name="config_hmac64">HMAC Is Base 64</string>
     <string name="config_allowIP">Allow IP:</string>
@@ -113,4 +121,5 @@
     <string name="config_protocol">Protocol:</string>
     <string name="menu_send_knock">Send Knock</string>
     <string name="libLoadError">Could not load libfko</string>
+    <string name="HMAC_Legacy">Cannot use HMAC with legacy mode</string>
 </resources>
