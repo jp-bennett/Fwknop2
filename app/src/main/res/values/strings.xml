@@ -50,6 +50,7 @@
     <string-array name="configtype_options">
         <item>Open Port</item>
         <item>Nat Access</item>
+        <item>Local Nat Access</item>
         <item>Server Command</item>
     </string-array>
     <string-array name="ssh_options">

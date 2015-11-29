@@ -1,5 +1,7 @@
 package biz.incomsystems.fwknop2;
 
+import android.util.Log;
+
 import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
 
@@ -56,7 +58,8 @@ public class Config {
             return(R.string.key64_xchars);
         } else if (!(this.PORTS.matches("tcp/\\d.*") || this.PORTS.matches("udp/\\d.*") || this.MESSAGE_TYPE.equalsIgnoreCase("Server Command"))) {
             return(R.string.port_format);
-        } else if (!(this.ACCESS_IP.equalsIgnoreCase("Allow IP") || this.ACCESS_IP.equalsIgnoreCase("Prompt IP") || (ipValidate.isValid(this.ACCESS_IP)))){ //Have to have a valid ip to allow, if using allow ip
+        } else if (!(this.ACCESS_IP.equalsIgnoreCase("Allow IP") || this.ACCESS_IP.equalsIgnoreCase("Resolve IP") || this.ACCESS_IP.equalsIgnoreCase("Prompt IP") || (ipValidate.isValid(this.ACCESS_IP)))){ //Have to have a valid ip to allow, if using allow ip
+            Log.e("fwknop2", this.ACCESS_IP);
             return(R.string.valid_ip);
         }  else if (!ipValidate.isValid(this.SERVER_IP) && !DomainValidator.getInstance().isValid(this.SERVER_IP)) { // check server entry. Must be a valid url or ip.
             return(R.string.valid_server);

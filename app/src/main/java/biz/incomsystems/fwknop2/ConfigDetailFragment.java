@@ -183,6 +183,15 @@ public class ConfigDetailFragment extends Fragment {
                 config.NAT_IP = "";
                 config.NAT_PORT = "";
             }
+            if (configtype.equalsIgnoreCase("Local Nat Access")) {
+                config.NAT_IP = "127.0.0.1";
+                config.NAT_PORT = txt_nat_port.getText().toString();
+                config.PORTS = txt_ports.getText().toString();
+                config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+            } else {
+                config.NAT_IP = "";
+                config.NAT_PORT = "";
+            }
             if (configtype.equalsIgnoreCase("Server Command")) {
                 config.SERVER_CMD = txt_server_cmd.getText().toString();
             } else {
@@ -481,33 +490,40 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Open Port";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
+                    lay_natIP.setVisibility(View.GONE);
+                    lay_natport.setVisibility(View.GONE);
+                    lay_serverCMD.setVisibility(View.GONE);
                     txt_nat_ip.setText("");
                     txt_nat_port.setText("");
                     txt_server_cmd.setText("");
-                } else {
-                    lay_AccessPort.setVisibility(View.GONE);
-                    lay_fwTimeout.setVisibility(View.GONE);
-                }
-                if (pos == 1) {
+                } else if (pos == 1) {
                     configtype = "Nat Access";
-                    txt_server_cmd.setText("");
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
                     lay_natIP.setVisibility(View.VISIBLE);
                     lay_natport.setVisibility(View.VISIBLE);
-                } else {
+                    lay_serverCMD.setVisibility(View.GONE);
+                    txt_server_cmd.setText("");
+                } else if (pos == 2) {
+                    configtype = "Local Nat Access";
+                    lay_AccessPort.setVisibility(View.VISIBLE);
+                    lay_fwTimeout.setVisibility(View.VISIBLE);
+                    lay_natIP.setVisibility(View.GONE);
+                    lay_natport.setVisibility(View.VISIBLE);
+                    lay_serverCMD.setVisibility(View.GONE);
+                    txt_server_cmd.setText("");
+                    txt_nat_ip.setText("127.0.0.1");
+                } else if (pos == 3) {
+                    configtype = "Server Command";
+                    lay_AccessPort.setVisibility(View.GONE);
+                    lay_fwTimeout.setVisibility(View.GONE);
                     lay_natIP.setVisibility(View.GONE);
                     lay_natport.setVisibility(View.GONE);
-                }
-                if (pos == 2) {
-                    configtype = "Server Command";
                     lay_serverCMD.setVisibility(View.VISIBLE);
                     txt_ports.setText("");
                     txt_nat_ip.setText("");
                     txt_nat_port.setText("");
-                    txt_server_time.setText("");
-                } else {
-                    lay_serverCMD.setVisibility(View.GONE);
+                    //txt_server_time.setText("");
                 }
             }
 
@@ -551,10 +567,15 @@ public class ConfigDetailFragment extends Fragment {
                 chkb64hmac.setChecked(true);
             } else { chkb64hmac.setChecked(false);}
             if (!config.SERVER_CMD.equalsIgnoreCase("")) { //can move this logic elsewhere
-                spn_configtype.setSelection(2);
+                spn_configtype.setSelection(3);
                 txt_server_cmd.setText(config.SERVER_CMD);
             } else if (!config.NAT_IP.equalsIgnoreCase("")) {
-                spn_configtype.setSelection(1);
+                if (config.NAT_IP.equalsIgnoreCase("127.0.0.1")) {
+                    spn_configtype.setSelection(2);
+
+                } else {
+                    spn_configtype.setSelection(1);
+                }
                 txt_ports.setText(config.PORTS);
                 txt_nat_ip.setText(config.NAT_IP);
                 txt_nat_port.setText(config.NAT_PORT);

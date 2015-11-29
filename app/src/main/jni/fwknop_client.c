@@ -249,13 +249,19 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
         }
     }
 
-    LOGV("Finished setting hmac type.");
+
 
     /* Set Nat
     */
     if (nat_access_str[0] != 0x0){
         // if nat_access_str is not blank, push it into fko context
-        res = fko_set_spa_nat_access(ctx, nat_access_str);
+        if (strncmp(nat_access_str, "127.0.0.1", 9) == 0) {
+            message_type = FKO_CLIENT_TIMEOUT_LOCAL_NAT_ACCESS_MSG;
+            res = fko_set_spa_message_type(ctx, message_type);
+            LOGV("Finished setting local-nat.");
+        } else {
+            res = fko_set_spa_nat_access(ctx, nat_access_str);
+        }
         if (res != FKO_SUCCESS) {
                     strcpy(res_msg, fko_errmsg("Error setting NAT string", res));
                     goto cleanup;
