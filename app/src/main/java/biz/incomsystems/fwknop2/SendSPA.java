@@ -325,6 +325,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 nat_access_str = resolved_IP.getHostAddress() + "," +config.NAT_PORT; //The nat-local address is the public ip
                 nat_local = "true"; // let the jni function know that we are doing nat-local
 
+            } else {
+                nat_local = "false";
             }
 
             spaPacket = sendSPAPacket();
