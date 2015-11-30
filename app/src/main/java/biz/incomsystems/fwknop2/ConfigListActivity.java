@@ -56,7 +56,7 @@ public class ConfigListActivity extends AppCompatActivity
         ((ConfigListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.config_list))
                 .setActivateOnItemClick(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
         if (findViewById(R.id.config_detail_container) != null) {
