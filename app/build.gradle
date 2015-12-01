@@ -1,54 +1,58 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.model.application'
 repositories {
     maven { url 'https://raw.github.com/Sonelli/maven/master' }
 }
+model {
 
-android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.2'
-    sourceSets.main {
-        jni.srcDirs = ['src/main/jni',
-                        'src/main/jni/libfko'
-        ]
+    android.lintOptions {
+        abortOnError = false
     }
-    lintOptions {
-        abortOnError false
-    }
-
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES.txt'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/dependencies.txt'
-        exclude 'META-INF/LGPL2.1'
-    }
-
-    defaultConfig {
-        applicationId "org.cipherdyne.fwknop2"
-        minSdkVersion 15
-        targetSdkVersion 23
-        versionCode 14
-        versionName "1.2-Alpha2"
-        ndk {
-            moduleName 'libfwknop'
-            ldLibs 'log'
-            cFlags '-DHAVE_CONFIG_H'
+    android {
+        compileSdkVersion = 23
+        buildToolsVersion = '23.0.2'
+        sources.main {
+            jni.source.srcDirs = ['src/main/jni'/*, 'src/main/jni/libfko'*/]
+            jniLibs.source.srcDirs = ['src/main/jni/libfko']
         }
-            
+        defaultConfig.with {
+            applicationId = "org.cipherdyne.fwknop2"
+            minSdkVersion.apiLevel = 15
+            targetSdkVersion.apiLevel = 23
+            versionCode = 16
+            versionName = "1.2-Alpha2"
+        }
+
+
+        packagingOptions.excludes = ['META-INF/DEPENDENCIES.txt','META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
+        /*packagingOptions.excludes.add('META-INF/LICENSE.txt')
+        packagingOptions.excludes.add('META-INF/NOTICE.txt')
+        packagingOptions.excludes.add('META-INF/NOTICE')
+        packagingOptions.excludes.add('META-INF/LICENSE')
+        packagingOptions.excludes.add('META-INF/DEPENDENCIES')
+        packagingOptions.excludes.add('META-INF/notice.txt')
+        packagingOptions.excludes.add('META-INF/license.txt')
+        packagingOptions.excludes.add('META-INF/dependencies.txt')
+        packagingOptions.excludes.add('META-INF/LGPL2.1')*/
+
+
+
+
     }
-    buildTypes {
+    android.buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled = false
+            proguardFiles.add(file('proguard-rules.pro'))
         }
+    }
+    android.ndk {
+        moduleName = 'fwknop'
+        ldLibs.add('log')
+        CFlags.add('-DHAVE_CONFIG_H')
+        CFlags.add("-I${file('src/main/jni')}".toString())
+        CFlags.add("-I${file('src/main/jni/libfko')}".toString())
+        platformVersion = '19'
     }
 }
-
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.1.1'
