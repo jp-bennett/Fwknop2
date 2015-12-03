@@ -27,7 +27,6 @@
 
 #include "fwknop_client.h"
 #include "fko.h"
-#include "libfko/fko.h"
 
 /* Format error message.
  */

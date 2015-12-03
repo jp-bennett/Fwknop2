@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -56,8 +55,6 @@ public class ConfigListActivity extends AppCompatActivity
         ((ConfigListFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.config_list))
                 .setActivateOnItemClick(true);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
 
         if (findViewById(R.id.config_detail_container) != null) {
             // The detail container view will be present only in the

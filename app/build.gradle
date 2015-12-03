@@ -3,15 +3,15 @@ repositories {
     maven { url 'https://raw.github.com/Sonelli/maven/master' }
 }
 model {
-
     android.lintOptions {
         abortOnError = false
     }
     android {
         compileSdkVersion = 23
         buildToolsVersion = '23.0.2'
+        packagingOptions.excludes = ['META-INF/DEPENDENCIES.txt','META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
         sources.main {
-            jni.source.srcDirs = ['src/main/jni'/*, 'src/main/jni/libfko'*/]
+            jni.source.srcDirs = ['src/main/jni']
             jniLibs.source.srcDirs = ['src/main/jni/libfko']
         }
         defaultConfig.with {
@@ -21,22 +21,6 @@ model {
             versionCode = 16
             versionName = "1.2-Alpha2"
         }
-
-
-        packagingOptions.excludes = ['META-INF/DEPENDENCIES.txt','META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
-        /*packagingOptions.excludes.add('META-INF/LICENSE.txt')
-        packagingOptions.excludes.add('META-INF/NOTICE.txt')
-        packagingOptions.excludes.add('META-INF/NOTICE')
-        packagingOptions.excludes.add('META-INF/LICENSE')
-        packagingOptions.excludes.add('META-INF/DEPENDENCIES')
-        packagingOptions.excludes.add('META-INF/notice.txt')
-        packagingOptions.excludes.add('META-INF/license.txt')
-        packagingOptions.excludes.add('META-INF/dependencies.txt')
-        packagingOptions.excludes.add('META-INF/LGPL2.1')*/
-
-
-
-
     }
     android.buildTypes {
         release {

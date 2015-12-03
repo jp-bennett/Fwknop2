@@ -17,7 +17,9 @@ This file is part of Fwknop2.
 package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -155,7 +157,6 @@ public class ConfigDetailFragment extends Fragment {
         } else if (id == R.id.qr_code) {
             try {
                 IntentIntegrator.forSupportFragment(this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES).initiateScan();
-                //startActivityForResult(intent, 0);
             } catch (Exception e) { // This is where the play store is called if the app is not installed
 
             }
@@ -289,8 +290,19 @@ public class ConfigDetailFragment extends Fragment {
                     myactivity.onBackPressed();
                 }
             } else {
+                AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                alertDialog.setTitle("Error");
+                alertDialog.setMessage(getString(isValid));
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+                /*
                 toast.setText(getString(isValid));
-                toast.show();
+                toast.show(); */
             }
 
 

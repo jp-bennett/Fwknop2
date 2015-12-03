@@ -397,8 +397,36 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 } else if (!config.SSH_CMD.equalsIgnoreCase("")) {
                     String ssh_uri = "ssh://" + config.SSH_CMD + "/#" + config.NICK_NAME;
                     Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));
-                    mActivity.startActivity(i);
+                    try {
+                        mActivity.startActivity(i);
+                    } catch (Exception ex) {
+                        AlertDialog alertDialog = new AlertDialog.Builder(mActivity).create();
+                        alertDialog.setTitle("Error");
+                        if (ex.toString().contains("ActivityNotFoundException")) {
+                            alertDialog.setMessage("No SSH app found.  Juicessh or Connectbot are both recommended.");
+                        } else {
+                            alertDialog.setMessage(ex.toString());
+                        }
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
                 }
+            } else {
+                AlertDialog alertDialog = new AlertDialog.Builder(mActivity).create();
+                alertDialog.setTitle("Error");
+                alertDialog.setMessage(result);
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
             }
         }
     }
