@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.ContextMenu;
@@ -35,7 +36,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import java.util.ArrayList;
-
 
 
 /**
@@ -127,6 +127,11 @@ public class ConfigListFragment extends ListFragment {
         return rootView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         super.onCreateOptionsMenu(menu, inflater);
@@ -205,6 +210,11 @@ public class ConfigListFragment extends ListFragment {
 
         MenuInflater inflater = this.getActivity().getMenuInflater();
         inflater.inflate(R.menu.list_longtap_menu, menu);
+
+        NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity());
+        if (nfcAdapter == null || !nfcAdapter.isEnabled()){
+            menu.removeItem(R.id.write_nfc_tag);
+        }
     }
 
     @Override
@@ -222,6 +232,11 @@ public class ConfigListFragment extends ListFragment {
                 Intent detailIntent = new Intent(getActivity(), ConfigDetailActivity.class);
                 detailIntent.putExtra(ConfigDetailFragment.ARG_ITEM_ID, ((TextView) info.targetView).getText().toString());
                 startActivity(detailIntent);
+
+            case R.id.write_nfc_tag:
+                WriteFwknopNickToNfcDialog dialog = new WriteFwknopNickToNfcDialog(getActivity(),
+                        ((TextView)info.targetView).getText().toString());
+                dialog.show();
 
             default:
                 return super.onContextItemSelected(item);

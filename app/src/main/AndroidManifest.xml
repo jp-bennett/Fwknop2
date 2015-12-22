@@ -2,17 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="biz.incomsystems.fwknop2" >
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS"/>
+    <uses-permission android:name="com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS" />
     <uses-permission android:name="com.sonelli.juicessh.api.v1.permission.OPEN_SESSIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        tools:replace="android:icon,android:theme"
         android:allowBackup="true"
         android:icon="@mipmap/fwknop2"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon,android:theme" >
         <activity
             android:name=".ConfigListActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -24,7 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="biz.incomsystems.fwknop2.HelpActivity"
+            android:name=".HelpActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" >
         </activity>
@@ -34,12 +37,23 @@
         </activity>
         <activity
             android:name=".ConfigDetailActivity"
-            android:label="@string/title_config_detail"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_config_detail"
             android:parentActivityName=".ConfigListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ConfigListActivity" />
+        </activity>
+        <activity
+            android:name=".NfcKnockActivity"
+            android:label="@string/title_activity_nfc_knock"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/nfckey" />
+            </intent-filter>
         </activity>
     </application>
 

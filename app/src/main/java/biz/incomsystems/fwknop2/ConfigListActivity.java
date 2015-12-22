@@ -24,6 +24,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
 import java.util.List;
 
 /**
@@ -47,7 +48,6 @@ public class ConfigListActivity extends AppCompatActivity
     ConfigDetailFragment fragment;
     public boolean mTwoPane; // Whether in two-pane mode.
     public String selected_nick;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +64,7 @@ public class ConfigListActivity extends AppCompatActivity
             mTwoPane = true;
 
         }
+
         SharedPreferences prefs = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         boolean haveWeShownPreferences = prefs.getBoolean("HaveShownPrefs", false);
 
