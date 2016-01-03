@@ -41,7 +41,7 @@ class WriteFwknopNickToNfcDialog extends AlertDialog {
     private static final short TNF_MIME_MEDIA = 2;
     private static final String NFC_TOKEN_MIME_TYPE = "application/nfckey";
 
-    private static final String TAG = WriteFwknopNickToNfcDialog.class.getName().toString();
+    private static final String TAG = WriteFwknopNickToNfcDialog.class.getName();
 
     private final PowerManager.WakeLock mWakeLock;
 
