@@ -326,7 +326,10 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             if (config.NAT_IP.equalsIgnoreCase("127.0.0.1")) { //if Nat-local
                 nat_access_str = resolved_IP.getHostAddress() + "," +config.NAT_PORT; //The nat-local address is the public ip
                 nat_local = "true"; // let the jni function know that we are doing nat-local
-
+            } else if (!config.NAT_IP.equalsIgnoreCase("")) {
+                nat_local = "false";
+                nat_access_str = config.NAT_IP + "," + config.NAT_PORT;
+                Log.d("fwknop2", nat_access_str);
             } else {
                 nat_local = "false";
             }

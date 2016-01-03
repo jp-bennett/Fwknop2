@@ -180,18 +180,12 @@ public class ConfigDetailFragment extends Fragment {
                 config.NAT_PORT = txt_nat_port.getText().toString();
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
-            } else {
-                config.NAT_IP = "";
-                config.NAT_PORT = "";
             }
             if (configtype.equalsIgnoreCase("Local Nat Access")) {
                 config.NAT_IP = "127.0.0.1";
                 config.NAT_PORT = txt_nat_port.getText().toString();
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
-            } else {
-                config.NAT_IP = "";
-                config.NAT_PORT = "";
             }
             if (configtype.equalsIgnoreCase("Server Command")) {
                 config.SERVER_CMD = txt_server_cmd.getText().toString();
