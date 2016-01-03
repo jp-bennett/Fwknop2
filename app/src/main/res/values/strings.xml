@@ -15,6 +15,7 @@
     <string name="valid_server">You Must supply a valid server address.</string>
     <string name="knock">Send knock</string>
     <string name="edit">Edit config</string>
+    <string name="write_nfc_tag">Write to NFC tag</string>
     <string name="juice_first">A connection must be saved in Juicessh before being used here.</string>
     <string name="blank_key">Key cannot be blank.</string>
     <string name="Rijndael_Key">Rijndael Key</string>
@@ -123,4 +124,11 @@
     <string name="menu_send_knock">Send Knock</string>
     <string name="libLoadError">Could not load libfko</string>
     <string name="HMAC_Legacy">Cannot use HMAC with legacy mode</string>
+    <string name="title_activity_nfc_knock">NfcKnockActivity</string>
+    <string name="setup_nfc_tag">Set up Fwknop NFC Tag</string>
+    <string name="status_awaiting_tap">Tap a tag to write...</string>
+    <string name="status_write_success">Success!</string>
+    <string name="status_failed_to_write">Unable to write data to NFC tag. If the problem persists, try a different tag</string>
+    <string name="status_tag_not_writable">NFC tag is not writable. Please use a different tag.</string>
+    <string name="done_label">Done</string>
 </resources>

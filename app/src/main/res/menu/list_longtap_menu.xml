@@ -6,4 +6,7 @@
     <item android:id="@+id/edit"
         android:title="@string/edit" >
     </item>
+    <item android:id="@+id/write_nfc_tag"
+        android:title="@string/write_nfc_tag" >
+    </item>
 </menu>

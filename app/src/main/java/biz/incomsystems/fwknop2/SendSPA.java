@@ -249,9 +249,11 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pdLoading = new ProgressDialog(mActivity);
-            pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
-            pdLoading.show();
+            if(mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity") == false) {
+                pdLoading = new ProgressDialog(mActivity);
+                pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
+                pdLoading.show();
+            }
         }
 
         @Override
@@ -370,7 +372,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            pdLoading.dismiss();
+            if(mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity") == false)
+                pdLoading.dismiss();
 
             Toast.makeText(mActivity, result, Toast.LENGTH_LONG).show();
             Log.v("fwknop2", result);
