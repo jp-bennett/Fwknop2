@@ -18,7 +18,7 @@ model {
             applicationId = "org.cipherdyne.fwknop2"
             minSdkVersion.apiLevel = 15
             targetSdkVersion.apiLevel = 23
-            versionCode = 17
+            versionCode = 18
             versionName = "1.2-Beta1"
         }
     }
