@@ -212,7 +212,7 @@ public class ConfigListFragment extends ListFragment {
         inflater.inflate(R.menu.list_longtap_menu, menu);
 
         NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity());
-        if (nfcAdapter == null || !nfcAdapter.isEnabled() || (android.os.Build.VERSION.SDK_INT < 19)){
+        if (nfcAdapter == null || !nfcAdapter.isEnabled()){
             menu.removeItem(R.id.write_nfc_tag);
         }
     }
@@ -235,9 +235,9 @@ public class ConfigListFragment extends ListFragment {
                 return true;
 
             case R.id.write_nfc_tag:
-                WriteFwknopNickToNfcDialog dialog = new WriteFwknopNickToNfcDialog(getActivity(),
-                        ((TextView)info.targetView).getText().toString());
-                dialog.show();
+                Intent nfcIntent = new Intent(getActivity(), WriteFwknopNickToNfcDialog.class);
+                nfcIntent.putExtra(WriteFwknopNickToNfcDialog.ARG_ITEM_TARGET, ((TextView)info.targetView).getText().toString());
+                startActivity(nfcIntent);
 
             default:
                 return super.onContextItemSelected(item);

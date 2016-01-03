@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.database.Cursor;
 import android.text.InputType;
 import android.util.Log;
 import android.widget.EditText;
@@ -128,8 +127,9 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         mydb = new DBHelper(ourAct);
         config = new Config();
         config = mydb.getConfig(nick);
-        Cursor CurrentIndex = mydb.getData(nick);
-        CurrentIndex.moveToFirst();
+        //Cursor CurrentIndex = mydb.getData(nick);
+        //CurrentIndex.moveToFirst();
+        mydb.close();
 
         //These variables are the ones that the jni pulls settings from.
         access_str = config.PORTS;
@@ -185,6 +185,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         IPPrompt.setNegativeButton(ourAct.getResources().getText(R.string.cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // Canceled.
+                ourAct.finish();
             }
         });
         IPPrompt.setNeutralButton("Scan QR", new DialogInterface.OnClickListener() {
@@ -249,7 +250,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if(mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity") == false) {
+            if(!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity")) {
                 pdLoading = new ProgressDialog(mActivity);
                 pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
                 pdLoading.show();
@@ -375,13 +376,14 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            if(mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity") == false)
+            if(!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity"))
                 pdLoading.dismiss();
 
             Toast.makeText(mActivity, result, Toast.LENGTH_LONG).show();
             Log.v("fwknop2", result);
             if (result.contains("Success")) {
                 if (config.SSH_CMD.contains("juice:")) {
+                    Log.i("Fwknop2", "Attempting to launch Juicessh");
                     ready = false; //probably not needed
                     client = new PluginClient();
                     client.start(mActivity, new OnClientStartedListener() {

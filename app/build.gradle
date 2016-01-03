@@ -19,7 +19,7 @@ model {
             minSdkVersion.apiLevel = 15
             targetSdkVersion.apiLevel = 23
             versionCode = 18
-            versionName = "1.2-Beta1"
+            versionName = "1.2-Beta2"
         }
     }
     android.buildTypes {
