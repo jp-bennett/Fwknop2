@@ -404,7 +404,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
                 } else if (config.SSH_CMD.contains("ovpn:")) {
                     final String EXTRA_NAME = "de.blinkt.openvpn.shortcutProfileName";
-                    Log.i("fwknop2", EXTRA_NAME);
                     Intent i = new Intent(Intent.ACTION_MAIN);
                     i.setClassName("de.blinkt.openvpn", "de.blinkt.openvpn.LaunchVPN");
                     i.putExtra(EXTRA_NAME, config.SSH_CMD.substring(5));

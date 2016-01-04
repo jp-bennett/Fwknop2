@@ -43,7 +43,6 @@ public class Config {
                 this.SERVER_PORT = String.valueOf(62201);
             }
         }
-        Log.d("fwknop2", this.NAT_IP);
 
         if (this.NICK_NAME.equalsIgnoreCase("")) { // Need to create a new Nick
             return(R.string.unique_nick); // choosing a used nick will just overwrite it. So really
