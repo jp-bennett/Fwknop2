@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -80,6 +81,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+@WANT_C_UNIT_TESTS_TRUE@noinst_PROGRAMS = fko_utests$(EXEEXT)
 subdir = lib
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/config/depcomp $(include_HEADERS)
@@ -130,8 +132,7 @@ am__objects_1 = base64.lo cipher_funcs.lo digest.lo \
 	fko_decode.lo fko_encryption.lo fko_error.lo fko_funcs.lo \
 	fko_message.lo fko_nat_access.lo fko_rand_value.lo \
 	fko_server_auth.lo fko_timestamp.lo fko_hmac.lo hmac.lo \
-	fko_user.lo md5.lo rijndael.lo sha1.lo sha2.lo gpgme_funcs.lo \
-	strlcpy.lo strlcat.lo fko_util.lo
+	fko_user.lo md5.lo rijndael.lo sha1.lo sha2.lo gpgme_funcs.lo
 am_libfko_la_OBJECTS = $(am__objects_1)
 libfko_la_OBJECTS = $(am_libfko_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -141,6 +142,43 @@ am__v_lt_1 =
 libfko_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libfko_la_LDFLAGS) $(LDFLAGS) -o $@
+PROGRAMS = $(noinst_PROGRAMS)
+am__fko_utests_SOURCES_DIST = fko_utests.c base64.c base64.h \
+	cipher_funcs.c cipher_funcs.h digest.c digest.h \
+	fko_client_timeout.c fko_common.h fko_digest.c fko_encode.c \
+	fko_decode.c fko_encryption.c fko_error.c fko_funcs.c \
+	fko_message.c fko_message.h fko_nat_access.c fko_rand_value.c \
+	fko_server_auth.c fko.h fko_limits.h fko_timestamp.c \
+	fko_hmac.c hmac.c hmac.h fko_user.c fko_user.h md5.c md5.h \
+	rijndael.c rijndael.h sha1.c sha1.h sha2.c sha2.h \
+	fko_context.h fko_state.h gpgme_funcs.c gpgme_funcs.h
+am__objects_2 = fko_utests-base64.$(OBJEXT) \
+	fko_utests-cipher_funcs.$(OBJEXT) fko_utests-digest.$(OBJEXT) \
+	fko_utests-fko_client_timeout.$(OBJEXT) \
+	fko_utests-fko_digest.$(OBJEXT) \
+	fko_utests-fko_encode.$(OBJEXT) \
+	fko_utests-fko_decode.$(OBJEXT) \
+	fko_utests-fko_encryption.$(OBJEXT) \
+	fko_utests-fko_error.$(OBJEXT) fko_utests-fko_funcs.$(OBJEXT) \
+	fko_utests-fko_message.$(OBJEXT) \
+	fko_utests-fko_nat_access.$(OBJEXT) \
+	fko_utests-fko_rand_value.$(OBJEXT) \
+	fko_utests-fko_server_auth.$(OBJEXT) \
+	fko_utests-fko_timestamp.$(OBJEXT) \
+	fko_utests-fko_hmac.$(OBJEXT) fko_utests-hmac.$(OBJEXT) \
+	fko_utests-fko_user.$(OBJEXT) fko_utests-md5.$(OBJEXT) \
+	fko_utests-rijndael.$(OBJEXT) fko_utests-sha1.$(OBJEXT) \
+	fko_utests-sha2.$(OBJEXT) fko_utests-gpgme_funcs.$(OBJEXT)
+@WANT_C_UNIT_TESTS_TRUE@am_fko_utests_OBJECTS =  \
+@WANT_C_UNIT_TESTS_TRUE@	fko_utests-fko_utests.$(OBJEXT) \
+@WANT_C_UNIT_TESTS_TRUE@	$(am__objects_2)
+fko_utests_OBJECTS = $(am_fko_utests_OBJECTS)
+@WANT_C_UNIT_TESTS_TRUE@fko_utests_DEPENDENCIES =  \
+@WANT_C_UNIT_TESTS_TRUE@	$(top_builddir)/lib/libfko.la \
+@WANT_C_UNIT_TESTS_TRUE@	$(top_builddir)/common/libfko_util.a
+fko_utests_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(fko_utests_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -175,8 +213,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libfko_la_SOURCES)
-DIST_SOURCES = $(libfko_la_SOURCES)
+SOURCES = $(libfko_la_SOURCES) $(fko_utests_SOURCES)
+DIST_SOURCES = $(libfko_la_SOURCES) $(am__fko_utests_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -340,11 +378,20 @@ libfko_source_files = \
     fko.h fko_limits.h fko_timestamp.c fko_hmac.c hmac.c hmac.h \
     fko_user.c fko_user.h md5.c md5.h rijndael.c rijndael.h sha1.c \
     sha1.h sha2.c sha2.h fko_context.h fko_state.h \
-    gpgme_funcs.c gpgme_funcs.h strlcpy.c strlcat.c fko_util.c fko_util.h
+    gpgme_funcs.c gpgme_funcs.h
 
 @WANT_C_UNIT_TESTS_TRUE@libfko_la_LIBADD = $(top_builddir)/common/cunit_common.o
+@WANT_C_UNIT_TESTS_TRUE@fko_utests_SOURCES = fko_utests.c $(libfko_source_files)
+@WANT_C_UNIT_TESTS_TRUE@fko_utests_CPPFLAGS = -I $(top_builddir)/lib -I $(top_builddir)/common $(GPGME_CFLAGS)
+@WANT_C_UNIT_TESTS_TRUE@fko_utests_LDADD = $(top_builddir)/lib/libfko.la $(top_builddir)/common/libfko_util.a
+@WANT_C_UNIT_TESTS_TRUE@fko_utests_LDFLAGS = -lcunit $(GPGME_LIBS)
+@APPLE_PLATFORM_FALSE@@WANT_C_UNIT_TESTS_FALSE@libfko_la_LDFLAGS = -version-info 2:4:0 $(GPGME_LIBS) \
+@APPLE_PLATFORM_FALSE@@WANT_C_UNIT_TESTS_FALSE@                      -export-symbols-regex '^fko_' \
+@APPLE_PLATFORM_FALSE@@WANT_C_UNIT_TESTS_FALSE@                      -Wl,--whole-archive,$(top_builddir)/common/libfko_util.a,--no-whole-archive
+
+@APPLE_PLATFORM_TRUE@@WANT_C_UNIT_TESTS_FALSE@libfko_la_LDFLAGS = -version-info 2:4:0 $(GPGME_LIBS) -export-symbols-regex '^fko_'
+@WANT_C_UNIT_TESTS_TRUE@libfko_la_LDFLAGS = -version-info 2:4:0 $(GPGME_LIBS) -export-symbols-regex '^fko_'
 libfko_la_SOURCES = $(libfko_source_files)
-libfko_la_LDFLAGS = -version-info 2:3:0 $(GPGME_LIBS) -export-symbols-regex '^fko_'
 AM_CPPFLAGS = $(GPGME_CFLAGS) -I $(top_srcdir)/common
 include_HEADERS = fko.h
 all: all-am
@@ -420,6 +467,19 @@ clean-libLTLIBRARIES:
 libfko.la: $(libfko_la_OBJECTS) $(libfko_la_DEPENDENCIES) $(EXTRA_libfko_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libfko_la_LINK) -rpath $(libdir) $(libfko_la_OBJECTS) $(libfko_la_LIBADD) $(LIBS)
 
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+
+fko_utests$(EXEEXT): $(fko_utests_OBJECTS) $(fko_utests_DEPENDENCIES) $(EXTRA_fko_utests_DEPENDENCIES) 
+	@rm -f fko_utests$(EXEEXT)
+	$(AM_V_CCLD)$(fko_utests_LINK) $(fko_utests_OBJECTS) $(fko_utests_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -443,15 +503,36 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_server_auth.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_timestamp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_user.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-base64.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-cipher_funcs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-digest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_client_timeout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_decode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_digest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_encode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_encryption.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_error.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_funcs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_hmac.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_message.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_nat_access.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_rand_value.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_server_auth.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_timestamp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_user.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-fko_utests.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-gpgme_funcs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-hmac.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-md5.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-rijndael.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-sha1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-sha2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gpgme_funcs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hmac.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rijndael.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strlcat.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strlcpy.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -476,6 +557,342 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+fko_utests-fko_utests.o: fko_utests.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_utests.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_utests.Tpo -c -o fko_utests-fko_utests.o `test -f 'fko_utests.c' || echo '$(srcdir)/'`fko_utests.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_utests.Tpo $(DEPDIR)/fko_utests-fko_utests.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_utests.c' object='fko_utests-fko_utests.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_utests.o `test -f 'fko_utests.c' || echo '$(srcdir)/'`fko_utests.c
+
+fko_utests-fko_utests.obj: fko_utests.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_utests.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_utests.Tpo -c -o fko_utests-fko_utests.obj `if test -f 'fko_utests.c'; then $(CYGPATH_W) 'fko_utests.c'; else $(CYGPATH_W) '$(srcdir)/fko_utests.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_utests.Tpo $(DEPDIR)/fko_utests-fko_utests.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_utests.c' object='fko_utests-fko_utests.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_utests.obj `if test -f 'fko_utests.c'; then $(CYGPATH_W) 'fko_utests.c'; else $(CYGPATH_W) '$(srcdir)/fko_utests.c'; fi`
+
+fko_utests-base64.o: base64.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-base64.o -MD -MP -MF $(DEPDIR)/fko_utests-base64.Tpo -c -o fko_utests-base64.o `test -f 'base64.c' || echo '$(srcdir)/'`base64.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-base64.Tpo $(DEPDIR)/fko_utests-base64.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='base64.c' object='fko_utests-base64.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-base64.o `test -f 'base64.c' || echo '$(srcdir)/'`base64.c
+
+fko_utests-base64.obj: base64.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-base64.obj -MD -MP -MF $(DEPDIR)/fko_utests-base64.Tpo -c -o fko_utests-base64.obj `if test -f 'base64.c'; then $(CYGPATH_W) 'base64.c'; else $(CYGPATH_W) '$(srcdir)/base64.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-base64.Tpo $(DEPDIR)/fko_utests-base64.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='base64.c' object='fko_utests-base64.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-base64.obj `if test -f 'base64.c'; then $(CYGPATH_W) 'base64.c'; else $(CYGPATH_W) '$(srcdir)/base64.c'; fi`
+
+fko_utests-cipher_funcs.o: cipher_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-cipher_funcs.o -MD -MP -MF $(DEPDIR)/fko_utests-cipher_funcs.Tpo -c -o fko_utests-cipher_funcs.o `test -f 'cipher_funcs.c' || echo '$(srcdir)/'`cipher_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-cipher_funcs.Tpo $(DEPDIR)/fko_utests-cipher_funcs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cipher_funcs.c' object='fko_utests-cipher_funcs.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-cipher_funcs.o `test -f 'cipher_funcs.c' || echo '$(srcdir)/'`cipher_funcs.c
+
+fko_utests-cipher_funcs.obj: cipher_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-cipher_funcs.obj -MD -MP -MF $(DEPDIR)/fko_utests-cipher_funcs.Tpo -c -o fko_utests-cipher_funcs.obj `if test -f 'cipher_funcs.c'; then $(CYGPATH_W) 'cipher_funcs.c'; else $(CYGPATH_W) '$(srcdir)/cipher_funcs.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-cipher_funcs.Tpo $(DEPDIR)/fko_utests-cipher_funcs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='cipher_funcs.c' object='fko_utests-cipher_funcs.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-cipher_funcs.obj `if test -f 'cipher_funcs.c'; then $(CYGPATH_W) 'cipher_funcs.c'; else $(CYGPATH_W) '$(srcdir)/cipher_funcs.c'; fi`
+
+fko_utests-digest.o: digest.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-digest.o -MD -MP -MF $(DEPDIR)/fko_utests-digest.Tpo -c -o fko_utests-digest.o `test -f 'digest.c' || echo '$(srcdir)/'`digest.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-digest.Tpo $(DEPDIR)/fko_utests-digest.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='digest.c' object='fko_utests-digest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-digest.o `test -f 'digest.c' || echo '$(srcdir)/'`digest.c
+
+fko_utests-digest.obj: digest.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-digest.obj -MD -MP -MF $(DEPDIR)/fko_utests-digest.Tpo -c -o fko_utests-digest.obj `if test -f 'digest.c'; then $(CYGPATH_W) 'digest.c'; else $(CYGPATH_W) '$(srcdir)/digest.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-digest.Tpo $(DEPDIR)/fko_utests-digest.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='digest.c' object='fko_utests-digest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-digest.obj `if test -f 'digest.c'; then $(CYGPATH_W) 'digest.c'; else $(CYGPATH_W) '$(srcdir)/digest.c'; fi`
+
+fko_utests-fko_client_timeout.o: fko_client_timeout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_client_timeout.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_client_timeout.Tpo -c -o fko_utests-fko_client_timeout.o `test -f 'fko_client_timeout.c' || echo '$(srcdir)/'`fko_client_timeout.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_client_timeout.Tpo $(DEPDIR)/fko_utests-fko_client_timeout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_client_timeout.c' object='fko_utests-fko_client_timeout.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_client_timeout.o `test -f 'fko_client_timeout.c' || echo '$(srcdir)/'`fko_client_timeout.c
+
+fko_utests-fko_client_timeout.obj: fko_client_timeout.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_client_timeout.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_client_timeout.Tpo -c -o fko_utests-fko_client_timeout.obj `if test -f 'fko_client_timeout.c'; then $(CYGPATH_W) 'fko_client_timeout.c'; else $(CYGPATH_W) '$(srcdir)/fko_client_timeout.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_client_timeout.Tpo $(DEPDIR)/fko_utests-fko_client_timeout.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_client_timeout.c' object='fko_utests-fko_client_timeout.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_client_timeout.obj `if test -f 'fko_client_timeout.c'; then $(CYGPATH_W) 'fko_client_timeout.c'; else $(CYGPATH_W) '$(srcdir)/fko_client_timeout.c'; fi`
+
+fko_utests-fko_digest.o: fko_digest.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_digest.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_digest.Tpo -c -o fko_utests-fko_digest.o `test -f 'fko_digest.c' || echo '$(srcdir)/'`fko_digest.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_digest.Tpo $(DEPDIR)/fko_utests-fko_digest.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_digest.c' object='fko_utests-fko_digest.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_digest.o `test -f 'fko_digest.c' || echo '$(srcdir)/'`fko_digest.c
+
+fko_utests-fko_digest.obj: fko_digest.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_digest.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_digest.Tpo -c -o fko_utests-fko_digest.obj `if test -f 'fko_digest.c'; then $(CYGPATH_W) 'fko_digest.c'; else $(CYGPATH_W) '$(srcdir)/fko_digest.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_digest.Tpo $(DEPDIR)/fko_utests-fko_digest.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_digest.c' object='fko_utests-fko_digest.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_digest.obj `if test -f 'fko_digest.c'; then $(CYGPATH_W) 'fko_digest.c'; else $(CYGPATH_W) '$(srcdir)/fko_digest.c'; fi`
+
+fko_utests-fko_encode.o: fko_encode.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_encode.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_encode.Tpo -c -o fko_utests-fko_encode.o `test -f 'fko_encode.c' || echo '$(srcdir)/'`fko_encode.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_encode.Tpo $(DEPDIR)/fko_utests-fko_encode.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_encode.c' object='fko_utests-fko_encode.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_encode.o `test -f 'fko_encode.c' || echo '$(srcdir)/'`fko_encode.c
+
+fko_utests-fko_encode.obj: fko_encode.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_encode.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_encode.Tpo -c -o fko_utests-fko_encode.obj `if test -f 'fko_encode.c'; then $(CYGPATH_W) 'fko_encode.c'; else $(CYGPATH_W) '$(srcdir)/fko_encode.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_encode.Tpo $(DEPDIR)/fko_utests-fko_encode.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_encode.c' object='fko_utests-fko_encode.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_encode.obj `if test -f 'fko_encode.c'; then $(CYGPATH_W) 'fko_encode.c'; else $(CYGPATH_W) '$(srcdir)/fko_encode.c'; fi`
+
+fko_utests-fko_decode.o: fko_decode.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_decode.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_decode.Tpo -c -o fko_utests-fko_decode.o `test -f 'fko_decode.c' || echo '$(srcdir)/'`fko_decode.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_decode.Tpo $(DEPDIR)/fko_utests-fko_decode.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_decode.c' object='fko_utests-fko_decode.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_decode.o `test -f 'fko_decode.c' || echo '$(srcdir)/'`fko_decode.c
+
+fko_utests-fko_decode.obj: fko_decode.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_decode.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_decode.Tpo -c -o fko_utests-fko_decode.obj `if test -f 'fko_decode.c'; then $(CYGPATH_W) 'fko_decode.c'; else $(CYGPATH_W) '$(srcdir)/fko_decode.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_decode.Tpo $(DEPDIR)/fko_utests-fko_decode.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_decode.c' object='fko_utests-fko_decode.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_decode.obj `if test -f 'fko_decode.c'; then $(CYGPATH_W) 'fko_decode.c'; else $(CYGPATH_W) '$(srcdir)/fko_decode.c'; fi`
+
+fko_utests-fko_encryption.o: fko_encryption.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_encryption.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_encryption.Tpo -c -o fko_utests-fko_encryption.o `test -f 'fko_encryption.c' || echo '$(srcdir)/'`fko_encryption.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_encryption.Tpo $(DEPDIR)/fko_utests-fko_encryption.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_encryption.c' object='fko_utests-fko_encryption.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_encryption.o `test -f 'fko_encryption.c' || echo '$(srcdir)/'`fko_encryption.c
+
+fko_utests-fko_encryption.obj: fko_encryption.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_encryption.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_encryption.Tpo -c -o fko_utests-fko_encryption.obj `if test -f 'fko_encryption.c'; then $(CYGPATH_W) 'fko_encryption.c'; else $(CYGPATH_W) '$(srcdir)/fko_encryption.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_encryption.Tpo $(DEPDIR)/fko_utests-fko_encryption.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_encryption.c' object='fko_utests-fko_encryption.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_encryption.obj `if test -f 'fko_encryption.c'; then $(CYGPATH_W) 'fko_encryption.c'; else $(CYGPATH_W) '$(srcdir)/fko_encryption.c'; fi`
+
+fko_utests-fko_error.o: fko_error.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_error.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_error.Tpo -c -o fko_utests-fko_error.o `test -f 'fko_error.c' || echo '$(srcdir)/'`fko_error.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_error.Tpo $(DEPDIR)/fko_utests-fko_error.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_error.c' object='fko_utests-fko_error.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_error.o `test -f 'fko_error.c' || echo '$(srcdir)/'`fko_error.c
+
+fko_utests-fko_error.obj: fko_error.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_error.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_error.Tpo -c -o fko_utests-fko_error.obj `if test -f 'fko_error.c'; then $(CYGPATH_W) 'fko_error.c'; else $(CYGPATH_W) '$(srcdir)/fko_error.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_error.Tpo $(DEPDIR)/fko_utests-fko_error.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_error.c' object='fko_utests-fko_error.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_error.obj `if test -f 'fko_error.c'; then $(CYGPATH_W) 'fko_error.c'; else $(CYGPATH_W) '$(srcdir)/fko_error.c'; fi`
+
+fko_utests-fko_funcs.o: fko_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_funcs.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_funcs.Tpo -c -o fko_utests-fko_funcs.o `test -f 'fko_funcs.c' || echo '$(srcdir)/'`fko_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_funcs.Tpo $(DEPDIR)/fko_utests-fko_funcs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_funcs.c' object='fko_utests-fko_funcs.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_funcs.o `test -f 'fko_funcs.c' || echo '$(srcdir)/'`fko_funcs.c
+
+fko_utests-fko_funcs.obj: fko_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_funcs.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_funcs.Tpo -c -o fko_utests-fko_funcs.obj `if test -f 'fko_funcs.c'; then $(CYGPATH_W) 'fko_funcs.c'; else $(CYGPATH_W) '$(srcdir)/fko_funcs.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_funcs.Tpo $(DEPDIR)/fko_utests-fko_funcs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_funcs.c' object='fko_utests-fko_funcs.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_funcs.obj `if test -f 'fko_funcs.c'; then $(CYGPATH_W) 'fko_funcs.c'; else $(CYGPATH_W) '$(srcdir)/fko_funcs.c'; fi`
+
+fko_utests-fko_message.o: fko_message.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_message.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_message.Tpo -c -o fko_utests-fko_message.o `test -f 'fko_message.c' || echo '$(srcdir)/'`fko_message.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_message.Tpo $(DEPDIR)/fko_utests-fko_message.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_message.c' object='fko_utests-fko_message.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_message.o `test -f 'fko_message.c' || echo '$(srcdir)/'`fko_message.c
+
+fko_utests-fko_message.obj: fko_message.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_message.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_message.Tpo -c -o fko_utests-fko_message.obj `if test -f 'fko_message.c'; then $(CYGPATH_W) 'fko_message.c'; else $(CYGPATH_W) '$(srcdir)/fko_message.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_message.Tpo $(DEPDIR)/fko_utests-fko_message.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_message.c' object='fko_utests-fko_message.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_message.obj `if test -f 'fko_message.c'; then $(CYGPATH_W) 'fko_message.c'; else $(CYGPATH_W) '$(srcdir)/fko_message.c'; fi`
+
+fko_utests-fko_nat_access.o: fko_nat_access.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_nat_access.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_nat_access.Tpo -c -o fko_utests-fko_nat_access.o `test -f 'fko_nat_access.c' || echo '$(srcdir)/'`fko_nat_access.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_nat_access.Tpo $(DEPDIR)/fko_utests-fko_nat_access.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_nat_access.c' object='fko_utests-fko_nat_access.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_nat_access.o `test -f 'fko_nat_access.c' || echo '$(srcdir)/'`fko_nat_access.c
+
+fko_utests-fko_nat_access.obj: fko_nat_access.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_nat_access.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_nat_access.Tpo -c -o fko_utests-fko_nat_access.obj `if test -f 'fko_nat_access.c'; then $(CYGPATH_W) 'fko_nat_access.c'; else $(CYGPATH_W) '$(srcdir)/fko_nat_access.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_nat_access.Tpo $(DEPDIR)/fko_utests-fko_nat_access.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_nat_access.c' object='fko_utests-fko_nat_access.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_nat_access.obj `if test -f 'fko_nat_access.c'; then $(CYGPATH_W) 'fko_nat_access.c'; else $(CYGPATH_W) '$(srcdir)/fko_nat_access.c'; fi`
+
+fko_utests-fko_rand_value.o: fko_rand_value.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_rand_value.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_rand_value.Tpo -c -o fko_utests-fko_rand_value.o `test -f 'fko_rand_value.c' || echo '$(srcdir)/'`fko_rand_value.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_rand_value.Tpo $(DEPDIR)/fko_utests-fko_rand_value.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_rand_value.c' object='fko_utests-fko_rand_value.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_rand_value.o `test -f 'fko_rand_value.c' || echo '$(srcdir)/'`fko_rand_value.c
+
+fko_utests-fko_rand_value.obj: fko_rand_value.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_rand_value.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_rand_value.Tpo -c -o fko_utests-fko_rand_value.obj `if test -f 'fko_rand_value.c'; then $(CYGPATH_W) 'fko_rand_value.c'; else $(CYGPATH_W) '$(srcdir)/fko_rand_value.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_rand_value.Tpo $(DEPDIR)/fko_utests-fko_rand_value.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_rand_value.c' object='fko_utests-fko_rand_value.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_rand_value.obj `if test -f 'fko_rand_value.c'; then $(CYGPATH_W) 'fko_rand_value.c'; else $(CYGPATH_W) '$(srcdir)/fko_rand_value.c'; fi`
+
+fko_utests-fko_server_auth.o: fko_server_auth.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_server_auth.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_server_auth.Tpo -c -o fko_utests-fko_server_auth.o `test -f 'fko_server_auth.c' || echo '$(srcdir)/'`fko_server_auth.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_server_auth.Tpo $(DEPDIR)/fko_utests-fko_server_auth.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_server_auth.c' object='fko_utests-fko_server_auth.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_server_auth.o `test -f 'fko_server_auth.c' || echo '$(srcdir)/'`fko_server_auth.c
+
+fko_utests-fko_server_auth.obj: fko_server_auth.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_server_auth.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_server_auth.Tpo -c -o fko_utests-fko_server_auth.obj `if test -f 'fko_server_auth.c'; then $(CYGPATH_W) 'fko_server_auth.c'; else $(CYGPATH_W) '$(srcdir)/fko_server_auth.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_server_auth.Tpo $(DEPDIR)/fko_utests-fko_server_auth.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_server_auth.c' object='fko_utests-fko_server_auth.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_server_auth.obj `if test -f 'fko_server_auth.c'; then $(CYGPATH_W) 'fko_server_auth.c'; else $(CYGPATH_W) '$(srcdir)/fko_server_auth.c'; fi`
+
+fko_utests-fko_timestamp.o: fko_timestamp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_timestamp.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_timestamp.Tpo -c -o fko_utests-fko_timestamp.o `test -f 'fko_timestamp.c' || echo '$(srcdir)/'`fko_timestamp.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_timestamp.Tpo $(DEPDIR)/fko_utests-fko_timestamp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_timestamp.c' object='fko_utests-fko_timestamp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_timestamp.o `test -f 'fko_timestamp.c' || echo '$(srcdir)/'`fko_timestamp.c
+
+fko_utests-fko_timestamp.obj: fko_timestamp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_timestamp.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_timestamp.Tpo -c -o fko_utests-fko_timestamp.obj `if test -f 'fko_timestamp.c'; then $(CYGPATH_W) 'fko_timestamp.c'; else $(CYGPATH_W) '$(srcdir)/fko_timestamp.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_timestamp.Tpo $(DEPDIR)/fko_utests-fko_timestamp.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_timestamp.c' object='fko_utests-fko_timestamp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_timestamp.obj `if test -f 'fko_timestamp.c'; then $(CYGPATH_W) 'fko_timestamp.c'; else $(CYGPATH_W) '$(srcdir)/fko_timestamp.c'; fi`
+
+fko_utests-fko_hmac.o: fko_hmac.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_hmac.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_hmac.Tpo -c -o fko_utests-fko_hmac.o `test -f 'fko_hmac.c' || echo '$(srcdir)/'`fko_hmac.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_hmac.Tpo $(DEPDIR)/fko_utests-fko_hmac.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_hmac.c' object='fko_utests-fko_hmac.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_hmac.o `test -f 'fko_hmac.c' || echo '$(srcdir)/'`fko_hmac.c
+
+fko_utests-fko_hmac.obj: fko_hmac.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_hmac.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_hmac.Tpo -c -o fko_utests-fko_hmac.obj `if test -f 'fko_hmac.c'; then $(CYGPATH_W) 'fko_hmac.c'; else $(CYGPATH_W) '$(srcdir)/fko_hmac.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_hmac.Tpo $(DEPDIR)/fko_utests-fko_hmac.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_hmac.c' object='fko_utests-fko_hmac.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_hmac.obj `if test -f 'fko_hmac.c'; then $(CYGPATH_W) 'fko_hmac.c'; else $(CYGPATH_W) '$(srcdir)/fko_hmac.c'; fi`
+
+fko_utests-hmac.o: hmac.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-hmac.o -MD -MP -MF $(DEPDIR)/fko_utests-hmac.Tpo -c -o fko_utests-hmac.o `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-hmac.Tpo $(DEPDIR)/fko_utests-hmac.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hmac.c' object='fko_utests-hmac.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-hmac.o `test -f 'hmac.c' || echo '$(srcdir)/'`hmac.c
+
+fko_utests-hmac.obj: hmac.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-hmac.obj -MD -MP -MF $(DEPDIR)/fko_utests-hmac.Tpo -c -o fko_utests-hmac.obj `if test -f 'hmac.c'; then $(CYGPATH_W) 'hmac.c'; else $(CYGPATH_W) '$(srcdir)/hmac.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-hmac.Tpo $(DEPDIR)/fko_utests-hmac.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='hmac.c' object='fko_utests-hmac.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-hmac.obj `if test -f 'hmac.c'; then $(CYGPATH_W) 'hmac.c'; else $(CYGPATH_W) '$(srcdir)/hmac.c'; fi`
+
+fko_utests-fko_user.o: fko_user.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_user.o -MD -MP -MF $(DEPDIR)/fko_utests-fko_user.Tpo -c -o fko_utests-fko_user.o `test -f 'fko_user.c' || echo '$(srcdir)/'`fko_user.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_user.Tpo $(DEPDIR)/fko_utests-fko_user.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_user.c' object='fko_utests-fko_user.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_user.o `test -f 'fko_user.c' || echo '$(srcdir)/'`fko_user.c
+
+fko_utests-fko_user.obj: fko_user.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-fko_user.obj -MD -MP -MF $(DEPDIR)/fko_utests-fko_user.Tpo -c -o fko_utests-fko_user.obj `if test -f 'fko_user.c'; then $(CYGPATH_W) 'fko_user.c'; else $(CYGPATH_W) '$(srcdir)/fko_user.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-fko_user.Tpo $(DEPDIR)/fko_utests-fko_user.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fko_user.c' object='fko_utests-fko_user.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-fko_user.obj `if test -f 'fko_user.c'; then $(CYGPATH_W) 'fko_user.c'; else $(CYGPATH_W) '$(srcdir)/fko_user.c'; fi`
+
+fko_utests-md5.o: md5.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-md5.o -MD -MP -MF $(DEPDIR)/fko_utests-md5.Tpo -c -o fko_utests-md5.o `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-md5.Tpo $(DEPDIR)/fko_utests-md5.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='md5.c' object='fko_utests-md5.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-md5.o `test -f 'md5.c' || echo '$(srcdir)/'`md5.c
+
+fko_utests-md5.obj: md5.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-md5.obj -MD -MP -MF $(DEPDIR)/fko_utests-md5.Tpo -c -o fko_utests-md5.obj `if test -f 'md5.c'; then $(CYGPATH_W) 'md5.c'; else $(CYGPATH_W) '$(srcdir)/md5.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-md5.Tpo $(DEPDIR)/fko_utests-md5.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='md5.c' object='fko_utests-md5.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-md5.obj `if test -f 'md5.c'; then $(CYGPATH_W) 'md5.c'; else $(CYGPATH_W) '$(srcdir)/md5.c'; fi`
+
+fko_utests-rijndael.o: rijndael.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-rijndael.o -MD -MP -MF $(DEPDIR)/fko_utests-rijndael.Tpo -c -o fko_utests-rijndael.o `test -f 'rijndael.c' || echo '$(srcdir)/'`rijndael.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-rijndael.Tpo $(DEPDIR)/fko_utests-rijndael.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='rijndael.c' object='fko_utests-rijndael.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-rijndael.o `test -f 'rijndael.c' || echo '$(srcdir)/'`rijndael.c
+
+fko_utests-rijndael.obj: rijndael.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-rijndael.obj -MD -MP -MF $(DEPDIR)/fko_utests-rijndael.Tpo -c -o fko_utests-rijndael.obj `if test -f 'rijndael.c'; then $(CYGPATH_W) 'rijndael.c'; else $(CYGPATH_W) '$(srcdir)/rijndael.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-rijndael.Tpo $(DEPDIR)/fko_utests-rijndael.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='rijndael.c' object='fko_utests-rijndael.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-rijndael.obj `if test -f 'rijndael.c'; then $(CYGPATH_W) 'rijndael.c'; else $(CYGPATH_W) '$(srcdir)/rijndael.c'; fi`
+
+fko_utests-sha1.o: sha1.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-sha1.o -MD -MP -MF $(DEPDIR)/fko_utests-sha1.Tpo -c -o fko_utests-sha1.o `test -f 'sha1.c' || echo '$(srcdir)/'`sha1.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-sha1.Tpo $(DEPDIR)/fko_utests-sha1.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sha1.c' object='fko_utests-sha1.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-sha1.o `test -f 'sha1.c' || echo '$(srcdir)/'`sha1.c
+
+fko_utests-sha1.obj: sha1.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-sha1.obj -MD -MP -MF $(DEPDIR)/fko_utests-sha1.Tpo -c -o fko_utests-sha1.obj `if test -f 'sha1.c'; then $(CYGPATH_W) 'sha1.c'; else $(CYGPATH_W) '$(srcdir)/sha1.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-sha1.Tpo $(DEPDIR)/fko_utests-sha1.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sha1.c' object='fko_utests-sha1.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-sha1.obj `if test -f 'sha1.c'; then $(CYGPATH_W) 'sha1.c'; else $(CYGPATH_W) '$(srcdir)/sha1.c'; fi`
+
+fko_utests-sha2.o: sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-sha2.o -MD -MP -MF $(DEPDIR)/fko_utests-sha2.Tpo -c -o fko_utests-sha2.o `test -f 'sha2.c' || echo '$(srcdir)/'`sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-sha2.Tpo $(DEPDIR)/fko_utests-sha2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sha2.c' object='fko_utests-sha2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-sha2.o `test -f 'sha2.c' || echo '$(srcdir)/'`sha2.c
+
+fko_utests-sha2.obj: sha2.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-sha2.obj -MD -MP -MF $(DEPDIR)/fko_utests-sha2.Tpo -c -o fko_utests-sha2.obj `if test -f 'sha2.c'; then $(CYGPATH_W) 'sha2.c'; else $(CYGPATH_W) '$(srcdir)/sha2.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-sha2.Tpo $(DEPDIR)/fko_utests-sha2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sha2.c' object='fko_utests-sha2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-sha2.obj `if test -f 'sha2.c'; then $(CYGPATH_W) 'sha2.c'; else $(CYGPATH_W) '$(srcdir)/sha2.c'; fi`
+
+fko_utests-gpgme_funcs.o: gpgme_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-gpgme_funcs.o -MD -MP -MF $(DEPDIR)/fko_utests-gpgme_funcs.Tpo -c -o fko_utests-gpgme_funcs.o `test -f 'gpgme_funcs.c' || echo '$(srcdir)/'`gpgme_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-gpgme_funcs.Tpo $(DEPDIR)/fko_utests-gpgme_funcs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gpgme_funcs.c' object='fko_utests-gpgme_funcs.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-gpgme_funcs.o `test -f 'gpgme_funcs.c' || echo '$(srcdir)/'`gpgme_funcs.c
+
+fko_utests-gpgme_funcs.obj: gpgme_funcs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-gpgme_funcs.obj -MD -MP -MF $(DEPDIR)/fko_utests-gpgme_funcs.Tpo -c -o fko_utests-gpgme_funcs.obj `if test -f 'gpgme_funcs.c'; then $(CYGPATH_W) 'gpgme_funcs.c'; else $(CYGPATH_W) '$(srcdir)/gpgme_funcs.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-gpgme_funcs.Tpo $(DEPDIR)/fko_utests-gpgme_funcs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gpgme_funcs.c' object='fko_utests-gpgme_funcs.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-gpgme_funcs.obj `if test -f 'gpgme_funcs.c'; then $(CYGPATH_W) 'gpgme_funcs.c'; else $(CYGPATH_W) '$(srcdir)/gpgme_funcs.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -588,7 +1005,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -625,8 +1042,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -697,21 +1114,24 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	clean-libLTLIBRARIES clean-libtool cscopelist-am ctags \
-	ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am \
-	install-includeHEADERS install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	clean-libLTLIBRARIES clean-libtool clean-local \
+	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-includeHEADERS install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am uninstall-includeHEADERS \
 	uninstall-libLTLIBRARIES
 
+
+clean-local:
+	rm -f fko_utests *.gcno *.gcda
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

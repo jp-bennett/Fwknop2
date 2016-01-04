@@ -108,7 +108,7 @@
     <string name="config_InternalIP">Internal IP:</string>
     <string name="config_internal_port">Internal Port:</string>
     <string name="config_cmd">Server Command:</string>
-    <string name="config_ssh_app">Run EXTERNAL App:</string>
+    <string name="config_ssh_app">Run External App:</string>
     <string name="config_ssh_uri">User@address:port</string>
     <string name="config_ovpn_uri">ovpn config name</string>
     <string name="config_http_url">Http or https address to query to find our IP:</string>

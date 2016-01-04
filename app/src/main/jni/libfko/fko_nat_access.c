@@ -6,7 +6,7 @@
  * Purpose: Set/Get the spa nat access request data.
  *
  *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
- *  Copyright (C) 2009-2014 fwknop developers and contributors. For a full
+ *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
  *  License (GNU General Public License):
@@ -93,7 +93,8 @@ fko_set_spa_nat_access(fko_ctx_t ctx, const char * const msg)
             ctx->message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
     }
     else
-        if(ctx->message_type != FKO_LOCAL_NAT_ACCESS_MSG)
+        if(ctx->message_type != FKO_LOCAL_NAT_ACCESS_MSG
+                && ctx->message_type != FKO_CLIENT_TIMEOUT_LOCAL_NAT_ACCESS_MSG)
             ctx->message_type = FKO_NAT_ACCESS_MSG;
 
     return(FKO_SUCCESS);

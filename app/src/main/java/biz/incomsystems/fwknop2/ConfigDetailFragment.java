@@ -173,26 +173,31 @@ public class ConfigDetailFragment extends Fragment {
             if (configtype.equalsIgnoreCase("Open Port")) {//messagetype = configtype
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
-            } else {
-                config.PORTS = "";
-                config.SERVER_TIMEOUT = "";
+                config.SERVER_CMD = "";
+                config.NAT_PORT = "";
+                config.NAT_IP = "";
+
             }
             if (configtype.equalsIgnoreCase("Nat Access")) {
                 config.NAT_IP = txt_nat_ip.getText().toString();
                 config.NAT_PORT = txt_nat_port.getText().toString();
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                config.SERVER_CMD = "";
             }
             if (configtype.equalsIgnoreCase("Local Nat Access")) {
                 config.NAT_IP = "127.0.0.1";
                 config.NAT_PORT = txt_nat_port.getText().toString();
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                config.SERVER_CMD = "";
             }
             if (configtype.equalsIgnoreCase("Server Command")) {
                 config.SERVER_CMD = txt_server_cmd.getText().toString();
-            } else {
-                config.SERVER_CMD = "";
+                config.PORTS = "";
+                config.SERVER_TIMEOUT = "";
+                config.NAT_PORT = "";
+                config.NAT_IP = "";
             }
             if (spn_allowip.getSelectedItemPosition() == 0) {
                 config.ACCESS_IP = "Resolve IP";
