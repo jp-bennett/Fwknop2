@@ -402,6 +402,32 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                         }
                     });
 
+                } else if (config.SSH_CMD.contains("ovpn:")) {
+                    final String EXTRA_NAME = "de.blinkt.openvpn.shortcutProfileName";
+                    Log.i("fwknop2", EXTRA_NAME);
+                    Intent i = new Intent(Intent.ACTION_MAIN);
+                    i.setClassName("de.blinkt.openvpn", "de.blinkt.openvpn.LaunchVPN");
+                    i.putExtra(EXTRA_NAME, config.SSH_CMD.substring(5));
+
+
+                    try {
+                        mActivity.startActivity(i);
+                    } catch (Exception ex) {
+                        AlertDialog alertDialog = new AlertDialog.Builder(mActivity).create();
+                        alertDialog.setTitle("Error");
+                        if (ex.toString().contains("ActivityNotFoundException")) {
+                            alertDialog.setMessage("No OVPN app found.  OpenVPN for Android is recommended.");
+                        } else {
+                            alertDialog.setMessage(ex.toString());
+                        }
+                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        alertDialog.show();
+                    }
                 } else if (!config.SSH_CMD.equalsIgnoreCase("")) {
                     String ssh_uri = "ssh://" + config.SSH_CMD + "/#" + config.NICK_NAME;
                     Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(ssh_uri));

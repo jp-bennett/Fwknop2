@@ -78,8 +78,10 @@ public class ConfigDetailFragment extends Fragment {
     LinearLayout lay_AccessPort;
     LinearLayout lay_fwTimeout;
     LinearLayout lay_sshcmd;
+    LinearLayout lay_ovpncmd;
     LinearLayout lay_serverPort;
     TextView txt_ssh_cmd;
+    TextView txt_ovpn_cmd;
     String configtype = "Open Port";
     Spinner spn_protocol;
     Spinner spn_DigestType;
@@ -211,6 +213,9 @@ public class ConfigDetailFragment extends Fragment {
             config.SSH_CMD = "";
             if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("SSH Uri")) {
                 config.SSH_CMD = txt_ssh_cmd.getText().toString();
+                config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
+            } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("OpenVPN for Android")) {
+                config.SSH_CMD = "ovpn:" + txt_ovpn_cmd.getText().toString();
                 config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
             } else if (spn_ssh.getSelectedItem().toString().equalsIgnoreCase("Juicessh")) {
                 config.SSH_CMD = "juice:" + juice_adapt.getConnectionName(spn_juice.getSelectedItemPosition());
@@ -356,6 +361,8 @@ public class ConfigDetailFragment extends Fragment {
         lay_fwTimeout = (LinearLayout) rootView.findViewById(R.id.fwTimeoutl);
         lay_sshcmd = (LinearLayout) rootView.findViewById(R.id.sshcmdsl);
         txt_ssh_cmd = (TextView) rootView.findViewById(R.id.sshcmd);
+        lay_ovpncmd = (LinearLayout) rootView.findViewById(R.id.ovpncmdsl);
+        txt_ovpn_cmd = (TextView) rootView.findViewById(R.id.ovpncmd);
         txt_KEY = (TextView) rootView.findViewById(R.id.passwd);
         txt_HMAC = (TextView) rootView.findViewById(R.id.hmac);
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
@@ -427,7 +434,7 @@ public class ConfigDetailFragment extends Fragment {
             juice_adapt = new ConnectionSpinnerAdapter(getActivity());
             spn_juice.setAdapter(juice_adapt);
         } else {
-            list.remove(2);
+            list.remove(3);
             adapter_ssh.notifyDataSetChanged();
         }
 
@@ -439,16 +446,19 @@ public class ConfigDetailFragment extends Fragment {
                 // parent.getItemAtPosition(pos)
                 if (pos == 0) {
                     lay_sshcmd.setVisibility(View.GONE);
+                    lay_ovpncmd.setVisibility(View.GONE);
                     spn_juice.setVisibility(View.GONE);
                     // blank the other options here
                 } else if (pos == 1) {
                     // show the txt for the uri
                     lay_sshcmd.setVisibility(View.VISIBLE);
+                    lay_ovpncmd.setVisibility(View.GONE);
                     spn_juice.setVisibility(View.GONE);
-                } else if (pos == 2) {
-                    if(getActivity().checkCallingOrSelfPermission("com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS") == PackageManager.PERMISSION_GRANTED) {
+                } else if (pos == 3) {
+                    if (getActivity().checkCallingOrSelfPermission("com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS") == PackageManager.PERMISSION_GRANTED) {
 
                         lay_sshcmd.setVisibility(View.GONE);
+                        lay_ovpncmd.setVisibility(View.GONE);
 
                         if (connectionListLoader == null) {
                             connectionListLoader = new ConnectionListLoader(getActivity(), juice_adapt);
@@ -477,11 +487,17 @@ public class ConfigDetailFragment extends Fragment {
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
                     }
+                } else if (pos == 2) {
+                    // show the txt for the uri
+                    lay_sshcmd.setVisibility(View.GONE);
+                    lay_ovpncmd.setVisibility(View.VISIBLE);
+                    spn_juice.setVisibility(View.GONE);
                 }
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
 
         spn_configtype = (Spinner) rootView.findViewById(R.id.configtype);
@@ -592,7 +608,10 @@ public class ConfigDetailFragment extends Fragment {
             if (config.SSH_CMD.equalsIgnoreCase("")) {
                 spn_ssh.setSelection(0);
             } else if (config.SSH_CMD.contains("juice:") && juiceInstalled) {
+                spn_ssh.setSelection(3);
+            } else if (config.SSH_CMD.contains("ovpn:")) {
                 spn_ssh.setSelection(2);
+                txt_ovpn_cmd.setText(config.SSH_CMD.substring(5));
             } else {
                 spn_ssh.setSelection(1);
                 txt_ssh_cmd.setText(config.SSH_CMD);

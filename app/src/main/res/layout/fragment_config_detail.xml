@@ -438,6 +438,29 @@
             android:textSize="20sp"
             />
     </LinearLayout>
+    <LinearLayout android:id="@+id/ovpncmdsl"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:id="@+id/ovpncmdStr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/config_ovpn_uri"
+            android:textSize="20sp"
+            />
+        <EditText
+            android:id="@+id/ovpncmd"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:singleLine="true"
+            android:inputType="text"
+            android:textSize="20sp"
+            />
+    </LinearLayout>
     <LinearLayout android:id="@+id/juice_spnl"
         android:orientation="horizontal"
         android:layout_width="fill_parent"

@@ -57,6 +57,7 @@
     <string-array name="ssh_options">
         <item>None</item>
         <item>SSH Uri</item>
+        <item>OpenVPN for Android</item>
         <item>Juicessh</item>
     </string-array>
     <string name="help_page">
@@ -73,8 +74,8 @@
  and use a qr code generated on the router to auto fill the encryption and HMAC keys.
   </p>
 <p>If Juicessh is installed, you can autostart a saved Juicessh connection by selecting Juicessh from the
- "Run SSH App" menu, and after a brief delay, choosing the desired connection. If you want to use a different
-  SSH app, select "SSH Uri", and then type in your desired Username to connect as. This will use the system\'s
+ "Run External App" menu, and after a brief delay, choosing the desired connection. If you want to use a different
+  app, select "SSH Uri", and then type in your desired Username to connect as. This will use the system\'s
   default ssh client to try to connect to the port you are opening.
  </p>
  <p>
@@ -107,8 +108,9 @@
     <string name="config_InternalIP">Internal IP:</string>
     <string name="config_internal_port">Internal Port:</string>
     <string name="config_cmd">Server Command:</string>
-    <string name="config_ssh_app">Run SSH App:</string>
+    <string name="config_ssh_app">Run EXTERNAL App:</string>
     <string name="config_ssh_uri">User@address:port</string>
+    <string name="config_ovpn_uri">ovpn config name</string>
     <string name="config_http_url">Http or https address to query to find our IP:</string>
     <string name="config_dns">Try to retrieve our ip using dns first.</string>
     <string name="config_button_save">Save settings</string>
