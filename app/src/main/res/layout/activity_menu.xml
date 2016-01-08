@@ -10,6 +10,13 @@
     style="?android:attr/textAppearanceLarge"
     >
     <CheckBox
+        android:id="@+id/chkb_nfc"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/config_nfc"
+        />
+    <CheckBox
         android:id="@+id/chkb_dns"
         android:textSize="20sp"
         android:layout_width="wrap_content"

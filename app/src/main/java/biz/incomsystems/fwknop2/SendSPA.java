@@ -461,6 +461,9 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                         });
                 alertDialog.show();
             }
+            if (config.SSH_CMD.equalsIgnoreCase("") && (ourAct.getLocalClassName().contains("NfcKnockActivity"))) {
+                ourAct.finish();
+            }
         }
     }
 }

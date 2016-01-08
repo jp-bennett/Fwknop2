@@ -133,4 +133,8 @@
     <string name="status_failed_to_write">Unable to write data to NFC tag. If the problem persists, try a different tag</string>
     <string name="status_tag_not_writable">NFC tag is not writable. Please use a different tag.</string>
     <string name="done_label">Done</string>
+    <string name="config_nfc">Enable sending knock from NFC</string>
+    <string name="nfcDisabled">NFC-Fwknop2 disabled</string>
+    <string name="nfcError">NFC Tag parsing error</string>
+    <string name="SendingSPATo">"Sending SPA to "</string>
 </resources>

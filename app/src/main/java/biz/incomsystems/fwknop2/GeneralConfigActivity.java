@@ -12,8 +12,10 @@ import org.apache.commons.validator.routines.DomainValidator;
 
 public class GeneralConfigActivity extends FragmentActivity {
     CheckBox chkDns;
+    CheckBox chkNfc;
     TextView txt_url;
     boolean dnsEnabled;
+    boolean nfcEnabled;
     String ipUrl;
     SharedPreferences prefs;
 
@@ -24,16 +26,20 @@ public class GeneralConfigActivity extends FragmentActivity {
 
         prefs = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         dnsEnabled = prefs.getBoolean("EnableDns", true);
+        nfcEnabled = prefs.getBoolean("EnableNfc", false);
         ipUrl = prefs.getString("ipSource", "http://whatismyip.akamai.com");
         chkDns = (CheckBox) findViewById(R.id.chkb_dns);
+        chkNfc = (CheckBox) findViewById(R.id.chkb_nfc);
         txt_url = (TextView) findViewById(R.id.myip_url);
         chkDns.setChecked(dnsEnabled);
+        chkNfc.setChecked(nfcEnabled);
         txt_url.setText(ipUrl);
     }
 
     public void defaultSettings(View view) {
         txt_url.setText("http://whatismyip.akamai.com");
         chkDns.setChecked(true);
+        chkNfc.setChecked(false);
     }
 
     public void saveSettings(View view) {
@@ -43,6 +49,7 @@ public class GeneralConfigActivity extends FragmentActivity {
                 if (DomainValidator.getInstance().isValid(tmp[1])) {
                     SharedPreferences.Editor ed = prefs.edit();
                     ed.putBoolean("EnableDns", chkDns.isChecked());
+                    ed.putBoolean("EnableNfc", chkNfc.isChecked());
                     ed.putString("ipSource", txt_url.getText().toString());
                     ed.apply();
                     finish();
