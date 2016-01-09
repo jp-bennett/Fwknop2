@@ -18,8 +18,8 @@ model {
             applicationId = "org.cipherdyne.fwknop2"
             minSdkVersion.apiLevel = 15
             targetSdkVersion.apiLevel = 23
-            versionCode = 21
-            versionName = "1.2-RC.1"
+            versionCode = 22
+            versionName = "1.2"
         }
     }
     android.buildTypes {

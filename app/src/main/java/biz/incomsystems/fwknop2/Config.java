@@ -43,7 +43,15 @@ public class Config {
                 this.SERVER_PORT = String.valueOf(62201);
             }
         }
-
+        if (this.MESSAGE_TYPE.contains("Nat")) {
+            try {
+                if (Integer.parseInt(this.NAT_PORT) < 1 || Integer.parseInt(this.NAT_PORT) > 65535) {
+                    return (R.string.NotValidNatPort);
+                }
+            } catch (NumberFormatException ex) {
+                return (R.string.NotValidNatPort);
+            }
+        }
         if (this.NICK_NAME.equalsIgnoreCase("")) { // Need to create a new Nick
             return(R.string.unique_nick); // choosing a used nick will just overwrite it. So really
         } else if ((this.LEGACY && this.HMAC_BASE64) || (this.LEGACY && !this.HMAC.equalsIgnoreCase(""))) {
@@ -59,12 +67,13 @@ public class Config {
         } else if (!(this.PORTS.matches("tcp/\\d.*") || this.PORTS.matches("udp/\\d.*") || this.MESSAGE_TYPE.equalsIgnoreCase("Server Command"))) {
             return(R.string.port_format);
         } else if (!(this.ACCESS_IP.equalsIgnoreCase("Allow IP") || this.ACCESS_IP.equalsIgnoreCase("Resolve IP") || this.ACCESS_IP.equalsIgnoreCase("Prompt IP") || (ipValidate.isValid(this.ACCESS_IP)))){ //Have to have a valid ip to allow, if using allow ip
-            Log.e("fwknop2", this.ACCESS_IP);
             return(R.string.valid_ip);
         }  else if (!ipValidate.isValid(this.SERVER_IP) && !DomainValidator.getInstance().isValid(this.SERVER_IP)) { // check server entry. Must be a valid url or ip.
             return(R.string.valid_server);
         } else if (this.juice_uuid == null) { //This one might have to go in the main function
-            return(R.string.juice_first);
+            return (R.string.juice_first);
+        } else if (this.MESSAGE_TYPE.equalsIgnoreCase("NAT Access") && !ipValidate.isValid(this.NAT_IP)){
+            return (R.string.NotValidNatIP);
         } else {
             return 0;
         }

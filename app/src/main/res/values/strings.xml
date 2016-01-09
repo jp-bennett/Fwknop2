@@ -73,14 +73,35 @@
  If you are using luci-app-fwknop on an Openwrt router, you can select the "Capture qr" option from the menu,
  and use a qr code generated on the router to auto fill the encryption and HMAC keys.
   </p>
-<p>If Juicessh is installed, you can autostart a saved Juicessh connection by selecting Juicessh from the
+ <p>
+ If Juicessh is installed, you can autostart a saved Juicessh connection by selecting Juicessh from the
  "Run External App" menu, and after a brief delay, choosing the desired connection. If you want to use a different
-  app, select "SSH Uri", and then type in your desired Username to connect as. This will use the system\'s
-  default ssh client to try to connect to the port you are opening.
+ app, select "SSH Uri", and then type in your desired Username to connect as. This will use the system\'s
+ default ssh client to try to connect to the port you are opening.
+ </p>
+ <p>
+ Another option in the External App menu is "OpenVPN for Android".  Selecting this option and
+ filling in a profile name will automatically launch that profile after sending a successful knock.
+ </p>
+ <p>
+ The "Allow IP" option specifies what IP to send as the source address.  The "prompt" option will ask
+ for the IP to allow when a knock is sent.  This prompt has an option to scan a qr code containing an
+ IP address.  This service is provided at <a href="https://incomsystems.biz/fwknop-gui/qr.php">https://incomsystems.biz/fwknop-gui/qr.php</a>.
  </p>
  <p>
   Once the data is filled in, select "Save Config" from the menu. Then, to send a SPA knock, select the
-   Saved config you want to use, and tap the "Send Knock" button at the bottom of the list.
+  Saved config you want to use, and tap the "Send Knock" button at the bottom of the list.
+ </p>
+ <p>
+ From the list of saved configs, a long tap launches a context menu.  This contains the options to edit or delete a config.
+ If the device contains NFC capabilities, the option to write a config to an NFC tag will also be present.
+ Note that only the nickname is written to the NFC tag, which avoids exposing any credentials in the NFC tag.
+ There is an option in the general configuration menu to enable sending knocks via NFC tags.  This option defaults
+ to false, and any scanned NFC tag will be ignored by fwknop2 while this option is disabled.
+ </p>
+ <p>
+ Once sending knocks via NFC is enabled, scanning an NFC token sends the associated knock.
+ This process will work even if Fwknop2 is not currently opened.
  </p>
  <p>This app is open source software, Licensed GPLv2+. The source can be found  <a href="https://github.com/oneru/Fwknop2">on github</a>. Please report any bugs here.</p>
  <p>Credits: Based on fwknop and libfko written by <a href="https://www.cipherdyne.org/fwknop/"> Michael Rash</a></p>
@@ -137,4 +158,6 @@
     <string name="nfcDisabled">NFC-Fwknop2 disabled</string>
     <string name="nfcError">NFC Tag parsing error</string>
     <string name="SendingSPATo">"Sending SPA to "</string>
+    <string name="NotValidNatIP">You must supply a valid NAT IP</string>
+    <string name="NotValidNatPort">You must provide a valid NAT port</string>
 </resources>
