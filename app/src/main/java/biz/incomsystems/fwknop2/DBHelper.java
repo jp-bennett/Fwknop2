@@ -203,6 +203,52 @@ public class DBHelper extends SQLiteOpenHelper {
 
         CurrentIndex.close();
 
+        // There was at least one reported crash related to an unexpected null returned from this function.
+        // This is a bit of a heavyhanded solution.  (OK, it's an ugly hack)
+
+        if (config.ACCESS_IP == null) {
+            config.ACCESS_IP = "";
+        }
+        if (config.PORTS == null) {
+            config.PORTS = "";
+        }
+        if (config.SERVER_IP == null) {
+            config.SERVER_IP = "";
+        }
+        if (config.SERVER_PORT == null) {
+            config.SERVER_PORT = "";
+        }
+        if (config.SERVER_TIMEOUT == null) {
+            config.SERVER_TIMEOUT = "";
+        }
+        if (config.KEY == null) {
+            config.KEY = "";
+        }
+        if (config.HMAC == null) {
+            config.HMAC = "";
+        }
+        if (config.NAT_IP == null) {
+            config.NAT_IP = "";
+        }
+        if (config.NAT_PORT == null) {
+            config.NAT_PORT = "";
+        }
+        if (config.SERVER_CMD == null) {
+            config.SERVER_CMD = "";
+        }
+        if (config.SSH_CMD == null) {
+            config.SSH_CMD = "";
+        }
+        if (config.PROTOCOL == null) {
+            config.PROTOCOL = "";
+        }
+        if (config.DIGEST_TYPE == null) {
+            config.DIGEST_TYPE = "";
+        }
+        if (config.HMAC_TYPE == null) {
+            config.HMAC_TYPE = "";
+        }
+
         return config;
     }
 }
