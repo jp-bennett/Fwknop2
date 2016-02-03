@@ -10,16 +10,19 @@ model {
         compileSdkVersion = 23
         buildToolsVersion = '23.0.2'
         packagingOptions.excludes = ['META-INF/DEPENDENCIES.txt','META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
-        sources.main {
-            jni.source.srcDirs = ['src/main/jni']
-            jniLibs.source.srcDirs = ['src/main/jni/libfko']
-        }
+
         defaultConfig.with {
             applicationId = "org.cipherdyne.fwknop2"
             minSdkVersion.apiLevel = 15
             targetSdkVersion.apiLevel = 23
             versionCode = 23
             versionName = "1.2.1"
+        }
+    }
+    android.sources {
+        main {
+            jni.source.srcDirs = ['src/main/jni']
+            jniLibs.source.srcDirs = ['src/main/jni/libfko']
         }
     }
     android.buildTypes {
