@@ -55,6 +55,9 @@
                 <data android:mimeType="application/nfckey" />
             </intent-filter>
         </activity>
+        <service android:name=".countdownTimer" >
+
+        </service>
         <activity
             android:name=".WriteFwknopNickToNfcDialog">
         </activity>

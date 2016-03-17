@@ -200,7 +200,7 @@ public class DBHelper extends SQLiteOpenHelper {
         config.LEGACY = (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_LEGACY)) == 1);
         config.DIGEST_TYPE = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_DIGEST_TYPE));
         config.HMAC_TYPE = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC_TYPE));
-
+        config.NICK_NAME = nick;
         CurrentIndex.close();
 
         // There was at least one reported crash related to an unexpected null returned from this function.

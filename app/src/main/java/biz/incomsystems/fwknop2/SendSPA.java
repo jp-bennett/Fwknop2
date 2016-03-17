@@ -38,8 +38,14 @@ import com.sonelli.juicessh.pluginlibrary.listeners.OnClientStartedListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionFinishedListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionStartedListener;
 
-import org.xbill.DNS.*;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.xbill.DNS.ARecord;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.Resolver;
+import org.xbill.DNS.SimpleResolver;
+import org.xbill.DNS.Type;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -448,6 +454,13 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                                 });
                         alertDialog.show();
                     }
+                } else {
+                    Intent newtimer = new Intent(mActivity, countdownTimer.class); //countdownTimer ourtimer = new countdownTimer();
+                    newtimer.putExtra("timeout", config.SERVER_TIMEOUT);
+                    newtimer.putExtra("nickname", config.NICK_NAME);
+                 //   ourtimer.nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); //(NotificationManager)getSystemService( Context.NOTIFICATION_SERVICE);
+
+                    mActivity.startService(newtimer);
                 }
             } else {
                 AlertDialog alertDialog = new AlertDialog.Builder(mActivity).create();
