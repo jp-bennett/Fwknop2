@@ -100,6 +100,7 @@ public class ConfigDetailFragment extends Fragment {
     CheckBox chkb64hmac ;
     CheckBox chkblegacy;
     CheckBox chkbrandom;
+    CheckBox chkbKeep_Open;
 
     /**
      * The fragment argument representing the item ID that this fragment
@@ -173,6 +174,7 @@ public class ConfigDetailFragment extends Fragment {
             if (configtype.equalsIgnoreCase("Open Port")) {//messagetype = configtype
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                config.KEEP_OPEN = chkbKeep_Open.isChecked();
                 config.SERVER_CMD = "";
                 config.NAT_PORT = "";
                 config.NAT_IP = "";
@@ -183,6 +185,7 @@ public class ConfigDetailFragment extends Fragment {
                 config.NAT_PORT = txt_nat_port.getText().toString();
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                config.KEEP_OPEN = chkbKeep_Open.isChecked();
                 config.SERVER_CMD = "";
             }
             if (configtype.equalsIgnoreCase("Local Nat Access")) {
@@ -190,12 +193,14 @@ public class ConfigDetailFragment extends Fragment {
                 config.NAT_PORT = txt_nat_port.getText().toString();
                 config.PORTS = txt_ports.getText().toString();
                 config.SERVER_TIMEOUT = txt_server_time.getText().toString();
+                config.KEEP_OPEN = chkbKeep_Open.isChecked();
                 config.SERVER_CMD = "";
             }
             if (configtype.equalsIgnoreCase("Server Command")) {
                 config.SERVER_CMD = txt_server_cmd.getText().toString();
                 config.PORTS = "";
                 config.SERVER_TIMEOUT = "";
+                config.KEEP_OPEN = false;
                 config.NAT_PORT = "";
                 config.NAT_IP = "";
             }
@@ -375,6 +380,7 @@ public class ConfigDetailFragment extends Fragment {
         chkblegacy = (CheckBox) rootView.findViewById(R.id.chkblegacy);
         chkbrandom = (CheckBox) rootView.findViewById(R.id.chkbrandom);
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
+        chkbKeep_Open = (CheckBox) rootView.findViewById(R.id.chkbKeep_open);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -517,6 +523,7 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Open Port";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
+                    chkbKeep_Open.setVisibility(View.VISIBLE);
                     lay_natIP.setVisibility(View.GONE);
                     lay_natport.setVisibility(View.GONE);
                     lay_serverCMD.setVisibility(View.GONE);
@@ -527,6 +534,7 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Nat Access";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
+                    chkbKeep_Open.setVisibility(View.VISIBLE);
                     lay_natIP.setVisibility(View.VISIBLE);
                     lay_natport.setVisibility(View.VISIBLE);
                     lay_serverCMD.setVisibility(View.GONE);
@@ -535,6 +543,7 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Local Nat Access";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
+                    chkbKeep_Open.setVisibility(View.VISIBLE);
                     lay_natIP.setVisibility(View.GONE);
                     lay_natport.setVisibility(View.VISIBLE);
                     lay_serverCMD.setVisibility(View.GONE);
@@ -544,6 +553,7 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Server Command";
                     lay_AccessPort.setVisibility(View.GONE);
                     lay_fwTimeout.setVisibility(View.GONE);
+                    chkbKeep_Open.setVisibility(View.GONE);
                     lay_natIP.setVisibility(View.GONE);
                     lay_natport.setVisibility(View.GONE);
                     lay_serverCMD.setVisibility(View.VISIBLE);
@@ -585,6 +595,7 @@ public class ConfigDetailFragment extends Fragment {
                 chkbrandom.setChecked(true);
             }
             txt_server_time.setText(config.SERVER_TIMEOUT);
+            chkbKeep_Open.setChecked(config.KEEP_OPEN);
             txt_KEY.setText(config.KEY);
             if (config.KEY_BASE64) {
                 chkb64key.setChecked(true);

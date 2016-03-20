@@ -28,6 +28,7 @@ public class Config {
     public String MESSAGE_TYPE;
     public String DIGEST_TYPE;
     public String HMAC_TYPE;
+    public Boolean KEEP_OPEN;
 
     public int Is_Valid(){
         InetAddressValidator ipValidate = new InetAddressValidator();

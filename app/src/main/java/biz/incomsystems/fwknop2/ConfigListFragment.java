@@ -120,7 +120,9 @@ public class ConfigListFragment extends ListFragment {
                 new View.OnClickListener() {
                     public void onClick(View v) {
                         String nick = ((ConfigListActivity) getActivity()).selected_nick;
+                        OurSender.reKnock = false;
                         OurSender.send(nick, getActivity());
+                        //if we launch the service from here...  we can tell sender to
                     }
 
                 });

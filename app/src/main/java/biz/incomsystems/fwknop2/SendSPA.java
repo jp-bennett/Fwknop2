@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.text.InputType;
 import android.util.Log;
 import android.widget.EditText;
@@ -68,6 +69,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     Boolean ready;
     public PluginClient client;
     public boolean isConnected = false;
+    public boolean reKnock;
+    private SharedPreferences prefs;
 
     public native String sendSPAPacket();
 
@@ -125,16 +128,19 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     @Override
     public void onSessionFinished() {
     }
-
+    public String resend() {
+        final getExternalIP task = new getExternalIP(ourAct);
+        task.execute();
+        return "Success";
+    }
     public int send(String nick, final Activity newAct) {
         ourAct = newAct;
+        prefs = ourAct.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
         final InetAddressValidator ipValidate = new InetAddressValidator();
         final IntentIntegrator getQR = new IntentIntegrator(ourAct);
         mydb = new DBHelper(ourAct);
         config = new Config();
         config = mydb.getConfig(nick);
-        //Cursor CurrentIndex = mydb.getData(nick);
-        //CurrentIndex.moveToFirst();
         mydb.close();
 
         //These variables are the ones that the jni pulls settings from.
@@ -256,15 +262,17 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if(!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity")) {
-                pdLoading = new ProgressDialog(mActivity);
-                pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
-                pdLoading.show();
+            if(!reKnock) {
+                if (!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity")) {
+                    pdLoading = new ProgressDialog(mActivity);
+                    pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
+                    pdLoading.show();
+                }
             }
         }
 
         @Override
-        protected String doInBackground(Void... params) {
+        public String doInBackground(Void... params) {
             InetAddressValidator ipValidate = new InetAddressValidator();
 
             try {
@@ -279,7 +287,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
 
 
-                SharedPreferences prefs = mActivity.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
+                //SharedPreferences prefs = mActivity.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
                 if (prefs.getBoolean("EnableDns", true)) {
                     try {
                         Resolver resolver = new SimpleResolver("208.67.222.222");
@@ -375,13 +383,15 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 } catch (Exception ex) {
                     return ex.toString();
                 }
-                return mActivity.getResources().getText(R.string.success).toString();
-            } else return mActivity.getResources().getText(R.string.spa_failure).toString();//"Failure generating SPA data";
+                return "Success";
+            } else return "Failure generating SPA data"; //mActivity.getResources().getText(R.string.spa_failure).toString();//
         }
 
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+            if (reKnock)
+                return;
             if(!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity"))
                 pdLoading.dismiss();
 
@@ -454,14 +464,35 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                                 });
                         alertDialog.show();
                     }
-                } else {
-                    Intent newtimer = new Intent(mActivity, countdownTimer.class); //countdownTimer ourtimer = new countdownTimer();
-                    newtimer.putExtra("timeout", config.SERVER_TIMEOUT);
-                    newtimer.putExtra("nickname", config.NICK_NAME);
-                 //   ourtimer.nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE); //(NotificationManager)getSystemService( Context.NOTIFICATION_SERVICE);
-
-                    mActivity.startService(newtimer);
                 }
+                    if ((prefs.getBoolean("EnableNotification", true)) && config.SERVER_CMD.equalsIgnoreCase("") && Build.VERSION.SDK_INT > 15) {
+                        Intent newtimer = new Intent(mActivity, countdownTimer.class); //countdownTimer ourtimer = new countdownTimer();
+                        newtimer.putExtra("timeout", config.SERVER_TIMEOUT);
+                        newtimer.putExtra("nickname", config.NICK_NAME);
+                        if (config.KEEP_OPEN) {
+                            newtimer.putExtra("keep_open", true);
+
+                            newtimer.putExtra("access_str", access_str);
+                            newtimer.putExtra("allowip_str", allowip_str);
+                            newtimer.putExtra("passwd_str", passwd_str);
+                            newtimer.putExtra("passwd_b64", passwd_b64);
+                            newtimer.putExtra("hmac_str", hmac_str);
+                            newtimer.putExtra("hmac_b64", hmac_b64);
+                            newtimer.putExtra("fw_timeout_str", fw_timeout_str);
+                            newtimer.putExtra("nat_ip_str", nat_ip_str);
+                            newtimer.putExtra("nat_port_str", nat_port_str);
+                            newtimer.putExtra("nat_access_str", nat_access_str);
+                            newtimer.putExtra("nat_local", nat_local);
+                            newtimer.putExtra("server_cmd_str", server_cmd_str);
+                            newtimer.putExtra("legacy", legacy);
+                            newtimer.putExtra("digest_type", digest_type);
+                            newtimer.putExtra("hmac_type", hmac_type);
+                        }
+
+
+                        mActivity.startService(newtimer);
+                    }
+
             } else {
                 AlertDialog alertDialog = new AlertDialog.Builder(mActivity).create();
                 alertDialog.setTitle("Error");

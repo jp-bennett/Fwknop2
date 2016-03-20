@@ -325,6 +325,13 @@
             android:textSize="20sp"
             />
     </LinearLayout>
+    <CheckBox
+        android:id="@+id/chkbKeep_open"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/config_Reknock"
+        />
     <LinearLayout android:id="@+id/natipsl"
         android:visibility="gone"
         android:orientation="horizontal"

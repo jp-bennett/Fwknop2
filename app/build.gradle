@@ -15,8 +15,8 @@ model {
             applicationId = "org.cipherdyne.fwknop2"
             minSdkVersion.apiLevel = 15
             targetSdkVersion.apiLevel = 23
-            versionCode = 23
-            versionName = "1.2.1"
+            versionCode = 25
+            versionName = "1.2.2"
         }
     }
     android.sources {

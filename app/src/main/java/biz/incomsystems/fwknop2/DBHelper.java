@@ -28,7 +28,7 @@ import java.util.UUID;
 public class DBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "fwknop.db";
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 4;
     public static final String CONFIGS_TABLE_NAME = "configs";
     public static final String CONFIGS_COLUMN_ID = "id";
     public static final String CONFIGS_COLUMN_NICK_NAME = "NICK_NAME";
@@ -50,6 +50,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CONFIGS_COLUMN_PROTOCOL = "PROTOCOL";
     public static final String CONFIGS_COLUMN_DIGEST_TYPE = "DIGEST_TYPE";
     public static final String CONFIGS_COLUMN_HMAC_TYPE = "HMAC_TYPE";
+    public static final String CONFIGS_COLUMN_KEEP_OPEN = "KEEP_OPEN";
 
     public DBHelper(Context context)
     {
@@ -80,7 +81,8 @@ public class DBHelper extends SQLiteOpenHelper {
                         CONFIGS_COLUMN_LEGACY + " integer, " +
                         CONFIGS_COLUMN_PROTOCOL + " text, " +
                         CONFIGS_COLUMN_DIGEST_TYPE + " text, " +
-                        CONFIGS_COLUMN_HMAC_TYPE + " text " +
+                        CONFIGS_COLUMN_HMAC_TYPE + " text, " +
+                        CONFIGS_COLUMN_KEEP_OPEN + " integer " +
                         ")"
         );
     }
@@ -91,15 +93,20 @@ public class DBHelper extends SQLiteOpenHelper {
             db.execSQL("ALTER TABLE "+ CONFIGS_TABLE_NAME + " ADD COLUMN " +
                     CONFIGS_COLUMN_LEGACY + " INTEGER DEFAULT 0");
             db.execSQL("ALTER TABLE "+ CONFIGS_TABLE_NAME + " ADD COLUMN " +
-                    CONFIGS_COLUMN_PROTOCOL + " STRING DEFAULT 'udp'");
+                    CONFIGS_COLUMN_PROTOCOL + " TEXT DEFAULT 'udp'");
             oldVersion = 2;
         }
         if (oldVersion == 2) {
             db.execSQL("ALTER TABLE "+ CONFIGS_TABLE_NAME + " ADD COLUMN " +
-                    CONFIGS_COLUMN_DIGEST_TYPE + " STRING DEFAULT 'SHA256'");
+                    CONFIGS_COLUMN_DIGEST_TYPE + " TEXT DEFAULT 'SHA256'");
             db.execSQL("ALTER TABLE "+ CONFIGS_TABLE_NAME + " ADD COLUMN " +
-                    CONFIGS_COLUMN_HMAC_TYPE + " STRING DEFAULT 'SHA256'");
+                    CONFIGS_COLUMN_HMAC_TYPE + " TEXT DEFAULT 'SHA256'");
             oldVersion = 3;
+        }
+        if (oldVersion == 3) {
+            db.execSQL("ALTER TABLE "+ CONFIGS_TABLE_NAME + " ADD COLUMN " +
+                    CONFIGS_COLUMN_KEEP_OPEN + " INTEGER DEFAULT 0");
+            oldVersion = 4;
         }
 
     }
@@ -145,6 +152,7 @@ public class DBHelper extends SQLiteOpenHelper {
         contentValues.put(CONFIGS_COLUMN_PROTOCOL, config.PROTOCOL);
         contentValues.put(CONFIGS_COLUMN_DIGEST_TYPE, config.DIGEST_TYPE);
         contentValues.put(CONFIGS_COLUMN_HMAC_TYPE, config.HMAC_TYPE);
+        contentValues.put(CONFIGS_COLUMN_KEEP_OPEN, config.KEEP_OPEN);
 
         if (CheckNickIsUnique(config.NICK_NAME)) {
             db.update("configs", contentValues, "NICK_NAME='" + config.NICK_NAME + "'", null);
@@ -200,6 +208,7 @@ public class DBHelper extends SQLiteOpenHelper {
         config.LEGACY = (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_LEGACY)) == 1);
         config.DIGEST_TYPE = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_DIGEST_TYPE));
         config.HMAC_TYPE = CurrentIndex.getString(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_HMAC_TYPE));
+        config.KEEP_OPEN = (CurrentIndex.getInt(CurrentIndex.getColumnIndex(DBHelper.CONFIGS_COLUMN_KEEP_OPEN)) == 1);
         config.NICK_NAME = nick;
         CurrentIndex.close();
 

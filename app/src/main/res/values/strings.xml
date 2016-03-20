@@ -126,6 +126,8 @@
     <string name="config_mtype">Message Type:</string>
     <string name="config_Aports">Access Ports:</string>
     <string name="config_Ftimeout">Firewall Timeout:</string>
+    <string name="config_Reknock">Keep open:</string>
+    <string name="config_notification">Show timeout notification:</string>
     <string name="config_InternalIP">Internal IP:</string>
     <string name="config_internal_port">Internal Port:</string>
     <string name="config_cmd">Server Command:</string>
