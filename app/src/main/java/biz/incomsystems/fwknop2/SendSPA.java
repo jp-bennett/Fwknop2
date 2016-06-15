@@ -380,9 +380,11 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                         conn.getResponseCode();
                         conn.disconnect();
                     }
+                    Thread.sleep(1000);
                 } catch (Exception ex) {
                     return ex.toString();
                 }
+
                 return "Success";
             } else return "Failure generating SPA data"; //mActivity.getResources().getText(R.string.spa_failure).toString();//
         }

@@ -16,13 +16,16 @@ This file is part of Fwknop2.
  */
 package biz.incomsystems.fwknop2;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
@@ -442,6 +445,14 @@ public class ConfigDetailFragment extends Fragment {
         spn_juice = (Spinner) rootView.findViewById(R.id.juice_spn);
 
         if (juiceInstalled) {
+            int permissionCheck = ContextCompat.checkSelfPermission(getActivity(),
+                    "com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS");
+            if (permissionCheck == PackageManager.PERMISSION_DENIED) {
+
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{"com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS", "com.sonelli.juicessh.api.v1.permission.OPEN_SESSIONS"},
+                        0);
+            }
             juice_adapt = new ConnectionSpinnerAdapter(getActivity());
             spn_juice.setAdapter(juice_adapt);
         } else {
