@@ -54,8 +54,6 @@ public class NfcKnockActivity extends Activity {
                 }
             }
         }
-        return;
-
     }
 
     @Override

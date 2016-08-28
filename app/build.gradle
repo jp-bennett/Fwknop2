@@ -3,47 +3,60 @@ repositories {
     maven { url 'https://raw.github.com/Sonelli/maven/master' }
 }
 model {
-    android.lintOptions {
-        abortOnError = false
-    }
+
     android {
-        compileSdkVersion = 23
+        compileSdkVersion = 24
         buildToolsVersion = '23.0.3'
-        packagingOptions.excludes = ['META-INF/DEPENDENCIES.txt','META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
+        packagingOptions.excludes = ['META-INF/DEPENDENCIES.txt', 'META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
 
         defaultConfig.with {
             applicationId = "org.cipherdyne.fwknop2"
-            minSdkVersion.apiLevel = 15
-            targetSdkVersion.apiLevel = 23
+            minSdkVersion.apiLevel = 16
+            targetSdkVersion.apiLevel = 24
             versionCode = 25
-            versionName = "1.2.2"
+            versionName = "1.3.0"
         }
-    }
-    android.sources {
-        main {
-            jni.source.srcDirs = ['src/main/jni']
-            jniLibs.source.srcDirs = ['src/main/jni/libfko']
+        //lintOptions {
+          //  abortOnError = false
+        //}
+
+        sources {
+            //noinspection GroovyAssignabilityCheck
+            main {
+                jni {
+                    source.srcDir "src/main/jni"
+                }
+                jniLibs {
+                    source.srcDirs "src/main/jni/libfko"
+                }
+
+                java {
+                    source {
+                        srcDir "src/main/java"
+                    }
+                }
+            }
         }
-    }
-    android.buildTypes {
-        release {
-            minifyEnabled = false
-            proguardFiles.add(file('proguard-rules.pro'))
+        buildTypes {
+            release {
+                minifyEnabled = false
+                proguardFiles.add(file('proguard-rules.pro'))
+            }
         }
-    }
-    android.ndk {
-        moduleName = 'fwknop'
-        ldLibs.add('log')
-        CFlags.add('-DHAVE_CONFIG_H')
-        CFlags.add("-I${file('src/main/jni')}".toString())
-        CFlags.add("-I${file('src/main/jni/libfko')}".toString())
-        platformVersion = '19'
+        ndk {
+            moduleName = 'fwknop'
+            ldLibs.add('log')
+            CFlags.add('-DHAVE_CONFIG_H')
+            CFlags.add("-I${file('src/main/jni')}".toString())
+            CFlags.add("-I${file('src/main/jni/libfko')}".toString())
+            platformVersion = '19'
+        }
     }
 }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:support-v4:23.3.0'
+    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:support-v4:24.2.0'
     compile('commons-validator:commons-validator:1.4.1') {
         exclude group: 'commons-collections', module: 'commons-collections'
         exclude group: 'commons-logging', module: 'commons-logging'

@@ -41,7 +41,7 @@ public class WriteFwknopNickToNfcDialog extends Activity {
 
     public static final String ARG_ITEM_TARGET = "item_id";
     private NfcAdapter mAdapter;
-    private IntentFilter[] mFilters;
+    IntentFilter[] mFilters;
     private PendingIntent mPendingIntent;
     private IntentFilter[] intentFiltersArray;
     private String[][] techListsArray;
@@ -113,11 +113,7 @@ public class WriteFwknopNickToNfcDialog extends Activity {
                         }
                     });
 
-                } catch (IOException e) {
-
-                    Log.e(TAG, "Unable to write Fwknop nick to NFC tag. " + e);
-                    return;
-                } catch (FormatException e) {
+                } catch (Exception e) {
 
                     Log.e(TAG, "Unable to write Fwknop nick to NFC tag. " + e);
                     return;
