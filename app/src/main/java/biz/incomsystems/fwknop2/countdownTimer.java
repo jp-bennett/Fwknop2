@@ -1,13 +1,14 @@
 package biz.incomsystems.fwknop2;
 
 import android.app.IntentService;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.CountDownTimer;
-import android.util.Log;
+import android.support.v4.app.NotificationCompat;
+import android.util.SparseBooleanArray;
 
 
 public class countdownTimer extends IntentService {
@@ -17,10 +18,11 @@ public class countdownTimer extends IntentService {
     public String hmac_type;
     public boolean reknock;
     private SendSPA OurSender;
-    public Notification.Builder builder;
+    private int notificationId;
 
-    public NotificationManager nm;
-    public MyCounter timer;
+    private NotificationManager nm;
+    MyCounter timer;
+    private static SparseBooleanArray timerDict = new SparseBooleanArray();
 
     public long counter = 60;
     public int init_counter;
@@ -28,23 +30,22 @@ public class countdownTimer extends IntentService {
     public String nickname;
     public countdownTimer() {
         super("countdownTimer");
-
     }
 
     @Override
     public void onCreate() {
-        nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
     @Override
     public int onStartCommand(Intent intent, int blah, int blah2) {
-        //Log.d("fwknop2", "in onHandleIntent");
         reknock = intent.getBooleanExtra("keep_open", false);
         nickname = intent.getStringExtra("nickname");
         if (nickname == null) {
-            if (timer != null)
-                timer.cancel();
-            if (nm != null)
-                nm.cancel(0);
+            notificationId = intent.getIntExtra("notificationId", 0);
+            if (notificationId != 0) {
+                timerDict.put(notificationId, false);
+                nm.cancel(notificationId);
+            }
             stopSelf();
             return 0;
         }
@@ -69,94 +70,74 @@ public class countdownTimer extends IntentService {
         }
         init_counter = Integer.valueOf(intent.getStringExtra("timeout"));
 
-
-
-
-
-
+        long time = System.currentTimeMillis() / 1000L;
+        String tmpStr = Long.toString(time);
+        String last4Str = tmpStr.substring(tmpStr.length() -5);
+        notificationId = Integer.valueOf(last4Str);
 
         counter = init_counter;
         init_mscounter = init_counter * 1000;
-        //Log.d("fwknop2", nickname);
-        declareNotification();
-        timer = new MyCounter(init_mscounter, 1000);
+        timer = new MyCounter(this, init_mscounter, 1000, notificationId);
         timer.start();
+        timerDict.put(notificationId, true);
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
-//        timer.cancel();
     }
-
-
-
 
     @Override
     public void onHandleIntent(Intent intent) {
-
     }
-
-    public void declareNotification()
-    {
-        //Declare a new notification
-        Intent intent = new Intent(this, countdownTimer.class);
-        PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
-        builder = new Notification.Builder(this)
-                .setSmallIcon(R.drawable.fwknop2_small)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.fwknop2_small))
-                .setContentTitle("Fwknop2: " + nickname)
-                .setContentText(String.valueOf(counter));
-                builder.setDeleteIntent(pIntent);
-        if (reknock) {
-            builder.addAction(R.drawable.fwknop2, "Close connection", pIntent);
-        }
-
-        nm.notify(0, builder.build());
-    }
-
-    /**
-     * Show a notification while this service is running.
-     */
-
 
     public class MyCounter extends CountDownTimer
     {
-
-        public MyCounter(long millisInFuture, long countDownInterval)
+        int counterID;
+        NotificationCompat.Builder builder;
+        public MyCounter(Context MyCon, long millisInFuture, long countDownInterval, int cID)
         {
+
             super(millisInFuture, countDownInterval);
+            counterID = cID;
+            Intent intent = new Intent(MyCon, countdownTimer.class);
+            intent.putExtra("notificationId", notificationId);
+            PendingIntent pIntent = PendingIntent.getService(MyCon, notificationId, intent, 0);
+            builder = new NotificationCompat.Builder(MyCon)
+                    .setSmallIcon(R.drawable.fwknop2_outline)
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.fwknop2_small))
+                    .setContentTitle("Fwknop2: "  + nickname)
+                    .setContentText(String.valueOf(counter));
+            builder.setDeleteIntent(pIntent);
+            nm.notify(notificationId, builder.build());
         }
 
         @Override
         public void onFinish()
         {
-            counter = 0;
-
-
-            //Kill the game
-            nm.cancel(0);
+            nm.cancel(counterID);
             stopSelf();
+            timerDict.put(counterID, false);
         }
 
         @Override
-        public void onTick(long millisUntilFinished)
-        {
+        public void onTick(long millisUntilFinished) {
             counter = millisUntilFinished / 1000;
-            //declareNotification();
-            builder.setContentText(String.valueOf(counter));
-            nm.notify(0, builder.build());
-            if (counter < 11 && reknock) {
-               if (OurSender.resend().equalsIgnoreCase("Success")) {
-                   //restart the timer
-                   timer.start();
-               }
+            if (!timerDict.get(counterID)) {
+                stopSelf();
+                this.cancel();
+                nm.cancel(counterID);
 
-
-                //if counter is < 10, send knock and restart the timer
+            } else {
+                builder.setContentText(String.valueOf(counter));
+                nm.notify(counterID, builder.build());
+                if (counter < 11 && reknock) {
+                    if (OurSender.resend().equalsIgnoreCase("Success")) {
+                        //if counter is < 10, send knock and restart the timer
+                        this.start();
+                    }
+                }
             }
         }
-
     }
-
 }
