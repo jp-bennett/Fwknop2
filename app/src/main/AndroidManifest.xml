@@ -55,7 +55,7 @@
                 <data android:mimeType="application/nfckey" />
             </intent-filter>
         </activity>
-        <service android:name=".countdownTimer" >
+        <service android:name=".knockCountdownTimer" >
 
         </service>
         <activity

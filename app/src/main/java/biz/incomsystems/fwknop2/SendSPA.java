@@ -468,7 +468,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                     }
                 }
                     if ((prefs.getBoolean("EnableNotification", true)) && config.SERVER_CMD.equalsIgnoreCase("") && Build.VERSION.SDK_INT > 15) {
-                        Intent newtimer = new Intent(mActivity, countdownTimer.class); //countdownTimer ourtimer = new countdownTimer();
+                        Intent newtimer = new Intent(mActivity, knockCountdownTimer.class); //knockCountdownTimer ourtimer = new knockCountdownTimer();
                         newtimer.putExtra("timeout", config.SERVER_TIMEOUT);
                         newtimer.putExtra("nickname", config.NICK_NAME);
                         if (config.KEEP_OPEN) {

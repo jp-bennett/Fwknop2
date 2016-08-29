@@ -11,7 +11,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.SparseBooleanArray;
 
 
-public class countdownTimer extends IntentService {
+public class knockCountdownTimer extends IntentService {
 
 
     public String digest_type;
@@ -28,8 +28,8 @@ public class countdownTimer extends IntentService {
     public int init_counter;
     public long init_mscounter;
     public String nickname;
-    public countdownTimer() {
-        super("countdownTimer");
+    public knockCountdownTimer() {
+        super("knockCountdownTimer");
     }
 
     @Override
@@ -100,7 +100,7 @@ public class countdownTimer extends IntentService {
 
             super(millisInFuture, countDownInterval);
             counterID = cID;
-            Intent intent = new Intent(MyCon, countdownTimer.class);
+            Intent intent = new Intent(MyCon, knockCountdownTimer.class);
             intent.putExtra("notificationId", notificationId);
             PendingIntent pIntent = PendingIntent.getService(MyCon, notificationId, intent, 0);
             builder = new NotificationCompat.Builder(MyCon)
