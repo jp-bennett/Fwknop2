@@ -1,11 +1,10 @@
-/*
- *****************************************************************************
+/**
+ * \file lib/fko_user.c
  *
- * File:    fko_user.c
- *
- * Purpose: Set/Get the current username.
- *
- *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
+ * \brief Set/Get the current username.
+ */
+
+/*  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
  *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
@@ -31,7 +30,9 @@
 #include "fko_common.h"
 #include "fko.h"
 
-#ifdef WIN32
+#ifdef __MINGW32__
+  #include "../win32/getlogin.h"
+#elif WIN32
   #include <getlogin.h>
 #endif
 
@@ -52,7 +53,7 @@ fko_set_username(fko_ctx_t ctx, const char * const spoof_user)
     if(!CTX_INITIALIZED(ctx))
         return FKO_ERROR_CTX_NOT_INITIALIZED;
 
-    /* If spoof_user was not passed in, check for a SPOOF_USER enviroment
+    /* If spoof_user was not passed in, check for a SPOOF_USER environment
      * variable.  If it is set, use its value.
     */
     if(spoof_user != NULL && spoof_user[0] != '\0')
@@ -114,7 +115,7 @@ fko_set_username(fko_ctx_t ctx, const char * const spoof_user)
         return res;
     }
 
-    /* Just in case this is a subsquent call to this function.  We
+    /* Just in case this is a subsequent call to this function.  We
      * do not want to be leaking memory.
     */
     if(ctx->username != NULL)

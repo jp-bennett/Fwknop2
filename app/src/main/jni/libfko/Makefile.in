@@ -125,14 +125,14 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-@WANT_C_UNIT_TESTS_TRUE@libfko_la_DEPENDENCIES =  \
-@WANT_C_UNIT_TESTS_TRUE@	$(top_builddir)/common/cunit_common.o
+libfko_la_LIBADD =
 am__objects_1 = base64.lo cipher_funcs.lo digest.lo \
 	fko_client_timeout.lo fko_digest.lo fko_encode.lo \
 	fko_decode.lo fko_encryption.lo fko_error.lo fko_funcs.lo \
 	fko_message.lo fko_nat_access.lo fko_rand_value.lo \
 	fko_server_auth.lo fko_timestamp.lo fko_hmac.lo hmac.lo \
-	fko_user.lo md5.lo rijndael.lo sha1.lo sha2.lo gpgme_funcs.lo
+	fko_user.lo md5.lo rijndael.lo sha1.lo sha2.lo sha3.lo \
+	gpgme_funcs.lo
 am_libfko_la_OBJECTS = $(am__objects_1)
 libfko_la_OBJECTS = $(am_libfko_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -150,8 +150,8 @@ am__fko_utests_SOURCES_DIST = fko_utests.c base64.c base64.h \
 	fko_message.c fko_message.h fko_nat_access.c fko_rand_value.c \
 	fko_server_auth.c fko.h fko_limits.h fko_timestamp.c \
 	fko_hmac.c hmac.c hmac.h fko_user.c fko_user.h md5.c md5.h \
-	rijndael.c rijndael.h sha1.c sha1.h sha2.c sha2.h \
-	fko_context.h fko_state.h gpgme_funcs.c gpgme_funcs.h
+	rijndael.c rijndael.h sha1.c sha1.h sha2.c sha2.h sha3.c \
+	sha3.h fko_context.h fko_state.h gpgme_funcs.c gpgme_funcs.h
 am__objects_2 = fko_utests-base64.$(OBJEXT) \
 	fko_utests-cipher_funcs.$(OBJEXT) fko_utests-digest.$(OBJEXT) \
 	fko_utests-fko_client_timeout.$(OBJEXT) \
@@ -168,7 +168,8 @@ am__objects_2 = fko_utests-base64.$(OBJEXT) \
 	fko_utests-fko_hmac.$(OBJEXT) fko_utests-hmac.$(OBJEXT) \
 	fko_utests-fko_user.$(OBJEXT) fko_utests-md5.$(OBJEXT) \
 	fko_utests-rijndael.$(OBJEXT) fko_utests-sha1.$(OBJEXT) \
-	fko_utests-sha2.$(OBJEXT) fko_utests-gpgme_funcs.$(OBJEXT)
+	fko_utests-sha2.$(OBJEXT) fko_utests-sha3.$(OBJEXT) \
+	fko_utests-gpgme_funcs.$(OBJEXT)
 @WANT_C_UNIT_TESTS_TRUE@am_fko_utests_OBJECTS =  \
 @WANT_C_UNIT_TESTS_TRUE@	fko_utests-fko_utests.$(OBJEXT) \
 @WANT_C_UNIT_TESTS_TRUE@	$(am__objects_2)
@@ -377,20 +378,25 @@ libfko_source_files = \
     fko_message.h fko_nat_access.c fko_rand_value.c fko_server_auth.c \
     fko.h fko_limits.h fko_timestamp.c fko_hmac.c hmac.c hmac.h \
     fko_user.c fko_user.h md5.c md5.h rijndael.c rijndael.h sha1.c \
-    sha1.h sha2.c sha2.h fko_context.h fko_state.h \
+    sha1.h sha2.c sha2.h sha3.c sha3.h fko_context.h fko_state.h \
     gpgme_funcs.c gpgme_funcs.h
 
-@WANT_C_UNIT_TESTS_TRUE@libfko_la_LIBADD = $(top_builddir)/common/cunit_common.o
 @WANT_C_UNIT_TESTS_TRUE@fko_utests_SOURCES = fko_utests.c $(libfko_source_files)
 @WANT_C_UNIT_TESTS_TRUE@fko_utests_CPPFLAGS = -I $(top_builddir)/lib -I $(top_builddir)/common $(GPGME_CFLAGS)
 @WANT_C_UNIT_TESTS_TRUE@fko_utests_LDADD = $(top_builddir)/lib/libfko.la $(top_builddir)/common/libfko_util.a
 @WANT_C_UNIT_TESTS_TRUE@fko_utests_LDFLAGS = -lcunit $(GPGME_LIBS)
-@APPLE_PLATFORM_FALSE@@WANT_C_UNIT_TESTS_FALSE@libfko_la_LDFLAGS = -version-info 2:4:0 $(GPGME_LIBS) \
-@APPLE_PLATFORM_FALSE@@WANT_C_UNIT_TESTS_FALSE@                      -export-symbols-regex '^fko_' \
-@APPLE_PLATFORM_FALSE@@WANT_C_UNIT_TESTS_FALSE@                      -Wl,--whole-archive,$(top_builddir)/common/libfko_util.a,--no-whole-archive
+@APPLE_PLATFORM_FALSE@@USE_MINGW_FALSE@@WANT_C_UNIT_TESTS_FALSE@libfko_la_LDFLAGS = -version-info 3:0:0 $(GPGME_LIBS) \
+@APPLE_PLATFORM_FALSE@@USE_MINGW_FALSE@@WANT_C_UNIT_TESTS_FALSE@                      -export-symbols-regex '^fko_' \
+@APPLE_PLATFORM_FALSE@@USE_MINGW_FALSE@@WANT_C_UNIT_TESTS_FALSE@                      -Wl,--whole-archive,$(top_builddir)/common/libfko_util.a,--no-whole-archive
 
-@APPLE_PLATFORM_TRUE@@WANT_C_UNIT_TESTS_FALSE@libfko_la_LDFLAGS = -version-info 2:4:0 $(GPGME_LIBS) -export-symbols-regex '^fko_'
-@WANT_C_UNIT_TESTS_TRUE@libfko_la_LDFLAGS = -version-info 2:4:0 $(GPGME_LIBS) -export-symbols-regex '^fko_'
+@APPLE_PLATFORM_FALSE@@USE_MINGW_TRUE@@WANT_C_UNIT_TESTS_FALSE@libfko_la_LDFLAGS = -version-info 3:0:0 $(GPGME_LIBS) \
+@APPLE_PLATFORM_FALSE@@USE_MINGW_TRUE@@WANT_C_UNIT_TESTS_FALSE@                      -export-symbols-regex '^fko_' -no-undefined \
+@APPLE_PLATFORM_FALSE@@USE_MINGW_TRUE@@WANT_C_UNIT_TESTS_FALSE@                      -Wl,--whole-archive,$(top_builddir)/common/libfko_util.a,--no-whole-archive,-lwsock32,-lws2_32
+
+@APPLE_PLATFORM_TRUE@@WANT_C_UNIT_TESTS_FALSE@libfko_la_LDFLAGS = -version-info 3:0:0 $(GPGME_LIBS) -export-symbols-regex '^fko_'
+@WANT_C_UNIT_TESTS_TRUE@libfko_la_LDFLAGS = -version-info 3:0:0 $(GPGME_LIBS) -export-symbols-regex '^fko_' \
+@WANT_C_UNIT_TESTS_TRUE@                      -Wl,--whole-archive,$(top_builddir)/common/libfko_util.a,--no-whole-archive
+
 libfko_la_SOURCES = $(libfko_source_files)
 AM_CPPFLAGS = $(GPGME_CFLAGS) -I $(top_srcdir)/common
 include_HEADERS = fko.h
@@ -527,12 +533,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-rijndael.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-sha1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-sha2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fko_utests-sha3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gpgme_funcs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hmac.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rijndael.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sha3.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -879,6 +887,20 @@ fko_utests-sha2.obj: sha2.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sha2.c' object='fko_utests-sha2.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-sha2.obj `if test -f 'sha2.c'; then $(CYGPATH_W) 'sha2.c'; else $(CYGPATH_W) '$(srcdir)/sha2.c'; fi`
+
+fko_utests-sha3.o: sha3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-sha3.o -MD -MP -MF $(DEPDIR)/fko_utests-sha3.Tpo -c -o fko_utests-sha3.o `test -f 'sha3.c' || echo '$(srcdir)/'`sha3.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-sha3.Tpo $(DEPDIR)/fko_utests-sha3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sha3.c' object='fko_utests-sha3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-sha3.o `test -f 'sha3.c' || echo '$(srcdir)/'`sha3.c
+
+fko_utests-sha3.obj: sha3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-sha3.obj -MD -MP -MF $(DEPDIR)/fko_utests-sha3.Tpo -c -o fko_utests-sha3.obj `if test -f 'sha3.c'; then $(CYGPATH_W) 'sha3.c'; else $(CYGPATH_W) '$(srcdir)/sha3.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/fko_utests-sha3.Tpo $(DEPDIR)/fko_utests-sha3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sha3.c' object='fko_utests-sha3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o fko_utests-sha3.obj `if test -f 'sha3.c'; then $(CYGPATH_W) 'sha3.c'; else $(CYGPATH_W) '$(srcdir)/sha3.c'; fi`
 
 fko_utests-gpgme_funcs.o: gpgme_funcs.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fko_utests_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT fko_utests-gpgme_funcs.o -MD -MP -MF $(DEPDIR)/fko_utests-gpgme_funcs.Tpo -c -o fko_utests-gpgme_funcs.o `test -f 'gpgme_funcs.c' || echo '$(srcdir)/'`gpgme_funcs.c

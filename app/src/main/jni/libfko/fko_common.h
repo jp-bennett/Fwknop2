@@ -1,11 +1,10 @@
-/*
- *****************************************************************************
+/**
+ * \file lib/fko_common.h
  *
- * File:    fko_common.h
- *
- * Purpose: Common header for libfko source files.
- *
- *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
+ * \brief Common header for libfko source files.
+ */
+
+/*  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
  *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
@@ -73,7 +72,7 @@
   #define O_WRONLY    _O_WRONLY
   #define O_RDONLY    _O_RDONLY
   #define O_RDWR      _O_RDWR
-  #define O_CREAT     _O_CREAT 
+  #define O_CREAT     _O_CREAT
   #define O_EXCL      _O_EXCL
   #define S_IRUSR     _S_IREAD
   #define S_IWUSR     _S_IWRITE
@@ -90,7 +89,7 @@
   #endif
 #endif
 
-/* Work out endianess (sp?)
+/* Work out endianness
 */
 #if HAVE_ENDIAN_H       /* Should cover most Linux systems */
   #include <endian.h>

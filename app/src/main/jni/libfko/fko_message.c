@@ -1,12 +1,10 @@
-/*
- *****************************************************************************
+/**
+ * \file lib/fko_message.c
  *
- * File:    fko_message.c
- *
- * Purpose: Set/Get the spa message (access req/command/etc) based
- *          on the current spa data.
- *
- *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
+ * \brief Set/Get the spa message (access req/command/etc) based on the current spa data.
+ */
+
+/*  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
  *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
@@ -66,7 +64,7 @@ have_allow_ip(const char *msg)
         res = FKO_ERROR_INVALID_ALLOW_IP;
 
     if(res == FKO_SUCCESS)
-        if (! is_valid_ipv4_addr(ip_str))
+        if (! is_valid_ipv4_addr(ip_str, strlen(ip_str)))
             res = FKO_ERROR_INVALID_ALLOW_IP;
 
     return(res);
@@ -195,7 +193,7 @@ fko_set_spa_message(fko_ctx_t ctx, const char * const msg)
     if(res != FKO_SUCCESS)
         return(res);
 
-    /* Just in case this is a subsquent call to this function.  We
+    /* Just in case this is a subsequent call to this function.  We
      * do not want to be leaking memory.
     */
     if(ctx->message != NULL)
@@ -304,15 +302,27 @@ int
 validate_nat_access_msg(const char *msg)
 {
     const char   *ndx;
+    int     host_len;
     int     res         = FKO_SUCCESS;
     int     startlen    = strnlen(msg, MAX_SPA_MESSAGE_SIZE);
 
     if(startlen == MAX_SPA_MESSAGE_SIZE)
         return(FKO_ERROR_INVALID_DATA_MESSAGE_NAT_MISSING);
 
-    /* Should always have a valid allow IP regardless of message type
+    /* must have exactly one comma here
     */
-    if((res = have_allow_ip(msg)) != FKO_SUCCESS)
+    if(count_characters(msg, ',', startlen) != 1)
+        return(FKO_ERROR_INVALID_SPA_NAT_ACCESS_MSG);
+
+    /* Must not be longer than the max hostname length
+    */
+    host_len = strcspn(msg, ",");
+    if(host_len > MAX_HOSTNAME_LEN)
+        return(FKO_ERROR_INVALID_SPA_NAT_ACCESS_MSG);
+
+    /* Check for some invalid characters
+    */
+    if(strcspn(msg, " /?\"\'\\") < host_len)
         return(FKO_ERROR_INVALID_SPA_NAT_ACCESS_MSG);
 
     /* Position ourselves beyond the allow IP and make sure we have

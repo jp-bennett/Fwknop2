@@ -1,11 +1,10 @@
-/*
- *****************************************************************************
+/**
+ * \file lib/fko_nat_access.c
  *
- * File:    fko_nat_access.c
- *
- * Purpose: Set/Get the spa nat access request data.
- *
- *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
+ * \brief Set/Get the spa nat access request data.
+ */
+
+/*  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
  *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
@@ -69,7 +68,7 @@ fko_set_spa_nat_access(fko_ctx_t ctx, const char * const msg)
     if((res = validate_nat_access_msg(msg)) != FKO_SUCCESS)
         return(res);
 
-    /* Just in case this is a subsquent call to this function.  We
+    /* Just in case this is a subsequent call to this function.  We
      * do not want to be leaking memory.
     */
     if(ctx->nat_access != NULL)

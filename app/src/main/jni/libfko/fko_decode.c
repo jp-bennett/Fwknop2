@@ -1,11 +1,10 @@
-/*
- *****************************************************************************
+/**
+ * \file lib/fko_decode.c
  *
- * File:    fko_decode.c
- *
- * Purpose: Decode an FKO SPA message after decryption.
- *
- *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
+ * \brief Decode an FKO SPA message after decryption.
+ */
+
+/*  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
  *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
@@ -39,9 +38,9 @@
 /* Char used to separate SPA fields in an SPA packet */
 #define SPA_FIELD_SEPARATOR    ":"
 
-#ifdef HAVE_C_UNIT_TESTS
+#ifdef HAVE_C_UNIT_TESTS /* LCOV_EXCL_START */
 DECLARE_TEST_SUITE(fko_decode, "FKO decode test suite");
-#endif
+#endif /* LCOV_EXCL_STOP */
 
 static int
 num_fields(char *str)
@@ -108,6 +107,13 @@ verify_digest(char *tbuf, int t_size, fko_ctx_t ctx)
             sha512_base64(tbuf, (unsigned char*)ctx->encoded_msg, ctx->encoded_msg_len);
             break;
 
+        /* Note that we check SHA3_256 and SHA3_512 below because the
+         * digest lengths for these are the same as SHA256 and SHA512
+         * respectively, and setting the digest type for an incoming
+         * decrypted SPA packet is done initially by looking at the
+         * length.
+         */
+
         default: /* Invalid or unsupported digest */
             return(FKO_ERROR_INVALID_DIGEST_TYPE);
     }
@@ -116,7 +122,41 @@ verify_digest(char *tbuf, int t_size, fko_ctx_t ctx)
      * digest in the message data.
     */
     if(constant_runtime_cmp(ctx->digest, tbuf, t_size) != 0)
-        return(FKO_ERROR_DIGEST_VERIFICATION_FAILED);
+    {
+        /* Could potentially also have been SHA3_256 or SHA3_512 */
+        if(ctx->digest_type == FKO_DIGEST_SHA256)
+        {
+            memset(tbuf, 0, FKO_ENCODE_TMP_BUF_SIZE);
+            sha3_256_base64(tbuf, (unsigned char*)ctx->encoded_msg, ctx->encoded_msg_len);
+            if(constant_runtime_cmp(ctx->digest, tbuf, t_size) != 0)
+            {
+                return(FKO_ERROR_DIGEST_VERIFICATION_FAILED);
+            }
+            else
+            {
+                ctx->digest_type = FKO_DIGEST_SHA3_256;
+                ctx->digest_len  = SHA3_256_B64_LEN;
+            }
+
+        }
+        else if(ctx->digest_type == FKO_DIGEST_SHA512)
+        {
+            memset(tbuf, 0, FKO_ENCODE_TMP_BUF_SIZE);
+            sha3_512_base64(tbuf, (unsigned char*)ctx->encoded_msg, ctx->encoded_msg_len);
+            if(constant_runtime_cmp(ctx->digest, tbuf, t_size) != 0)
+            {
+                return(FKO_ERROR_DIGEST_VERIFICATION_FAILED);
+            }
+            else
+            {
+                ctx->digest_type = FKO_DIGEST_SHA3_512;
+                ctx->digest_len  = SHA3_512_B64_LEN;
+            }
+
+        }
+        else
+            return(FKO_ERROR_DIGEST_VERIFICATION_FAILED);
+    }
 
     return FKO_SUCCESS;
 }
@@ -136,6 +176,7 @@ is_valid_digest_len(int t_size, fko_ctx_t ctx)
             ctx->digest_len  = SHA1_B64_LEN;
             break;
 
+        /* Could also match SHA3_256_B64_LEN, handled in verify_digest() */
         case SHA256_B64_LEN:
             ctx->digest_type = FKO_DIGEST_SHA256;
             ctx->digest_len  = SHA256_B64_LEN;
@@ -146,6 +187,7 @@ is_valid_digest_len(int t_size, fko_ctx_t ctx)
             ctx->digest_len  = SHA384_B64_LEN;
             break;
 
+        /* Could also match SHA3_512_B64_LEN, handled in verify_digest() */
         case SHA512_B64_LEN:
             ctx->digest_type = FKO_DIGEST_SHA512;
             ctx->digest_len  = SHA512_B64_LEN;
@@ -591,7 +633,7 @@ fko_decode_spa_data(fko_ctx_t ctx)
     return(FKO_SUCCESS);
 }
 
-#ifdef HAVE_C_UNIT_TESTS
+#ifdef HAVE_C_UNIT_TESTS /* LCOV_EXCL_START */
 
 DECLARE_UTEST(num_fields, "Count the number of SPA fields in a SPA packet")
 {
@@ -600,7 +642,7 @@ DECLARE_UTEST(num_fields, "Count the number of SPA fields in a SPA packet")
 
     /* Zeroing the spa packet */
     memset(spa_packet, 0, sizeof(spa_packet));
-    
+
     /* Check we are able to count the number of SPA fields */
     for(ix_field=0 ; ix_field<=MAX_SPA_FIELDS+2 ; ix_field++)
     {
@@ -624,7 +666,7 @@ DECLARE_UTEST(last_field, "Count the number of bytes to the last :")
 
     /* Zeroing the spa packet */
     memset(spa_packet, 0, sizeof(spa_packet));
-    
+
     /* Check for a valid count when the number of field is less than MAX_SPA_FIELDS  */
     CU_ASSERT(last_field("a:") == 2);
     CU_ASSERT(last_field("ab:abc:") == 7);
@@ -650,6 +692,5 @@ int register_ts_fko_decode(void)
     return register_ts(&TEST_SUITE(fko_decode));
 }
 
-#endif /* HAVE_C_UNIT_TESTS */
-
+#endif /* HAVE_C_UNIT_TESTS */ /* LCOV_EXCL_STOP */
 /***EOF***/

@@ -1,12 +1,11 @@
-/*
- *****************************************************************************
+/**
+ * \file common/fko_util.h
  *
- * File:    fko_util.h
- *
- * Purpose: Header for utility functions used by libfko
- *
- *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
- *  Copyright (C) 2009-2014 fwknop developers and contributors. For a full
+ * \brief Header for utility functions used by libfko
+ */
+
+/*  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
+ *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
  *  License (GNU General Public License):
@@ -33,12 +32,18 @@
 
 #include "fko.h"
 
+#define MAX_CMDLINE_ARGS   30    /*!< should be way more than enough */
+#define MAX_ARGS_LINE_LEN  1024
+#define MAX_HOSTNAME_LEN    70
+
 /* Function prototypes
 */
 int     is_valid_encoded_msg_len(const int len);
 int     is_valid_pt_msg_len(const int len);
-int     is_valid_ipv4_addr(const char * const ip_str);
+int     is_valid_ipv4_addr(const char * const ip_str, const int len);
+int     is_valid_hostname(const char * const hostname_str, const int len);
 int     is_base64(const unsigned char * const buf, const unsigned short int len);
+void    hex_dump(const unsigned char *data, const int size);
 int     enc_mode_strtoint(const char *enc_mode_str);
 short   enc_mode_inttostr(int enc_mode, char* enc_mode_str, size_t enc_mode_size);
 int     strtol_wrapper(const char * const str, const int min,
@@ -54,6 +59,22 @@ int     zero_buf(char *buf, int len);
 const char * enc_type_inttostr(const int type);
 const char * msg_type_inttostr(const int type);
 
+void  chop_newline(char *str);
+void  chop_char(char *str, const char chop);
+void  chop_spaces(char *str);
+
+/**
+ *
+ * \brief counts the occurrences of a character
+ *
+ * \return returns the number of chars found
+ */
+int   count_characters(const char *str, const char match, int len);
+
+int   strtoargv(const char * const args_str, char **argv_new, int *argc_new);
+void  free_argv(char **argv_new, int *argc_new);
+
+int   ipv4_resolve(const char *dns_str, char *ip_str);
 #if !HAVE_STRLCAT
 size_t  strlcat(char *dst, const char *src, size_t siz);
 #endif
@@ -67,6 +88,17 @@ char * strndup( const char * s, size_t len );
 #endif
 
 int     dump_ctx_to_buffer(fko_ctx_t ctx, char *dump_buf, size_t dump_buf_len);
+
+#include <sys/types.h>
+#ifdef WIN32
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
+#else
+  #if HAVE_SYS_SOCKET_H
+    #include <sys/socket.h>
+  #endif
+  #include <netdb.h>
+#endif
 
 #endif /* FKO_UTIL_H */
 

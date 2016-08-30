@@ -1,11 +1,10 @@
-/*
- *****************************************************************************
+/**
+ * \file lib/hmac.h
  *
- * File:    hmac.h
- *
- * Purpose: Provide HMAC support for SPA communications
- *
- *  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
+ * \brief Provide HMAC support for SPA communications
+ */
+
+/*  Fwknop is developed primarily by the people listed in the file 'AUTHORS'.
  *  Copyright (C) 2009-2015 fwknop developers and contributors. For a full
  *  list of contributors, see the file 'CREDITS'.
  *
@@ -33,17 +32,111 @@
 
 #include "digest.h"
 
-#define MAX_DIGEST_BLOCK_LEN    SHA512_BLOCK_LEN
-
-void hmac_md5(const char *msg, const unsigned int msg_len,
+#define MAX_DIGEST_BLOCK_LEN    SHA3_256_BLOCK_LEN /**< The longest block length is from SHA3_256 */
+/**
+ * \brief Generate MD5 based HMAC
+ *
+ * This function generates an HMAC verification hash, based on MD5
+ *
+ * \param msg Pointer to the message to be signed
+ * \param msg_len size of the message string
+ * \param hmac Pointer to the hmac buffer, where the final hmac will be stored
+ * \param hmac_key Pointer to the key to be used for generating the hmac
+ * \param hmac_key_len Size of the hmac key
+ *
+ * \return FKO_SUCCESS if successful, returns an error code otherwise.
+ */
+int hmac_md5(const char *msg, const unsigned int msg_len,
         unsigned char *hmac, const char *hmac_key, const int hmac_key_len);
-void hmac_sha1(const char *msg, const unsigned int msg_len,
+/**
+ * \brief Generate SHA1 based HMAC
+ *
+ * This function generates an HMAC verification hash, based on SHA1
+ *
+ * \param msg Pointer to the message to be signed
+ * \param msg_len size of the message string
+ * \param hmac Pointer to the hmac buffer, where the final hmac will be stored
+ * \param hmac_key Pointer to the key to be used for generating the hmac
+ * \param hmac_key_len Size of the hmac key
+ *
+ * \return FKO_SUCCESS if successful, returns an error code otherwise.
+ */
+int hmac_sha1(const char *msg, const unsigned int msg_len,
         unsigned char *hmac, const char *hmac_key, const int hmac_key_len);
-void hmac_sha256(const char *msg, const unsigned int msg_len,
+/**
+ * \brief Generate SHA256 based HMAC
+ *
+ * This function generates an HMAC verification hash, based on SHA256
+ *
+ * \param msg Pointer to the message to be signed
+ * \param msg_len size of the message string
+ * \param hmac Pointer to the hmac buffer, where the final hmac will be stored
+ * \param hmac_key Pointer to the key to be used for generating the hmac
+ * \param hmac_key_len Size of the hmac key
+ *
+ * \return FKO_SUCCESS if successful, returns an error code otherwise.
+ */
+int hmac_sha256(const char *msg, const unsigned int msg_len,
         unsigned char *hmac, const char *hmac_key, const int hmac_key_len);
-void hmac_sha384(const char *msg, const unsigned int msg_len,
+/**
+ * \brief Generate SHA384 based HMAC
+ *
+ * This function generates an HMAC verification hash, based on SHA384
+ *
+ * \param msg Pointer to the message to be signed
+ * \param msg_len size of the message string
+ * \param hmac Pointer to the hmac buffer, where the final hmac will be stored
+ * \param hmac_key Pointer to the key to be used for generating the hmac
+ * \param hmac_key_len Size of the hmac key
+ *
+ * \return FKO_SUCCESS if successful, returns an error code otherwise.
+ */
+int hmac_sha384(const char *msg, const unsigned int msg_len,
         unsigned char *hmac, const char *hmac_key, const int hmac_key_len);
-void hmac_sha512(const char *msg, const unsigned int msg_len,
+/**
+ * \brief Generate SHA512 based HMAC
+ *
+ * This function generates an HMAC verification hash, based on SHA512
+ *
+ * \param msg Pointer to the message to be signed
+ * \param msg_len size of the message string
+ * \param hmac Pointer to the hmac buffer, where the final hmac will be stored
+ * \param hmac_key Pointer to the key to be used for generating the hmac
+ * \param hmac_key_len Size of the hmac key
+ *
+ * \return FKO_SUCCESS if successful, returns an error code otherwise.
+ */
+int hmac_sha512(const char *msg, const unsigned int msg_len,
+        unsigned char *hmac, const char *hmac_key, const int hmac_key_len);
+/**
+ * \brief Generate SHA3-256 based HMAC
+ *
+ * This function generates an HMAC verification hash, based on SHA3-256
+ *
+ * \param msg Pointer to the message to be signed
+ * \param msg_len size of the message string
+ * \param hmac Pointer to the hmac buffer, where the final hmac will be stored
+ * \param hmac_key Pointer to the key to be used for generating the hmac
+ * \param hmac_key_len Size of the hmac key
+ *
+ * \return FKO_SUCCESS if successful, returns an error code otherwise.
+ */
+int hmac_sha3_256(const char *msg, const unsigned int msg_len,
+        unsigned char *hmac, const char *hmac_key, const int hmac_key_len);
+/**
+ * \brief Generate SHA3-512 based HMAC
+ *
+ * This function generates an HMAC verification hash, based on SHA3-512
+ *
+ * \param msg Pointer to the message to be signed
+ * \param msg_len size of the message string
+ * \param hmac Pointer to the hmac buffer, where the final hmac will be stored
+ * \param hmac_key Pointer to the key to be used for generating the hmac
+ * \param hmac_key_len Size of the hmac key
+ *
+ * \return FKO_SUCCESS if successful, returns an error code otherwise.
+ */
+int hmac_sha3_512(const char *msg, const unsigned int msg_len,
         unsigned char *hmac, const char *hmac_key, const int hmac_key_len);
 
 #endif /* HMAC_H */
