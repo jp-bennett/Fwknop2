@@ -22,6 +22,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -353,7 +354,11 @@ public class ConfigDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_config_detail, container, false);
         active_Nick = getArguments().getString("item_id");
-        myJuice = new PluginContract();
+        try {
+            myJuice = new PluginContract();
+        } catch (Exception e) {
+            Log.e("fwknop2", "Juicessh exception");
+        }
 
         //Handlers for the input fields
         txt_NickName = (TextView) rootView.findViewById(R.id.NickName);
@@ -478,32 +483,39 @@ public class ConfigDetailFragment extends Fragment {
                     spn_juice.setVisibility(View.GONE);
                 } else if (pos == 3) {
                     if (getActivity().checkCallingOrSelfPermission("com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS") == PackageManager.PERMISSION_GRANTED) {
+                        try {
+                            lay_sshcmd.setVisibility(View.GONE);
+                            lay_ovpncmd.setVisibility(View.GONE);
 
-                        lay_sshcmd.setVisibility(View.GONE);
-                        lay_ovpncmd.setVisibility(View.GONE);
+                            if (connectionListLoader == null) {
 
-                        if (connectionListLoader == null) {
-                            connectionListLoader = new ConnectionListLoader(getActivity(), juice_adapt);
-                            connectionListLoader.setOnLoadedListener(new ConnectionListLoader.OnLoadedListener() {
-                                @Override
-                                public void onLoaded() {  // This is so ugly...
-                                    spn_juice.setVisibility(View.VISIBLE);
-                                    if (config.SSH_CMD.contains("juice:") && spn_juice.getCount() > 0) {
-                                        for (int n = 0; n < spn_juice.getCount(); n++) {
-                                            if (config.SSH_CMD.contains(juice_adapt.getConnectionName(n))) {
-                                                spn_juice.setSelection(n);
+                                connectionListLoader = new ConnectionListLoader(getActivity(), juice_adapt);
+                                connectionListLoader.setOnLoadedListener(new ConnectionListLoader.OnLoadedListener() {
+                                    @Override
+                                    public void onLoaded() {  // This is so ugly...
+                                        spn_juice.setVisibility(View.VISIBLE);
+                                        if (config.SSH_CMD.contains("juice:") && spn_juice.getCount() > 0) {
+                                            for (int n = 0; n < spn_juice.getCount(); n++) {
+                                                if (config.SSH_CMD.contains(juice_adapt.getConnectionName(n))) {
+                                                    spn_juice.setSelection(n);
+                                                }
                                             }
                                         }
                                     }
-                                }
-                            });
-                            getActivity().getSupportLoaderManager().initLoader(0, null, connectionListLoader);
-                        } else {
-                            getActivity().getSupportLoaderManager().restartLoader(0, null, connectionListLoader);
+                                });
+                                getActivity().getSupportLoaderManager().initLoader(0, null, connectionListLoader);
+                            } else {
+                                getActivity().getSupportLoaderManager().restartLoader(0, null, connectionListLoader);
+                            }
+                        } catch (Exception e) {
+                            Log.e("fwknop2", "Juicessh error");
                         }
                     } else {
                         Context context = getActivity();
                         CharSequence text = getText(R.string.juice_permissions);
+                        if(Build.VERSION.SDK_INT < 23) {
+                            text = getText(R.string.juice_permissions_reinstall);
+                        }
                         int duration = Toast.LENGTH_LONG;
                         Toast toast = Toast.makeText(context, text, duration);
                         toast.setGravity(Gravity.CENTER, 0, 0);

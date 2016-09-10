@@ -1,10 +1,6 @@
 package biz.incomsystems.fwknop2;
 
-import android.util.Log;
-
-import org.apache.commons.validator.routines.DomainValidator;
 import org.apache.commons.validator.routines.InetAddressValidator;
-
 import java.util.UUID;
 
 public class Config {
@@ -69,7 +65,7 @@ public class Config {
             return(R.string.port_format);
         } else if (!(this.ACCESS_IP.equalsIgnoreCase("Allow IP") || this.ACCESS_IP.equalsIgnoreCase("Resolve IP") || this.ACCESS_IP.equalsIgnoreCase("Prompt IP") || (ipValidate.isValid(this.ACCESS_IP)))){ //Have to have a valid ip to allow, if using allow ip
             return(R.string.valid_ip);
-        }  else if (!ipValidate.isValid(this.SERVER_IP) && !DomainValidator.getInstance().isValid(this.SERVER_IP)) { // check server entry. Must be a valid url or ip.
+        }  else if (!this.SERVER_IP.contains(".")) { // very loose checking, throws error when knocking.
             return(R.string.valid_server);
         } else if (this.juice_uuid == null) { //This one might have to go in the main function
             return (R.string.juice_first);
