@@ -164,7 +164,7 @@ public class ConfigDetailFragment extends Fragment {
         } else if (id == R.id.qr_code) {
             try {
                 IntentIntegrator.forSupportFragment(this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES).initiateScan();
-            } catch (Exception e) { // This is where the play store is called if the app is not installed
+            } catch (Throwable e) { // This is where the play store is called if the app is not installed
 
             }
         } else if (id == R.id.save) {
@@ -352,11 +352,21 @@ public class ConfigDetailFragment extends Fragment {
     @Override  //This is all the setup stuff for this fragment.
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        Thread.setDefaultUncaughtExceptionHandler(
+                new Thread.UncaughtExceptionHandler() {
+                    @Override public void uncaughtException(Thread t, Throwable e) {
+                        Log.e("fwknop2", t.getName()+": "+e);
+                        //MyWorker worker = new MyWorker();
+                        //worker.start();
+                    }
+                });
+
         View rootView = inflater.inflate(R.layout.fragment_config_detail, container, false);
         active_Nick = getArguments().getString("item_id");
         try {
             myJuice = new PluginContract();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Log.e("fwknop2", "Juicessh exception");
         }
 
@@ -458,8 +468,12 @@ public class ConfigDetailFragment extends Fragment {
                         new String[]{"com.sonelli.juicessh.api.v1.permission.READ_CONNECTIONS", "com.sonelli.juicessh.api.v1.permission.OPEN_SESSIONS"},
                         0);
             }
-            juice_adapt = new ConnectionSpinnerAdapter(getActivity());
-            spn_juice.setAdapter(juice_adapt);
+            try {
+                juice_adapt = new ConnectionSpinnerAdapter(getActivity());
+                spn_juice.setAdapter(juice_adapt);
+            } catch (Throwable ex) {
+                Log.e("fwknop2", "Juicessh error");
+            }
         } else {
             list.remove(3);
             adapter_ssh.notifyDataSetChanged();
@@ -507,7 +521,7 @@ public class ConfigDetailFragment extends Fragment {
                             } else {
                                 getActivity().getSupportLoaderManager().restartLoader(0, null, connectionListLoader);
                             }
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             Log.e("fwknop2", "Juicessh error");
                         }
                     } else {

@@ -13,7 +13,7 @@ model {
             applicationId = "org.cipherdyne.fwknop2"
             minSdkVersion.apiLevel = 16
             targetSdkVersion.apiLevel = 24
-            versionCode = 27
+            versionCode = 31
             versionName = "1.2.2"
         }
         //lintOptions {

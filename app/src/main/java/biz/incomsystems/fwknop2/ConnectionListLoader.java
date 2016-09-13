@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 
 import com.sonelli.juicessh.pluginlibrary.PluginContract;
 
@@ -36,6 +37,7 @@ public class ConnectionListLoader implements LoaderManager.LoaderCallbacks<Curso
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
+        try {
         return new CursorLoader(
                 context,
                 PluginContract.Connections.CONTENT_URI,
@@ -44,6 +46,10 @@ public class ConnectionListLoader implements LoaderManager.LoaderCallbacks<Curso
                 null,
                 PluginContract.Connections.SORT_ORDER_DEFAULT
         );
+        } catch (Throwable ex) {
+            Log.e("fwknop2", "Juice error");
+        }
+        return null;
 
     }
 
@@ -54,11 +60,15 @@ public class ConnectionListLoader implements LoaderManager.LoaderCallbacks<Curso
      */
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        try {
         if (adapter != null) {
             adapter.swapCursor(cursor);
             if (listener != null) {
                 listener.onLoaded();
             }
+        }
+        } catch (Throwable ex) {
+            Log.e("fwknop2", "Juice error");
         }
     }
 
@@ -69,8 +79,12 @@ public class ConnectionListLoader implements LoaderManager.LoaderCallbacks<Curso
      */
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        try {
         if (adapter != null) {
             adapter.swapCursor(null);
+        }
+        } catch (Throwable ex) {
+            Log.e("fwknop2", "Juice error");
         }
     }
 }
