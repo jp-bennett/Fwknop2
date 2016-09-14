@@ -128,7 +128,7 @@
     <string name="config_Aports">Access Ports:</string>
     <string name="config_Ftimeout">Firewall Timeout:</string>
     <string name="config_Reknock">Keep open:</string>
-    <string name="config_notification">Show timeout notification:</string>
+    <string name="config_notification">Show timeout notification.</string>
     <string name="config_InternalIP">Internal IP:</string>
     <string name="config_internal_port">Internal Port:</string>
     <string name="config_cmd">Server Command:</string>
@@ -136,7 +136,7 @@
     <string name="config_ssh_uri">User@address:port</string>
     <string name="config_ovpn_uri">ovpn config name</string>
     <string name="config_http_url">Http or https address to query to find our IP:</string>
-    <string name="config_dns">Try to retrieve our ip using dns first.</string>
+    <string name="config_dns">Try to retrieve our IP using dns first.</string>
     <string name="config_button_save">Save settings</string>
     <string name="configure">Configure</string>
     <string name="config_button_default">Default</string>
