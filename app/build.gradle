@@ -1,6 +1,6 @@
 apply plugin: 'com.android.model.application'
 repositories {
-    maven { url 'https://raw.github.com/Sonelli/maven/master' }
+    maven { url "https://jitpack.io" }
 }
 model {
 
@@ -64,5 +64,5 @@ dependencies {
     compile 'dnsjava:dnsjava:2.1.7'
     compile 'com.google.zxing:core:3.2.1'
     compile 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
-    compile 'com.sonelli:juicessh-pluginlibrary:1.0.+@aar'
+    compile 'com.github.Sonelli:juicessh-pluginlibrary:cf1a9c3494'
 }
