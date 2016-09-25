@@ -123,7 +123,7 @@ public class ConfigListFragment extends ListFragment {
                         OurSender = new SendSPA();
                         OurSender.reKnock = false;
                         OurSender.send(nick, getActivity());
-                        OurSender = null;
+                        //OurSender = null;
                         //if we launch the service from here...  we can tell sender to
                     }
 

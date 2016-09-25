@@ -127,11 +127,11 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             data2.putExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, gpg_sig);
             data2.putExtra(OpenPgpApi.EXTRA_KEY_IDS, key_array);
             data2.putExtra(OpenPgpApi.EXTRA_REQUEST_ASCII_ARMOR, false);
-            //os = new ByteArrayOutputStream();
-            //is = new ByteArrayInputStream(gpg_string.getBytes(Charset.forName("ASCII")));
+            os = new ByteArrayOutputStream();
+            is = new ByteArrayInputStream(gpg_string.getBytes(Charset.forName("ASCII")));
             OpenPgpApi api = new OpenPgpApi(ourAct, myServiceConnection.getService());
             Intent result = api.executeApi(data2, is, os);
-            gpg_string = "";
+            //gpg_string = "";
             if (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR) == OpenPgpApi.RESULT_CODE_SUCCESS) {
                 gpg_string = Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);  //Base64 encoding somewhere?
             }
@@ -447,6 +447,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             } else {
                 nat_local = "false";
             }
+            Log.d("fwknop2", "gpg string is" + gpg_string);
 
             spaPacket = sendSPAPacket();
             Log.d("fwknop2", "gpg string is" + gpg_string);
