@@ -120,8 +120,10 @@ public class ConfigListFragment extends ListFragment {
                 new View.OnClickListener() {
                     public void onClick(View v) {
                         String nick = ((ConfigListActivity) getActivity()).selected_nick;
+                        OurSender = new SendSPA();
                         OurSender.reKnock = false;
                         OurSender.send(nick, getActivity());
+                        OurSender = null;
                         //if we launch the service from here...  we can tell sender to
                     }
 
@@ -147,7 +149,7 @@ public class ConfigListFragment extends ListFragment {
         super.onViewCreated(view, savedInstanceState);
         mydb = new DBHelper(getActivity());
         array_list = mydb.getAllConfigs();
-        OurSender = new SendSPA();
+        //OurSender = new SendSPA();
         customAdapter = new ArrayAdapter<ArrayList>(
                 getActivity(),
                 android.R.layout.simple_list_item_activated_1,
@@ -196,6 +198,7 @@ public class ConfigListFragment extends ListFragment {
         @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+            if (OurSender != null)
         OurSender.onActivityResult(requestCode, resultCode, data); // have to call this manually as it isn't an activity class
     }
 
@@ -283,7 +286,7 @@ public class ConfigListFragment extends ListFragment {
     public void onDestroy() {
         super.onDestroy();
 
-        if (OurSender.isConnected) {
+        if (OurSender != null && OurSender.isConnected) {
             OurSender.client.stop(getActivity());
         }
     }

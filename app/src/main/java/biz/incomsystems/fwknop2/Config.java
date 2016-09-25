@@ -25,6 +25,9 @@ public class Config {
     public String DIGEST_TYPE;
     public String HMAC_TYPE;
     public Boolean KEEP_OPEN;
+    public Long GPG_SIG;
+    public Long GPG_KEY;
+    public Boolean USE_GPG;
 
     public int Is_Valid(){
         InetAddressValidator ipValidate = new InetAddressValidator();
@@ -50,7 +53,9 @@ public class Config {
             }
         }
         if (this.NICK_NAME.equalsIgnoreCase("")) { // Need to create a new Nick
-            return(R.string.unique_nick); // choosing a used nick will just overwrite it. So really
+            return (R.string.unique_nick); // choosing a used nick will just overwrite it. So really
+        } else if (USE_GPG &&  GPG_SIG == 0) {
+            return(R.string.no_gpg_selected);
         } else if ((this.LEGACY && this.HMAC_BASE64) || (this.LEGACY && !this.HMAC.equalsIgnoreCase(""))) {
             return(R.string.HMAC_Legacy);
         } else if(this.HMAC_BASE64 && this.HMAC.length() % 4 != 0) { // base64 must have a multiple of 4 length

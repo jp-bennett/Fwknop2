@@ -19,11 +19,14 @@ package biz.incomsystems.fwknop2;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -38,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
@@ -51,6 +55,13 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.sonelli.juicessh.pluginlibrary.PluginContract;
 
+import org.openintents.openpgp.IOpenPgpService2;
+import org.openintents.openpgp.util.OpenPgpApi;
+import org.openintents.openpgp.util.OpenPgpServiceConnection;
+import org.openintents.openpgp.util.OpenPgpUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
@@ -64,8 +75,15 @@ import java.util.UUID;
 public class ConfigDetailFragment extends Fragment {
     private ConnectionListLoader connectionListLoader;
 
+    OpenPgpServiceConnection myServiceConnection;
+
+    Boolean openKeychainBound = false;
+    public static final int REQUEST_CODE_SET_SIG = 9915;
+    public static final int REQUEST_CODE_SET_CRYPT = 9916;
+
     DBHelper mydb;
     Boolean juiceInstalled;
+    Boolean openKeychainInstalled;
     PluginContract myJuice;
     Config config;
     TextView txt_NickName ;  // objects representing the config options
@@ -84,6 +102,13 @@ public class ConfigDetailFragment extends Fragment {
     LinearLayout lay_sshcmd;
     LinearLayout lay_ovpncmd;
     LinearLayout lay_serverPort;
+    LinearLayout lay_KEY;
+    LinearLayout lay_gpg_buttons;
+    LinearLayout lay_HMAC;
+    Button btn_gpg_encrypt;
+    Button btn_gpg_sig;
+    TextView txt_gpg_crypt;
+    TextView txt_gpg_sig;
     TextView txt_ssh_cmd;
     TextView txt_ovpn_cmd;
     String configtype = "Open Port";
@@ -105,6 +130,7 @@ public class ConfigDetailFragment extends Fragment {
     CheckBox chkblegacy;
     CheckBox chkbrandom;
     CheckBox chkbKeep_Open;
+    CheckBox chkbUse_GPG;
 
     /**
      * The fragment argument representing the item ID that this fragment
@@ -135,11 +161,90 @@ public class ConfigDetailFragment extends Fragment {
         try {
             pm.getPackageInfo("com.sonelli.juicessh", PackageManager.GET_ACTIVITIES);
             juiceInstalled = true;
-            Log.v("fwknop2", "installed");
+            Log.v("fwknop2", "juicessh installed");
         } catch (PackageManager.NameNotFoundException e) {
             juiceInstalled = false;
-            Log.v("fwknop2", "not installed");
+            Log.v("fwknop2", "juicessh not installed");
         }
+
+        try {
+            pm.getPackageInfo("org.sufficientlysecure.keychain", PackageManager.GET_ACTIVITIES);
+            openKeychainInstalled = true;
+            Log.v("fwknop2", "Openkeychain installed");
+        } catch (PackageManager.NameNotFoundException e) {
+            openKeychainInstalled = false;
+            Log.v("fwknop2", "Openkeychain not installed");
+        }
+        if (openKeychainInstalled) {
+            myServiceConnection = new OpenPgpServiceConnection(getActivity().getApplicationContext(), "org.sufficientlysecure.keychain",
+                new OpenPgpServiceConnection.OnBound() {
+                    @Override
+                    public void onBound(IOpenPgpService2 service) {
+                        Log.d(OpenPgpApi.TAG, "onBound!");
+                        openKeychainBound = true;
+
+                        Intent data = new Intent();
+                        data.setAction(OpenPgpApi.ACTION_CHECK_PERMISSION);
+                        OpenPgpApi api = new OpenPgpApi(getActivity(), myServiceConnection.getService());
+
+                        Intent result = api.executeApi(data, (InputStream) null, null);
+                        switch (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {
+                            case OpenPgpApi.RESULT_CODE_SUCCESS: {
+
+                                Log.d("fwknop2", "Result OK");
+                                break;
+                            }
+                            case OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED: {
+                                //Toast.makeText(getActivity(), "Interaction required", Toast.LENGTH_LONG).show();
+                                Log.d("fwknop2", "Result Interaction");
+                                PendingIntent pi = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT);
+                                try {
+                                    getActivity().startIntentSenderForResult(pi.getIntentSender(), 42, null, 0, 0, 0);
+                                } catch (IntentSender.SendIntentException e) {
+                                    Log.e("fwknop2", "SendIntentException", e);
+                                }
+                                break;
+                            }
+                            case OpenPgpApi.RESULT_CODE_ERROR: {
+                                //OpenPgpError error = result.getParcelableExtra(OpenPgpApi.RESULT_ERROR);
+                                Toast.makeText(getActivity(), "Opengpg error, is Openkeychain installed?", Toast.LENGTH_LONG).show();
+                                chkbUse_GPG.setChecked(false);
+                                lay_KEY.setVisibility(View.VISIBLE);
+                                chkb64key.setVisibility(View.VISIBLE);
+                                lay_gpg_buttons.setVisibility(View.GONE);
+                            }
+
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e(OpenPgpApi.TAG, "exception when binding!", e);
+                    }
+                }
+            );
+            //myServiceConnection.bindToService();
+        }
+
+
+
+
+
+
+    }
+
+    @Override
+    public void onDestroy() {
+        if (myServiceConnection != null && openKeychainBound) {
+            try {
+                myServiceConnection.unbindFromService();
+            } catch (Exception e) {
+                Log.e("fwknop2", "Error unbinding openkeychain service");
+            }
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -164,7 +269,7 @@ public class ConfigDetailFragment extends Fragment {
         } else if (id == R.id.qr_code) {
             try {
                 IntentIntegrator.forSupportFragment(this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES).initiateScan();
-            } catch (Throwable e) { // This is where the play store is called if the app is not installed
+            } catch (Throwable e) {
 
             }
         } else if (id == R.id.save) {
@@ -238,8 +343,20 @@ public class ConfigDetailFragment extends Fragment {
                 config.juice_uuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
                 config.SSH_CMD = "";
             }
-            config.KEY = txt_KEY.getText().toString();       //key
-            config.KEY_BASE64 = chkb64key.isChecked();                      //is key b64
+
+            if (chkbUse_GPG.isChecked()) {
+                config.USE_GPG = true;
+                config.KEY = "";
+                config.KEY_BASE64 = false;
+                config.KEEP_OPEN = false;
+                //config.GPG_KEY = txt_gpg_crypt.getText().toString();
+                //config.GPG_SIG = txt_gpg_sig.getText().toString();
+            } else {
+                config.KEY = txt_KEY.getText().toString();       //key
+                config.KEY_BASE64 = chkb64key.isChecked();       //is key b64
+                config.GPG_KEY = 0L;
+                config.GPG_SIG = 0L;
+            }
             config.HMAC = txt_HMAC.getText().toString(); // hmac key
             config.HMAC_BASE64 = chkb64hmac.isChecked();                     //is hmac base64
             config.LEGACY = chkblegacy.isChecked();
@@ -313,9 +430,6 @@ public class ConfigDetailFragment extends Fragment {
                             }
                         });
                 alertDialog.show();
-                /*
-                toast.setText(getString(isValid));
-                toast.show(); */
             }
 
 
@@ -328,27 +442,105 @@ public class ConfigDetailFragment extends Fragment {
 
     @Override // Handle the qr code results
     public void onActivityResult(int requestCode, int resultCode, Intent data) { // Handle the qr code results
-        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if ((scanResult != null) && (scanResult.getContents() != null)) {
-            String contents = scanResult.getContents();
-            for (String stanzas: contents.split(" ")){
-                String[] tmp = stanzas.split(":");
-                if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
-                   txt_KEY.setText(tmp[1]);
-                    chkb64key.setChecked(true);
-                } else  if (tmp[0].equalsIgnoreCase("KEY")) {
-                    txt_KEY.setText(tmp[1]);
-                    chkb64key.setChecked(false);
-                } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
-                    txt_HMAC.setText(tmp[1]);
-                    chkb64hmac.setChecked(true);
-                } else if (tmp[0].equalsIgnoreCase( "HMAC_KEY")) {
-                    txt_HMAC.setText(tmp[1]);
-                    chkb64hmac.setChecked(false);
+        Log.d("fwknop2", "Result: " + resultCode);
+        if (data == null)
+            return;
+        switch (requestCode) {
+            case REQUEST_CODE_SET_CRYPT: {
+                Log.d("fwknop2", "Trying to set crypt");
+                config.GPG_KEY = data.getLongArrayExtra(OpenPgpApi.RESULT_KEY_IDS)[0];
+                txt_gpg_crypt.setText(OpenPgpUtils.convertKeyIdToHex(config.GPG_KEY));
+                //data.getLongArrayExtra(OpenPgpApi.RESULT_KEY_IDS)[0]; //Need to change all the things, store the long instead of the hex
+                break;
+            }
+            case REQUEST_CODE_SET_SIG: {
+                config.GPG_SIG = data.getLongExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, 0);
+                txt_gpg_sig.setText(OpenPgpUtils.convertKeyIdToHex(config.GPG_SIG));
+                break;
+            }
+            default: {
+
+                Log.d("fwknop2", requestCode + " " + resultCode);
+                IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+                if ((scanResult != null) && (scanResult.getContents() != null)) {
+                    String contents = scanResult.getContents();
+                    for (String stanzas : contents.split(" ")) {
+                        String[] tmp = stanzas.split(":");
+                        if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
+                            txt_KEY.setText(tmp[1]);
+                            chkb64key.setChecked(true);
+                        } else if (tmp[0].equalsIgnoreCase("KEY")) {
+                            txt_KEY.setText(tmp[1]);
+                            chkb64key.setChecked(false);
+                        } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
+                            txt_HMAC.setText(tmp[1]);
+                            chkb64hmac.setChecked(true);
+                        } else if (tmp[0].equalsIgnoreCase("HMAC_KEY")) {
+                            txt_HMAC.setText(tmp[1]);
+                            chkb64hmac.setChecked(false);
+                        }
+                    }// end for loop
                 }
-            }// end for loop
+            }
         }
     }
+
+    private class openkeychainCallback implements OpenPgpApi.IOpenPgpCallback {
+        boolean returnToCiphertextField;
+        ByteArrayOutputStream os;
+        int requestCode;
+
+        private openkeychainCallback(boolean returnToCiphertextField, ByteArrayOutputStream os, int requestCode) {
+            this.returnToCiphertextField = returnToCiphertextField;
+            this.os = os;
+            this.requestCode = requestCode;
+        }
+
+        @Override
+        public void onReturn(Intent result) {
+            Log.d("fwknop2", "in callback onreturn");
+            switch (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {
+                case OpenPgpApi.RESULT_CODE_SUCCESS: {
+
+                    switch (requestCode) {
+                        case REQUEST_CODE_SET_CRYPT: {
+                            Log.d("fwknop2", "Trying to set crypt");
+                            txt_gpg_crypt.setText(OpenPgpUtils.convertKeyIdToHex(result.getLongArrayExtra(OpenPgpApi.RESULT_KEY_IDS)[0]));
+                            break;
+                        }
+                        case REQUEST_CODE_SET_SIG: {
+                            txt_gpg_sig.setText(OpenPgpUtils.convertKeyIdToHex(result.getLongArrayExtra(OpenPgpApi.RESULT_KEY_IDS)[0]));
+                            break;
+                        }
+                        default: {
+
+                        }
+                    }
+
+                    break;
+                }
+
+                case OpenPgpApi.RESULT_CODE_ERROR: {
+                    Log.e("fwknop2", "Openkeychain error");
+
+                    break;
+                }
+                case OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED: {
+                    Log.d("fwknop2", "interaction");
+                    PendingIntent pi = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT);
+                    try {
+                        getActivity().startIntentSenderFromChild(
+                                getActivity(), pi.getIntentSender(),
+                                requestCode, null, 0, 0, 0);
+                    } catch (IntentSender.SendIntentException e) {
+
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     @Override  //This is all the setup stuff for this fragment.
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -391,7 +583,16 @@ public class ConfigDetailFragment extends Fragment {
         txt_ssh_cmd = (TextView) rootView.findViewById(R.id.sshcmd);
         lay_ovpncmd = (LinearLayout) rootView.findViewById(R.id.ovpncmdsl);
         txt_ovpn_cmd = (TextView) rootView.findViewById(R.id.ovpncmd);
+        lay_KEY = (LinearLayout) rootView.findViewById(R.id.passwdl);
+        lay_gpg_buttons = (LinearLayout) rootView.findViewById(R.id.lay_gpg_buttons);
+        btn_gpg_encrypt = (Button) rootView.findViewById(R.id.gpg_encrypt_button);
+        btn_gpg_sig = (Button) rootView.findViewById(R.id.gpg_sig_button);
+
+        txt_gpg_crypt = (TextView) rootView.findViewById(R.id.gpg_encrypt_lbl);
+        txt_gpg_sig = (TextView) rootView.findViewById(R.id.gpg_sig_lbl);
+
         txt_KEY = (TextView) rootView.findViewById(R.id.passwd);
+        lay_HMAC = (LinearLayout) rootView.findViewById(R.id.hmacl);
         txt_HMAC = (TextView) rootView.findViewById(R.id.hmac);
         chkb64hmac = (CheckBox) rootView.findViewById(R.id.chkb64hmac);
         chkb64key = (CheckBox) rootView.findViewById(R.id.chkb64key);
@@ -399,6 +600,7 @@ public class ConfigDetailFragment extends Fragment {
         chkbrandom = (CheckBox) rootView.findViewById(R.id.chkbrandom);
         spn_allowip = (Spinner) rootView.findViewById(R.id.allowip);
         chkbKeep_Open = (CheckBox) rootView.findViewById(R.id.chkbKeep_open);
+        chkbUse_GPG = (CheckBox) rootView.findViewById(R.id.chkbGPG);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.spinner_options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -425,6 +627,48 @@ public class ConfigDetailFragment extends Fragment {
                 } else {
                     lay_serverPort.setVisibility(View.VISIBLE);
                 }
+            }
+        });
+
+        chkbUse_GPG.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean ischecked) {
+                if (ischecked) {
+                    if (!openKeychainInstalled) {
+                        Toast.makeText(getActivity(), "Openkeychain must be installed to use GPG", Toast.LENGTH_LONG).show();
+                        chkbUse_GPG.setChecked(false);
+                        return;
+                    }
+                    lay_KEY.setVisibility(View.GONE);
+                    chkb64key.setVisibility(View.GONE);
+                    lay_gpg_buttons.setVisibility(View.VISIBLE);
+                    chkbKeep_Open.setVisibility(View.GONE);
+                    myServiceConnection.bindToService();
+
+                } else {
+                    lay_KEY.setVisibility(View.VISIBLE);
+                    chkbKeep_Open.setVisibility(View.VISIBLE);
+                    chkb64key.setVisibility(View.VISIBLE);
+                    lay_gpg_buttons.setVisibility(View.GONE);
+                }
+            }
+        });
+        btn_gpg_encrypt.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //move this to the buttons
+                Intent data = new Intent();
+                data.setAction(OpenPgpApi.ACTION_GET_KEY_IDS);
+                OpenPgpApi api = new OpenPgpApi(getActivity(), myServiceConnection.getService());
+                api.executeApiAsync(data, null, null, new openkeychainCallback(false, null, REQUEST_CODE_SET_CRYPT));
+            }
+        });
+        btn_gpg_sig.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //move this to the buttons
+                Intent data = new Intent();
+                data.setAction(OpenPgpApi.ACTION_GET_SIGN_KEY_ID);
+                OpenPgpApi api = new OpenPgpApi(getActivity(), myServiceConnection.getService());
+                api.executeApiAsync(data, null, null, new openkeychainCallback(false, null, REQUEST_CODE_SET_SIG));
             }
         });
 
@@ -560,7 +804,8 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Open Port";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
-                    chkbKeep_Open.setVisibility(View.VISIBLE);
+                    if (!chkbUse_GPG.isChecked())
+                        chkbKeep_Open.setVisibility(View.VISIBLE);
                     lay_natIP.setVisibility(View.GONE);
                     lay_natport.setVisibility(View.GONE);
                     lay_serverCMD.setVisibility(View.GONE);
@@ -571,7 +816,8 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Nat Access";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
-                    chkbKeep_Open.setVisibility(View.VISIBLE);
+                    if (!chkbUse_GPG.isChecked())
+                        chkbKeep_Open.setVisibility(View.VISIBLE);
                     lay_natIP.setVisibility(View.VISIBLE);
                     lay_natport.setVisibility(View.VISIBLE);
                     lay_serverCMD.setVisibility(View.GONE);
@@ -580,7 +826,8 @@ public class ConfigDetailFragment extends Fragment {
                     configtype = "Local Nat Access";
                     lay_AccessPort.setVisibility(View.VISIBLE);
                     lay_fwTimeout.setVisibility(View.VISIBLE);
-                    chkbKeep_Open.setVisibility(View.VISIBLE);
+                    if (!chkbUse_GPG.isChecked())
+                        chkbKeep_Open.setVisibility(View.VISIBLE);
                     lay_natIP.setVisibility(View.GONE);
                     lay_natport.setVisibility(View.VISIBLE);
                     lay_serverCMD.setVisibility(View.GONE);
@@ -597,7 +844,6 @@ public class ConfigDetailFragment extends Fragment {
                     txt_ports.setText("");
                     txt_nat_ip.setText("");
                     txt_nat_port.setText("");
-                    //txt_server_time.setText("");
                 }
             }
 
@@ -633,14 +879,40 @@ public class ConfigDetailFragment extends Fragment {
             }
             txt_server_time.setText(config.SERVER_TIMEOUT);
             chkbKeep_Open.setChecked(config.KEEP_OPEN);
-            txt_KEY.setText(config.KEY);
-            if (config.KEY_BASE64) {
-                chkb64key.setChecked(true);
-            } else { chkb64key.setChecked(false);}
+
+            if (config.GPG_KEY == 0) {
+                config.USE_GPG = false;
+                chkbUse_GPG.setChecked(false);
+                chkbKeep_Open.setVisibility(View.VISIBLE);
+                txt_KEY.setText(config.KEY);
+                lay_KEY.setVisibility(View.VISIBLE);
+                chkb64key.setVisibility(View.VISIBLE);
+                lay_gpg_buttons.setVisibility(View.GONE);
+                if (config.KEY_BASE64) {
+                    chkb64key.setChecked(true);
+                } else {
+                    chkb64key.setChecked(false);
+                }
+
+
+            } else {
+                chkbUse_GPG.setChecked(true);
+                config.USE_GPG = true;
+                Log.d("fwknop2", "here");
+                chkbKeep_Open.setVisibility(View.GONE);
+                lay_KEY.setVisibility(View.GONE);
+                chkb64key.setVisibility(View.GONE);
+                lay_gpg_buttons.setVisibility(View.VISIBLE);
+                txt_KEY.setText("");
+                txt_gpg_crypt.setText(OpenPgpUtils.convertKeyIdToHex(config.GPG_KEY));
+                txt_gpg_sig.setText(OpenPgpUtils.convertKeyIdToHex(config.GPG_SIG));
+            }
             txt_HMAC.setText(config.HMAC);
             if (config.HMAC_BASE64) {
                 chkb64hmac.setChecked(true);
-            } else { chkb64hmac.setChecked(false);}
+            } else {
+                chkb64hmac.setChecked(false);
+            }
             if (!config.SERVER_CMD.equalsIgnoreCase("")) { //can move this logic elsewhere
                 spn_configtype.setSelection(3);
                 txt_server_cmd.setText(config.SERVER_CMD);

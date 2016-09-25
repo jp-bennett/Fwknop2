@@ -116,6 +116,7 @@
     <string name="config_nickname">Nickname:</string>
     <string name="config_saddress">Server Address:</string>
     <string name="config_udp_port">Server Port:</string>
+    <string name="config_useGPG">Use GPG</string>
     <string name="config_rkey">Rijndael Key:</string>
     <string name="config_b64_key">Key Is Base 64</string>
     <string name="config_digest_type">SPA Digest Type</string>
@@ -163,4 +164,5 @@
     <string name="SendingSPATo">"Sending SPA to "</string>
     <string name="NotValidNatIP">You must supply a valid NAT IP</string>
     <string name="NotValidNatPort">You must provide a valid NAT port</string>
+    <string name="no_gpg_selected">Please select gpg keys</string>
 </resources>

@@ -115,6 +115,59 @@
 
     </LinearLayout>
 
+    <CheckBox
+        android:id="@+id/chkbGPG"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/config_useGPG"
+        />
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/lay_gpg_buttons"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+
+        <RelativeLayout
+
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/gpg_encrypt_button"
+                android:text="Encryption key"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+            />
+            <Button
+                android:id="@+id/gpg_sig_button"
+                android:text="Signature key"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+            />
+        </RelativeLayout>
+        <RelativeLayout
+
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/gpg_encrypt_lbl"
+                android:text="None selected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/gpg_sig_lbl"
+                android:text="None selected"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+    </LinearLayout>
 
 
     <LinearLayout android:id="@+id/passwdl"

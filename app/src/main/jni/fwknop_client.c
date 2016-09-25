@@ -55,6 +55,11 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     char nat_msg[MSG_BUFSIZE+1] = {0};
     jstring ourSpa;
     char *key_tmp[MAX_KEY_LEN+1] = {0}, *hmac_key_tmp[MAX_KEY_LEN+1] = {0};
+    char * spa_buf_ptr;
+    char * spa_digest_ptr;
+    char spa_buf[4096] = {0};
+    char crypt_buf[4096] = {0};
+    char * hmac_buf;
 
 
     LOGV("**** Init fwknop ****");
@@ -115,6 +120,10 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     fid = (*env)->GetFieldID(env, c, "legacy", "Ljava/lang/String;");
     jstring jlegacy = (*env)->GetObjectField(env, thiz, fid);
     const char *legacy = (*env)->GetStringUTFChars(env, jlegacy, 0);
+
+    jfieldID gpg_fid = (*env)->GetFieldID(env, c, "gpg_string", "Ljava/lang/String;");
+    jstring jgpg_string = (*env)->GetObjectField(env, thiz, gpg_fid);
+    const char *gpg_string = (*env)->GetStringUTFChars(env, jgpg_string, 0);
 
     /* Sanity checks
     */
@@ -300,16 +309,31 @@ jstring Java_biz_incomsystems_fwknop2_SendSPA_sendSPAPacket(JNIEnv* env,
     }
     LOGV("Finished finalize.");
 
+    fko_get_encoded_data(ctx, &spa_buf_ptr);
+    fko_get_spa_digest(ctx, &spa_digest_ptr);
+    sprintf(spa_buf, "%s:%s", spa_buf_ptr, spa_digest_ptr);
+
     res = fko_get_spa_data(ctx, &opts.spa_data);
     if (res != FKO_SUCCESS) {
         strcpy(res_msg, fko_errmsg("Error getting SPA data", res));
         goto cleanup;
     }
-
-
+    if (strcmp(gpg_string, "") == 0) {
+        jgpg_string = (*env)->NewStringUTF(env, spa_buf);
+        (*env)->SetObjectField(env, thiz, gpg_fid, jgpg_string);
+        ourSpa = (*env)->NewStringUTF(env, opts.spa_data);
+    } else {
+    strcpy(crypt_buf, gpg_string);
+    res = fko_set_spa_data(ctx, gpg_string); // eventually add error handling
+    res = fko_set_spa_hmac(ctx, hmac_str, hmac_str_len);
+    res = fko_get_spa_hmac(ctx, &hmac_buf);
+        if (hmac_buf != NULL)
+    strcat(crypt_buf, hmac_buf);
+    ourSpa = (*env)->NewStringUTF(env, crypt_buf + 2);
+}
     /* Generate the spa data packet
     */
-    ourSpa = (*env)->NewStringUTF(env, opts.spa_data);
+
 
 cleanup:
     /* Release the resources used by the fko context.

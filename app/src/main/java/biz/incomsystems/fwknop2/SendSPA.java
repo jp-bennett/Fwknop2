@@ -18,16 +18,20 @@ package biz.incomsystems.fwknop2;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -40,6 +44,11 @@ import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionFinishedListener;
 import com.sonelli.juicessh.pluginlibrary.listeners.OnSessionStartedListener;
 
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.openintents.openpgp.IOpenPgpService2;
+import org.openintents.openpgp.OpenPgpError;
+import org.openintents.openpgp.util.OpenPgpApi;
+import org.openintents.openpgp.util.OpenPgpServiceConnection;
+import org.openintents.openpgp.util.OpenPgpUtils;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
@@ -48,15 +57,21 @@ import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.Type;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +86,10 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public boolean isConnected = false;
     public boolean reKnock;
     private SharedPreferences prefs;
+    Boolean openkeychainReady = false;
+    OpenPgpServiceConnection myServiceConnection;
+    ByteArrayOutputStream os;
+    InputStream is;
 
     public native String sendSPAPacket();
 
@@ -90,16 +109,39 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public String legacy;
     public String digest_type;
     public String hmac_type;
+    public Long gpg_key;
+    public Long gpg_sig;
+    public String gpg_string = ""; //This will do double duty.  It will be blank on first run, then return the unencrypted string.  Finally, it will push the encrypted string back in to finish
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 2585){ //This request code is specifically for juicessh
+        if (requestCode == 2585) { //This request code is specifically for juicessh
             client.gotActivityResult(requestCode, resultCode, data);
+        } else if (requestCode == 42) {
+            Log.d("fwknop2", "openkeychain activityResult");
+            openkeychainReady = true;
+        } else if (requestCode == 43) {
+            long[] key_array = new long[1];
+            key_array[0] = gpg_key;
+            Intent data2 = new Intent();
+            data2.setAction(OpenPgpApi.ACTION_SIGN_AND_ENCRYPT);
+            data2.putExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, gpg_sig);
+            data2.putExtra(OpenPgpApi.EXTRA_KEY_IDS, key_array);
+            data2.putExtra(OpenPgpApi.EXTRA_REQUEST_ASCII_ARMOR, false);
+            //os = new ByteArrayOutputStream();
+            //is = new ByteArrayInputStream(gpg_string.getBytes(Charset.forName("ASCII")));
+            OpenPgpApi api = new OpenPgpApi(ourAct, myServiceConnection.getService());
+            Intent result = api.executeApi(data2, is, os);
+            gpg_string = "";
+            if (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR) == OpenPgpApi.RESULT_CODE_SUCCESS) {
+                gpg_string = Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);  //Base64 encoding somewhere?
+            }
+            openkeychainReady = true;
         } else { // This will match a qr code captured IP
             IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
             if ((scanResult != null) && (scanResult.getContents() != null)) {
                 String contents = scanResult.getContents();
                 Log.v("fwknop2", contents);
-                for (String stanzas: contents.split(" ")){
+                for (String stanzas : contents.split(" ")) {
                     String[] tmp = stanzas.split(":");
                     if (tmp[0].equalsIgnoreCase("CLIENT_IP")) {
                         allowip_str = (tmp[1]);
@@ -115,8 +157,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     public void onSessionStarted(int i, String s) {
         SendSPA.this.isConnected = true;
         try {
-            client.attach(i,s);
-        } catch (ServiceNotConnectedException ex){
+            client.attach(i, s);
+        } catch (ServiceNotConnectedException ex) {
             Log.e("fwknop2", "Error attaching");
         }
     }
@@ -128,11 +170,15 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     @Override
     public void onSessionFinished() {
     }
+
     public String resend() {
+        gpg_string = "";
+
         final getExternalIP task = new getExternalIP(ourAct);
         task.execute();
         return "Success";
     }
+
     public int send(String nick, final Activity newAct) {
         ourAct = newAct;
         prefs = ourAct.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
@@ -142,6 +188,59 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         config = new Config();
         config = mydb.getConfig(nick);
         mydb.close();
+        gpg_key = config.GPG_KEY;
+        gpg_sig = config.GPG_SIG;
+
+        if (config.GPG_KEY != 0L) {
+
+            myServiceConnection = new OpenPgpServiceConnection(ourAct.getApplicationContext(), "org.sufficientlysecure.keychain",
+                    new OpenPgpServiceConnection.OnBound() {
+                        @Override
+                        public void onBound(IOpenPgpService2 service) {
+                            Log.d(OpenPgpApi.TAG, "onBound!");
+
+                            Intent data = new Intent();
+                            data.setAction(OpenPgpApi.ACTION_CHECK_PERMISSION);
+                            OpenPgpApi api = new OpenPgpApi(ourAct, myServiceConnection.getService());
+
+                            Intent result = api.executeApi(data, (InputStream) null, null);
+                            switch (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {
+                                case OpenPgpApi.RESULT_CODE_SUCCESS: {
+                                    openkeychainReady = true;
+                                    break;
+                                }
+                                case OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED: {
+                                    //Toast.makeText(getActivity(), "Interaction required", Toast.LENGTH_LONG).show();
+                                    Log.d("fwknop2", "Result Interaction");
+                                    PendingIntent pi = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT);
+                                    try {
+                                        ourAct.startIntentSenderForResult(pi.getIntentSender(), 42, null, 0, 0, 0);
+                                    } catch (IntentSender.SendIntentException e) {
+                                        Log.e("fwknop2", "SendIntentException", e);
+                                    }
+                                    break;
+                                }
+                                case OpenPgpApi.RESULT_CODE_ERROR: {
+                                    //OpenPgpError error = result.getParcelableExtra(OpenPgpApi.RESULT_ERROR);
+                                    Toast.makeText(ourAct, "GPG error", Toast.LENGTH_LONG).show();
+
+                                }
+
+                            }
+
+
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            Log.e(OpenPgpApi.TAG, "exception when binding!", e);
+                        }
+                    }
+            );
+            myServiceConnection.bindToService();
+
+
+        } // have gpg
 
         //These variables are the ones that the jni pulls settings from.
         access_str = config.PORTS;
@@ -211,9 +310,10 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 }
             }
         });
+        //if (config.GPG_KEY != 0)
+         //   passwd_str = "none";
 
-
-        if (passwd_str.equalsIgnoreCase("")) { //here is where we prompt for a key
+        if (passwd_str.equalsIgnoreCase("") && config.GPG_KEY == 0L) { //here is where we prompt for a key
             //sadly, Android is retarded, and there is no way to wait for the user to finish with the dialog.
             AlertDialog.Builder PassPrompt = new AlertDialog.Builder(ourAct);
             PassPrompt.setTitle(ourAct.getResources().getText(R.string.Rijndael_Key));
@@ -251,18 +351,18 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
     }
 
 
-    private class getExternalIP extends AsyncTask<Void, Void, String>
-    {
+    private class getExternalIP extends AsyncTask<Void, Void, String> {
         private Activity mActivity;
         private String spaPacket;
-        public getExternalIP (Activity activity) {
+
+        public getExternalIP(Activity activity) {
             mActivity = activity;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if(!reKnock) {
+            if (!reKnock) {
                 if (!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity")) {
                     pdLoading = new ProgressDialog(mActivity);
                     pdLoading.setMessage("\t" + mActivity.getResources().getText(R.string.sending));
@@ -284,7 +384,6 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             if (allowip_str.equalsIgnoreCase("Source IP")) {
                 allowip_str = "0.0.0.0";
             } else if (allowip_str.equalsIgnoreCase("Resolve IP")) {
-
 
 
                 //SharedPreferences prefs = mActivity.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE);
@@ -339,7 +438,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 return ex.toString();
             }
             if (config.NAT_IP.equalsIgnoreCase("127.0.0.1")) { //if Nat-local
-                nat_access_str = resolved_IP.getHostAddress() + "," +config.NAT_PORT; //The nat-local address is the public ip
+                nat_access_str = resolved_IP.getHostAddress() + "," + config.NAT_PORT; //The nat-local address is the public ip
                 nat_local = "true"; // let the jni function know that we are doing nat-local
             } else if (!config.NAT_IP.equalsIgnoreCase("")) {
                 nat_local = "false";
@@ -350,6 +449,66 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             }
 
             spaPacket = sendSPAPacket();
+            Log.d("fwknop2", "gpg string is" + gpg_string);
+            if (gpg_key != 0) { //If we're dealing with a gpg key, do extra things
+                for (int i = 1; i < 11; i++) { //wait up to 10 seconds for gpg to be ready
+                    if (openkeychainReady)
+                        break;
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                    }
+
+                }
+                if (!openkeychainReady)
+                    return "GPG error"; //fail if gpg fails
+                long[] key_array = new long[1];
+
+                    key_array[0] = gpg_key;
+
+                Intent data = new Intent();
+                data.setAction(OpenPgpApi.ACTION_SIGN_AND_ENCRYPT);
+                data.putExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, gpg_sig);
+                data.putExtra(OpenPgpApi.EXTRA_KEY_IDS, key_array);
+                data.putExtra(OpenPgpApi.EXTRA_REQUEST_ASCII_ARMOR, false);
+                os = new ByteArrayOutputStream();
+                is = new ByteArrayInputStream(gpg_string.getBytes(Charset.forName("ASCII")));
+                OpenPgpApi api = new OpenPgpApi(ourAct, myServiceConnection.getService());
+                Intent result = api.executeApi(data, is, os);
+                if (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR) == OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED) {
+                    openkeychainReady = false;
+                    PendingIntent pi = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT);
+                    try {
+                        ourAct.startIntentSenderForResult(pi.getIntentSender(), 43, null, 0, 0, 0);
+                    } catch (IntentSender.SendIntentException e) {
+                        Log.e("fwknop2", "SendIntentException", e);
+                    }
+                } else if (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR) == OpenPgpApi.RESULT_CODE_ERROR) {
+                    OpenPgpError pgperror = result.getParcelableExtra(OpenPgpApi.RESULT_ERROR);
+                    Log.e("fwknop2", pgperror.getMessage());
+                    return "gpg error";
+                } else {
+                    if (os.toString().isEmpty()) {
+                        return "Failed to get gpg";
+                    }
+                    gpg_string = Base64.encodeToString(os.toByteArray(), Base64.NO_WRAP);
+
+                }
+                for (int i = 1; i < 121; i++) { //wait up to 1 minute for gpg to be ready
+                    if (openkeychainReady)
+                        break;
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                    }
+                }
+
+                if (!openkeychainReady || gpg_string.isEmpty())
+                    return "GPG error"; //fail if gpg fails
+                Log.d("fwknop2", "GPG string: " + gpg_string);
+                spaPacket = sendSPAPacket();
+                Log.d("fwknop2", "final packet: " + spaPacket);
+            }
             if (spaPacket != null) {
                 //InetAddress resolved_IP;
                 try {
@@ -359,7 +518,12 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                         DatagramPacket p = new DatagramPacket(spaBytes, spaBytes.length, resolved_IP, Integer.parseInt(config.SERVER_PORT));
                         DatagramSocket s = new DatagramSocket();
                         s.send(p);
+
                         s.close();
+                        p = null;
+                        s = null;
+
+
                     } else if (config.PROTOCOL.equalsIgnoreCase("tcp")) {
                         Socket s = new Socket(resolved_IP, Integer.parseInt(config.SERVER_PORT));
                         OutputStream out = s.getOutputStream();
@@ -374,7 +538,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                         spaPacket = spaPacket.replace("+", "-");
                         spaPacket = spaPacket.replace("/", "_");
                         URL packet = new URL("http://" + config.SERVER_IP + "/" + spaPacket);
-                        HttpURLConnection conn = (HttpURLConnection)packet.openConnection();
+                        HttpURLConnection conn = (HttpURLConnection) packet.openConnection();
                         conn.setRequestMethod("GET");
                         conn.connect();
                         conn.getResponseCode();
@@ -386,7 +550,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 }
 
                 return "Success";
-            } else return "Failure generating SPA data"; //mActivity.getResources().getText(R.string.spa_failure).toString();//
+            } else
+                return "Failure generating SPA data"; //mActivity.getResources().getText(R.string.spa_failure).toString();//
         }
 
         @Override
@@ -394,7 +559,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
             super.onPostExecute(result);
             if (reKnock)
                 return;
-            if(!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity"))
+            if (!mActivity.getLocalClassName().equals("biz.incomsystems.fwknop2.NfcKnockActivity"))
                 pdLoading.dismiss();
 
             Toast.makeText(mActivity, result, Toast.LENGTH_LONG).show();
@@ -414,6 +579,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                                 Log.e("fwknop2", "not connected error");
                             }
                         }
+
                         @Override
                         public void onClientStopped() {
                             Log.v("fwknop2", "client stopped");
@@ -467,33 +633,35 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                         alertDialog.show();
                     }
                 }
-                    if ((prefs.getBoolean("EnableNotification", true)) && !config.SERVER_TIMEOUT.equalsIgnoreCase("") && config.SERVER_CMD.equalsIgnoreCase("") && Build.VERSION.SDK_INT > 15) {
-                        Intent newtimer = new Intent(mActivity, knockCountdownTimer.class); //knockCountdownTimer ourtimer = new knockCountdownTimer();
-                        newtimer.putExtra("timeout", config.SERVER_TIMEOUT);
-                        newtimer.putExtra("nickname", config.NICK_NAME);
-                        if (config.KEEP_OPEN) {
-                            newtimer.putExtra("keep_open", true);
+                if ((prefs.getBoolean("EnableNotification", true)) && !config.SERVER_TIMEOUT.equalsIgnoreCase("") && config.SERVER_CMD.equalsIgnoreCase("") && Build.VERSION.SDK_INT > 15) {
+                    Intent newtimer = new Intent(mActivity, knockCountdownTimer.class); //knockCountdownTimer ourtimer = new knockCountdownTimer();
+                    newtimer.putExtra("timeout", config.SERVER_TIMEOUT);
+                    newtimer.putExtra("nickname", config.NICK_NAME);
+                    if (config.KEEP_OPEN) {
+                        newtimer.putExtra("keep_open", true);
 
-                            newtimer.putExtra("access_str", access_str);
-                            newtimer.putExtra("allowip_str", allowip_str);
-                            newtimer.putExtra("passwd_str", passwd_str);
-                            newtimer.putExtra("passwd_b64", passwd_b64);
-                            newtimer.putExtra("hmac_str", hmac_str);
-                            newtimer.putExtra("hmac_b64", hmac_b64);
-                            newtimer.putExtra("fw_timeout_str", fw_timeout_str);
-                            newtimer.putExtra("nat_ip_str", nat_ip_str);
-                            newtimer.putExtra("nat_port_str", nat_port_str);
-                            newtimer.putExtra("nat_access_str", nat_access_str);
-                            newtimer.putExtra("nat_local", nat_local);
-                            newtimer.putExtra("server_cmd_str", server_cmd_str);
-                            newtimer.putExtra("legacy", legacy);
-                            newtimer.putExtra("digest_type", digest_type);
-                            newtimer.putExtra("hmac_type", hmac_type);
-                        }
-
-
-                        mActivity.startService(newtimer);
+                        newtimer.putExtra("access_str", access_str);
+                        newtimer.putExtra("allowip_str", allowip_str);
+                        newtimer.putExtra("passwd_str", passwd_str);
+                        newtimer.putExtra("passwd_b64", passwd_b64);
+                        newtimer.putExtra("hmac_str", hmac_str);
+                        newtimer.putExtra("hmac_b64", hmac_b64);
+                        newtimer.putExtra("fw_timeout_str", fw_timeout_str);
+                        newtimer.putExtra("nat_ip_str", nat_ip_str);
+                        newtimer.putExtra("nat_port_str", nat_port_str);
+                        newtimer.putExtra("nat_access_str", nat_access_str);
+                        newtimer.putExtra("nat_local", nat_local);
+                        newtimer.putExtra("server_cmd_str", server_cmd_str);
+                        newtimer.putExtra("legacy", legacy);
+                        newtimer.putExtra("digest_type", digest_type);
+                        newtimer.putExtra("hmac_type", hmac_type);
+                        newtimer.putExtra("gpg_sig", gpg_sig);
+                        newtimer.putExtra("gpg_key", gpg_key);
                     }
+
+
+                    mActivity.startService(newtimer);
+                }
 
             } else {
                 AlertDialog alertDialog = new AlertDialog.Builder(mActivity).create();
@@ -511,5 +679,13 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
                 ourAct.finish();
             }
         }
+    }
+
+
+    public static long convertHexToKeyId(String data) {
+        int len = data.length();
+        String s2 = data.substring(len - 8);
+        String s1 = data.substring(0, len - 8);
+        return (Long.parseLong(s1, 16) << 32) | Long.parseLong(s2, 16);
     }
 }

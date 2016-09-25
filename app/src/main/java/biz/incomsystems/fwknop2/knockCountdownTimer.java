@@ -67,6 +67,9 @@ public class knockCountdownTimer extends IntentService {
             OurSender.legacy = intent.getStringExtra("legacy");
             OurSender.digest_type = intent.getStringExtra("digest_type");
             OurSender.hmac_type = intent.getStringExtra("hmac_type");
+            OurSender.gpg_key = intent.getLongExtra("gpg_key", 0L);
+            OurSender.gpg_sig = intent.getLongExtra("gpg_sig", 0L);
+            //OurSender.ourAct = ();
         }
         init_counter = Integer.valueOf(intent.getStringExtra("timeout"));
 
@@ -132,6 +135,7 @@ public class knockCountdownTimer extends IntentService {
                 builder.setContentText(String.valueOf(counter));
                 nm.notify(counterID, builder.build());
                 if (counter < 11 && reknock) {
+                    Intent intent = new Intent();
                     if (OurSender.resend().equalsIgnoreCase("Success")) {
                         //if counter is < 10, send knock and restart the timer
                         this.start();
