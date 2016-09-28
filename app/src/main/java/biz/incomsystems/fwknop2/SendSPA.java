@@ -280,7 +280,7 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
         final AlertDialog.Builder IPPrompt = new AlertDialog.Builder(ourAct);
         IPPrompt.setTitle("Source IP");
         final EditText input = new EditText(ourAct);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setInputType(InputType.TYPE_CLASS_PHONE);
         IPPrompt.setView(input);
         IPPrompt.setPositiveButton(ourAct.getResources().getText(R.string.ok), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
