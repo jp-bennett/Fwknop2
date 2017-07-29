@@ -351,6 +351,7 @@ public class ConfigDetailFragment extends Fragment {
                 //config.GPG_KEY = txt_gpg_crypt.getText().toString();
                 //config.GPG_SIG = txt_gpg_sig.getText().toString();
             } else {
+                config.USE_GPG = false;
                 config.KEY = txt_KEY.getText().toString();       //key
                 config.KEY_BASE64 = chkb64key.isChecked();       //is key b64
                 config.GPG_KEY = 0L;

@@ -54,7 +54,7 @@ public class Config {
         }
         if (this.NICK_NAME.equalsIgnoreCase("")) { // Need to create a new Nick
             return (R.string.unique_nick); // choosing a used nick will just overwrite it. So really
-        } else if (USE_GPG &&  GPG_SIG == 0) {
+        } else if (USE_GPG &&  GPG_SIG == 0L) {
             return(R.string.no_gpg_selected);
         } else if ((this.LEGACY && this.HMAC_BASE64) || (this.LEGACY && !this.HMAC.equalsIgnoreCase(""))) {
             return(R.string.HMAC_Legacy);
