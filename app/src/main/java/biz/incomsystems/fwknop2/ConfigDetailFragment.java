@@ -16,7 +16,6 @@ This file is part of Fwknop2.
  */
 package biz.incomsystems.fwknop2;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -26,7 +25,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -80,6 +78,7 @@ public class ConfigDetailFragment extends Fragment {
     Boolean openKeychainBound = false;
     public static final int REQUEST_CODE_SET_SIG = 9915;
     public static final int REQUEST_CODE_SET_CRYPT = 9916;
+    public static final int REQUEST_CODE_PERMISSION = 9917;
 
     DBHelper mydb;
     Boolean juiceInstalled;
@@ -270,7 +269,7 @@ public class ConfigDetailFragment extends Fragment {
             try {
                 IntentIntegrator.forSupportFragment(this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES).initiateScan();
             } catch (Throwable e) {
-
+                Log.e("fwknop2", "Barcode Scan error");
             }
         } else if (id == R.id.save) {
             Context context = getActivity(); // We know we will use a toast, so set it up now
@@ -440,47 +439,40 @@ public class ConfigDetailFragment extends Fragment {
     }
 
 
-    @Override // Handle the qr code results
+    @Override // Handle the qr code or openpgp results
     public void onActivityResult(int requestCode, int resultCode, Intent data) { // Handle the qr code results
         Log.d("fwknop2", "Result: " + resultCode);
         if (data == null)
             return;
-        switch (requestCode) {
-            case REQUEST_CODE_SET_CRYPT: {
-                Log.d("fwknop2", "Trying to set crypt");
-                config.GPG_KEY = data.getLongArrayExtra(OpenPgpApi.RESULT_KEY_IDS)[0];
+        if (requestCode == REQUEST_CODE_SET_CRYPT || requestCode == REQUEST_CODE_SET_SIG || requestCode == REQUEST_CODE_PERMISSION) {
+            if (requestCode == REQUEST_CODE_SET_CRYPT) {
+                config.GPG_KEY = data.getLongArrayExtra(OpenPgpApi.EXTRA_KEY_IDS_SELECTED)[0];
                 txt_gpg_crypt.setText(OpenPgpUtils.convertKeyIdToHex(config.GPG_KEY));
-                //data.getLongArrayExtra(OpenPgpApi.RESULT_KEY_IDS)[0]; //Need to change all the things, store the long instead of the hex
-                break;
-            }
-            case REQUEST_CODE_SET_SIG: {
+            } else if (requestCode == REQUEST_CODE_SET_SIG) {
                 config.GPG_SIG = data.getLongExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, 0);
                 txt_gpg_sig.setText(OpenPgpUtils.convertKeyIdToHex(config.GPG_SIG));
-                break;
             }
-            default: {
-
-                Log.d("fwknop2", requestCode + " " + resultCode);
-                IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-                if ((scanResult != null) && (scanResult.getContents() != null)) {
-                    String contents = scanResult.getContents();
-                    for (String stanzas : contents.split(" ")) {
-                        String[] tmp = stanzas.split(":");
-                        if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
-                            txt_KEY.setText(tmp[1]);
-                            chkb64key.setChecked(true);
-                        } else if (tmp[0].equalsIgnoreCase("KEY")) {
-                            txt_KEY.setText(tmp[1]);
-                            chkb64key.setChecked(false);
-                        } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
-                            txt_HMAC.setText(tmp[1]);
-                            chkb64hmac.setChecked(true);
-                        } else if (tmp[0].equalsIgnoreCase("HMAC_KEY")) {
-                            txt_HMAC.setText(tmp[1]);
-                            chkb64hmac.setChecked(false);
-                        }
-                    }// end for loop
-                }
+        } else {
+            Log.d("fwknop2", requestCode + " " + resultCode);
+            IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if ((scanResult != null) && (scanResult.getContents() != null)) {
+                String contents = scanResult.getContents();
+                for (String stanzas : contents.split(" ")) {
+                    String[] tmp = stanzas.split(":");
+                    if (tmp[0].equalsIgnoreCase("KEY_BASE64")) {
+                        txt_KEY.setText(tmp[1]);
+                        chkb64key.setChecked(true);
+                    } else if (tmp[0].equalsIgnoreCase("KEY")) {
+                        txt_KEY.setText(tmp[1]);
+                        chkb64key.setChecked(false);
+                    } else if (tmp[0].equalsIgnoreCase("HMAC_KEY_BASE64")) {
+                        txt_HMAC.setText(tmp[1]);
+                        chkb64hmac.setChecked(true);
+                    } else if (tmp[0].equalsIgnoreCase("HMAC_KEY")) {
+                        txt_HMAC.setText(tmp[1]);
+                        chkb64hmac.setChecked(false);
+                    }
+                }// end for loop
             }
         }
     }
@@ -529,11 +521,11 @@ public class ConfigDetailFragment extends Fragment {
                     Log.d("fwknop2", "interaction");
                     PendingIntent pi = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT);
                     try {
-                        getActivity().startIntentSenderFromChild(
-                                getActivity(), pi.getIntentSender(),
+                        getActivity().startIntentSenderForResult(
+                                pi.getIntentSender(),
                                 requestCode, null, 0, 0, 0);
                     } catch (IntentSender.SendIntentException e) {
-
+                        Log.e("fwknop2", "Openkeychain start intent error");
                     }
                     break;
                 }
@@ -639,6 +631,11 @@ public class ConfigDetailFragment extends Fragment {
                         chkbUse_GPG.setChecked(false);
                         return;
                     }
+                    Intent data = new Intent();
+                    data.setAction(OpenPgpApi.ACTION_CHECK_PERMISSION);
+                    OpenPgpApi api = new OpenPgpApi(getActivity(), myServiceConnection.getService());
+                    api.executeApiAsync(data, null, null, new openkeychainCallback(false, null, REQUEST_CODE_PERMISSION));
+
                     lay_KEY.setVisibility(View.GONE);
                     chkb64key.setVisibility(View.GONE);
                     lay_gpg_buttons.setVisibility(View.VISIBLE);
@@ -658,6 +655,7 @@ public class ConfigDetailFragment extends Fragment {
                 //move this to the buttons
                 Intent data = new Intent();
                 data.setAction(OpenPgpApi.ACTION_GET_KEY_IDS);
+                data.putExtra(OpenPgpApi.EXTRA_USER_IDS, new String[]{""});
                 OpenPgpApi api = new OpenPgpApi(getActivity(), myServiceConnection.getService());
                 api.executeApiAsync(data, null, null, new openkeychainCallback(false, null, REQUEST_CODE_SET_CRYPT));
             }
@@ -667,6 +665,7 @@ public class ConfigDetailFragment extends Fragment {
                 //move this to the buttons
                 Intent data = new Intent();
                 data.setAction(OpenPgpApi.ACTION_GET_SIGN_KEY_ID);
+                data.putExtra(OpenPgpApi.EXTRA_USER_ID, new String[]{""});
                 OpenPgpApi api = new OpenPgpApi(getActivity(), myServiceConnection.getService());
                 api.executeApiAsync(data, null, null, new openkeychainCallback(false, null, REQUEST_CODE_SET_SIG));
             }
@@ -696,8 +695,8 @@ public class ConfigDetailFragment extends Fragment {
         spn_HMACType.setSelection(2);
 
         spn_ssh = (Spinner) rootView.findViewById(R.id.ssh);
-        ArrayList<String> list = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
-        ArrayAdapter<String> adapter_ssh = new ArrayAdapter<String>(getActivity(),
+        ArrayList<String> list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.ssh_options)));
+        ArrayAdapter<String> adapter_ssh = new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_item,list);
         adapter_ssh.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_ssh.setAdapter(adapter_ssh);
