@@ -595,7 +595,8 @@ public class SendSPA implements OnSessionStartedListener, OnSessionFinishedListe
 
 
                     try {
-                        mActivity.startActivity(i);
+                        // by using the "ForResult" variant, de.blinkt.openvpn can call getCallingPackage() and properly whitelist us
+                        mActivity.startActivityForResult(i, 1);
                     } catch (Exception ex) {
                         AlertDialog alertDialog = new AlertDialog.Builder(mActivity).create();
                         alertDialog.setTitle("Error");
